@@ -1,0 +1,461 @@
+<?php
+session_start();
+
+// ==========================================================
+// PROTEKSI HALAMAN: hanya akun ber-role mahasiswa yang boleh akses
+// ==========================================================
+if (!isset($_SESSION['username']) || ($_SESSION['role'] ?? '') !== 'mahasiswa') {
+    header("Location: /bimbingan-skripsi/");
+    exit;
+}
+
+$title = 'Mahasiswa - Profil';
+
+require_once dirname(__DIR__, 3) . '/config/koneksi.php';
+
+$npmMhs = $_SESSION['username'] ?? '';
+$namaMhs = $_SESSION['nama'] ?? '';
+
+// Extract Angkatan from NPM (e.g. 2217051151 -> Angkatan 2022)
+$prefix = substr(trim($npmMhs), 0, 2);
+$angkatanMhs = is_numeric($prefix) ? '20' . $prefix : '2022';
+
+// Semester logic mapping
+$semesterMhs = 8;
+if ($angkatanMhs == '2020') $semesterMhs = 12;
+elseif ($angkatanMhs == '2021') $semesterMhs = 10;
+elseif ($angkatanMhs == '2022') $semesterMhs = 8;
+elseif ($angkatanMhs == '2023') $semesterMhs = 6;
+elseif ($angkatanMhs == '2024') $semesterMhs = 4;
+elseif ($angkatanMhs == '2025') $semesterMhs = 2;
+
+// Fetch active profile picture
+$fotoPath = '';
+try {
+    $stmtM = $pdo->prepare("SELECT profile_picture FROM mahasiswa WHERE REPLACE(npm, ' ', '') = REPLACE(:npm, ' ', '') LIMIT 1");
+    $stmtM->execute([':npm' => $npmMhs]);
+    $mhsDb = $stmtM->fetch(PDO::FETCH_ASSOC);
+    if (!empty($mhsDb['profile_picture'])) {
+        $fullPath = dirname(__DIR__, 3) . '/public/uploads/profile/' . $mhsDb['profile_picture'];
+        if (file_exists($fullPath) && is_file($fullPath)) {
+            $fotoPath = '/bimbingan-skripsi/public/uploads/profile/' . $mhsDb['profile_picture'];
+        }
+    }
+} catch (PDOException $e) {}
+
+// Fetch active thesis title from distribusi_mahasiswa
+$judulSkripsi = '-';
+try {
+    $stmt = $pdo->prepare("SELECT judul_skripsi FROM distribusi_mahasiswa WHERE REPLACE(npm, ' ', '') = REPLACE(:npm, ' ', '') LIMIT 1");
+    $stmt->execute([':npm' => $npmMhs]);
+    $judulSkripsi = $stmt->fetchColumn() ?: '-';
+} catch (PDOException $e) {}
+
+// Dynamic Initials Avatar
+$words = explode(' ', trim($namaMhs));
+$initials = '';
+$count = 0;
+foreach ($words as $w) {
+    if (!empty($w) && $count < 2) {
+        $initials .= strtoupper($w[0]);
+        $count++;
+    }
+}
+
+$profil = [
+    'nama'         => $namaMhs,
+    'npm'          => $npmMhs,
+    'prodi'        => 'S1 Ilmu Komputer',
+    'fakultas'     => 'Matematika dan Ilmu Pengetahuan Alam',
+    'universitas'  => 'Universitas Lampung',
+    'angkatan'     => $angkatanMhs,
+    'semester'     => $semesterMhs,
+    'judul'        => $judulSkripsi
+];
+
+require_once __DIR__ . '/../layouts/header.php';
+require_once __DIR__ . '/../layouts/topbar.php';
+require_once __DIR__ . '/../layouts/sidebar_mahasiswa.php';
+?>
+
+<style>
+    /* ================= PROFIL MAHASISWA (khusus halaman ini) ================= */
+
+    .profil-grid {
+        display: grid;
+        grid-template-columns: 1.2fr 0.8fr;
+        gap: 24px;
+        align-items: start;
+    }
+
+    @media (max-width: 992px) {
+        .profil-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .profil-left {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+    }
+
+    .card.table-card {
+        border-top: 4px solid #69a86e;
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+        border-left: 1px solid #e2e8f0;
+        border-right: 1px solid #e2e8f0;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .card-subtitle {
+        font-size: 16px;
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 18px;
+        border-bottom: 1px solid #e2e8f0;
+        padding-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .card-subtitle i {
+        color: #285aa9;
+    }
+
+    /* --- Avatar --- */
+    .avatar-wrap {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 22px;
+    }
+
+    .avatar-circle {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: #eef4fb;
+        border: 2px solid rgba(40, 90, 169, 0.2);
+        color: #285aa9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 46px;
+        font-weight: 700;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+
+    .avatar-label {
+        position: relative;
+        display: inline-block;
+        cursor: pointer;
+    }
+
+    .avatar-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: rgba(0,0,0,0.4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+    }
+
+    .avatar-label:hover .avatar-overlay {
+        opacity: 1;
+    }
+
+    .avatar-overlay i {
+        color: #ffffff;
+        font-size: 24px;
+    }
+
+    /* --- Info List --- */
+    .info-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .info-row {
+        display: grid;
+        grid-template-columns: 150px 1fr;
+        gap: 12px;
+        font-size: 14.5px;
+        border-bottom: 1px dashed #f1f5f9;
+        padding-bottom: 8px;
+    }
+
+    .info-row:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    .info-label {
+        color: #64748b;
+        font-weight: 600;
+    }
+
+    .info-value {
+        color: #1e293b;
+        line-height: 1.5;
+    }
+
+    /* --- Form sandi --- */
+    .form-group {
+        margin-bottom: 16px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 13.5px;
+        font-weight: 600;
+        color: #334155;
+    }
+
+    .form-input {
+        width: 100%;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        padding: 10px 14px;
+        font-size: 14px;
+        color: #334155;
+        box-sizing: border-box;
+        transition: border-color 0.2s;
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: #285aa9;
+    }
+
+    .btn-primary {
+        background: #285aa9;
+        color: #ffffff;
+        border: none;
+        padding: 11px 20px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: background-color 0.2s;
+        width: 100%;
+        justify-content: center;
+    }
+
+    .btn-primary:hover {
+        background: #1e4480;
+    }
+</style>
+
+<div class="content">
+
+    <div style="margin-bottom: 24px;">
+        <h1 class="page-title" style="margin: 0;">Profil Mahasiswa</h1>
+        <p style="color: #64748b; font-size: 14px; margin-top: 4px;">Informasi akademik mahasiswa (sinkronisasi SIAKADU) dan keamanan akun</p>
+    </div>
+
+    <div class="profil-grid">
+
+        <!-- ============ KOLOM KIRI: Informasi Profil Lengkap ============ -->
+        <div class="card table-card">
+            <div class="avatar-wrap">
+                <form action="/bimbingan-skripsi/app/controllers/MahasiswaController.php" method="POST" enctype="multipart/form-data">
+                    <input type="hidden" name="action" value="ubah_foto">
+                    <label class="avatar-label">
+                        <?php if (!empty($fotoPath)): ?>
+                            <img src="<?= htmlspecialchars($fotoPath) ?>" alt="Foto Profil" style="width:120px; height:120px; border-radius:50%; object-fit:cover; border:2px solid rgba(40, 90, 169, 0.2); display:block; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                        <?php else: ?>
+                            <div class="avatar-circle">
+                                <?= htmlspecialchars($initials) ?>
+                            </div>
+                        <?php endif; ?>
+                        <div class="avatar-overlay">
+                            <i class="fa-solid fa-camera"></i>
+                        </div>
+                        <input type="file" name="foto_profile" accept="image/*" onchange="this.form.submit()" style="display: none;">
+                    </label>
+                </form>
+            </div>
+
+            <div class="info-list">
+                <div class="info-row">
+                    <div class="info-label">Nama Lengkap</div>
+                    <div class="info-value" style="font-weight: 600; color: #0f172a;"><?= htmlspecialchars($profil['nama']) ?></div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">NPM</div>
+                    <div class="info-value" style="font-family: monospace; font-size: 15px;"><?= htmlspecialchars($profil['npm']) ?></div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Program Studi</div>
+                    <div class="info-value"><?= htmlspecialchars($profil['prodi']) ?></div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Fakultas</div>
+                    <div class="info-value"><?= htmlspecialchars($profil['fakultas']) ?></div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Universitas</div>
+                    <div class="info-value"><?= htmlspecialchars($profil['universitas']) ?></div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Angkatan</div>
+                    <div class="info-value"><?= htmlspecialchars($profil['angkatan']) ?></div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Semester Aktif</div>
+                    <div class="info-value">Semester <?= htmlspecialchars($profil['semester']) ?></div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Judul Skripsi</div>
+                    <div class="info-value" style="font-style: italic; color: #0f172a;"><?= htmlspecialchars($profil['judul']) ?></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ KOLOM KANAN: Ubah Kata Sandi ============ -->
+        <div class="card table-card" style="border-top-color: #285aa9;">
+            <div class="card-subtitle">
+                <i class="fa-solid fa-key"></i> Ubah Kata Sandi
+            </div>
+
+            <form id="formPassword">
+                <div class="form-group">
+                    <label for="password_lama">Kata Sandi Lama <span style="color: #ef4444;">*</span></label>
+                    <input type="password" class="form-input" id="password_lama" name="password_lama" placeholder="Masukkan kata sandi lama" required>
+                </div>
+                <div class="form-group">
+                    <label for="password_baru">Kata Sandi Baru <span style="color: #ef4444;">*</span></label>
+                    <input type="password" class="form-input" id="password_baru" name="password_baru" placeholder="Masukkan kata sandi baru" required>
+                </div>
+                <div class="form-group">
+                    <label for="password_konfirmasi">Konfirmasi Kata Sandi <span style="color: #ef4444;">*</span></label>
+                    <input type="password" class="form-input" id="password_konfirmasi" name="password_konfirmasi" placeholder="Ulangi kata sandi baru" required>
+                </div>
+
+                <button type="submit" class="btn-primary" style="margin-top: 10px;">
+                    <i class="fa-solid fa-floppy-disk"></i> Perbarui Kata Sandi
+                </button>
+            </form>
+        </div>
+
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.getElementById('formPassword').addEventListener('submit', function (e) {
+        e.preventDefault();
+        
+        const form = this;
+        const passwordBaru = document.getElementById('password_baru').value;
+        const passwordKonfirmasi = document.getElementById('password_konfirmasi').value;
+
+        if (passwordBaru !== passwordKonfirmasi) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Kata Sandi Tidak Cocok',
+                text: 'Konfirmasi kata sandi baru Anda tidak cocok!',
+                confirmButtonColor: '#285aa9'
+            });
+            return;
+        }
+
+        const formData = new FormData(form);
+
+        Swal.fire({
+            title: 'Ubah Kata Sandi?',
+            text: "Apakah Anda yakin ingin mengubah kata sandi akun Anda?",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#285aa9',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: 'Ya, Ubah',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const btnSubmit = form.querySelector('button[type="submit"]');
+                btnSubmit.disabled = true;
+                btnSubmit.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses...';
+
+                fetch('/bimbingan-skripsi/app/controllers/UbahPasswordController.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(res => res.json())
+                .then(data => {
+                    btnSubmit.disabled = false;
+                    btnSubmit.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Perbarui Kata Sandi';
+
+                    if (data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil',
+                            text: 'Kata sandi akun Anda berhasil diperbarui.',
+                            confirmButtonColor: '#285aa9'
+                        });
+                        form.reset();
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal',
+                            text: data.message || 'Terjadi kesalahan sistem.',
+                            confirmButtonColor: '#285aa9'
+                        });
+                    }
+                })
+                .catch(err => {
+                    btnSubmit.disabled = false;
+                    btnSubmit.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Perbarui Kata Sandi';
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error Koneksi',
+                        text: 'Gagal terhubung dengan server.',
+                        confirmButtonColor: '#285aa9'
+                    });
+                });
+            }
+        });
+    });
+</script>
+
+<?php if (isset($_SESSION['swal_success'])): ?>
+<script>
+    Swal.fire({
+        icon: 'success',
+        title: 'Berhasil',
+        text: '<?= htmlspecialchars($_SESSION['swal_success']) ?>',
+        confirmButtonColor: '#285aa9'
+    });
+</script>
+<?php unset($_SESSION['swal_success']); endif; ?>
+
+<?php if (isset($_SESSION['swal_error'])): ?>
+<script>
+    Swal.fire({
+        icon: 'error',
+        title: 'Gagal',
+        text: '<?= htmlspecialchars($_SESSION['swal_error']) ?>',
+        confirmButtonColor: '#285aa9'
+    });
+</script>
+<?php unset($_SESSION['swal_error']); endif; ?>
+
+</body>
+</html>

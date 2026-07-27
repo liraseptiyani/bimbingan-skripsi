@@ -1,0 +1,198 @@
+Log cleared.
+POST received: Array
+(
+    [topik_id] => 2
+    [alasan] => saya tertarik
+)
+Session: Array
+(
+    [username] => 2217051151
+    [role] => mahasiswa
+    [otoritas] => mahasiswa
+    [nama] => Lira Septiyani
+)
+
+POST received: Array
+(
+    [topik_id] => 2
+    [alasan] => saya tertarik
+)
+Session: Array
+(
+    [username] => 2217051151
+    [role] => mahasiswa
+    [otoritas] => mahasiswa
+    [nama] => Lira Septiyani
+)
+
+POST received: Array
+(
+    [topik_id] => 1
+    [alasan] => saya tertarik
+)
+Session: Array
+(
+    [username] => 2217051151
+    [role] => mahasiswa
+    [otoritas] => mahasiswa
+    [nama] => Lira Septiyani
+)
+
+PDOException: SQLSTATE[23503]: Foreign key violation: 7 ERROR:  insert or update on table "minat_topik" violates foreign key constraint "fk_minat_topik"
+DETAIL:  Key (topik_id)=(1) is not present in table "topik_skripsi".
+POST received: Array
+(
+    [topik_id] => 1
+    [alasan] => saya tertarik
+)
+Session: Array
+(
+    [username] => 2217051151
+    [role] => mahasiswa
+    [otoritas] => mahasiswa
+    [nama] => Lira Septiyani
+)
+
+PDOException: SQLSTATE[23503]: Foreign key violation: 7 ERROR:  insert or update on table "minat_topik" violates foreign key constraint "fk_minat_topik"
+DETAIL:  Key (topik_id)=(1) is not present in table "topik_skripsi".
+topik_penelitian_json: [{"id":1,"topik":"Sistem Bimbingan Skripsi","deskripsi":"sistem ini dikembangkan dengan bahasa pemrograman php native versi 7.4 dan database postgre sql","kuota_terisi":1,"kuota_max":1,"applicants":[{"status":"menunggu","alasan":"saya tertarik","nama":"Lira Septiyani","npm":"2217051151"}]}]
+topik_penelitian_json: [{"id":1,"topik":"Sistem Bimbingan Skripsi","deskripsi":"sistem ini dikembangkan dengan bahasa pemrograman php native versi 7.4 dan database postgre sql","kuota_terisi":1,"kuota_max":1,"applicants":[{"status":"menunggu","alasan":"saya tertarik","nama":"Lira Septiyani","npm":"2217051151"}]}]
+VERIFIKASI POST received: Array
+(
+    [action] => verifikasi
+    [id] => 1
+    [status] => disetujui
+)
+Session: Array
+(
+    [username] => 198104142005011001
+    [role] => dosen
+    [otoritas] => kaprodi
+    [nama] => Tristiyanto, S.Kom., M.I.S., Ph.D
+    [swal_success] => Topik penelitian berhasil diperbarui!
+)
+
+VERIFIKASI Query successful for status 'disetujui' on ID 1.
+VERIFIKASI POST received: Array
+(
+    [action] => verifikasi
+    [id] => 1
+    [status] => menunggu
+)
+Session: Array
+(
+    [username] => 198104142005011001
+    [role] => dosen
+    [otoritas] => kaprodi
+    [nama] => Tristiyanto, S.Kom., M.I.S., Ph.D
+    [swal_success] => Topik penelitian berhasil diperbarui!
+)
+
+VERIFIKASI Query successful for status 'menunggu' on ID 1.
+VERIFIKASI POST received: Array
+(
+    [action] => verifikasi
+    [id] => 1
+    [status] => disetujui
+)
+Session: Array
+(
+    [username] => 198104142005011001
+    [role] => dosen
+    [otoritas] => kaprodi
+    [nama] => Tristiyanto, S.Kom., M.I.S., Ph.D
+    [swal_success] => Topik penelitian berhasil diperbarui!
+)
+
+VERIFIKASI Query successful for status 'disetujui' on ID 1.
+tambah_dosen error: SQLSTATE[23503]: Foreign key violation: 7 ERROR:  insert or update on table "dosen" violates foreign key constraint "fk_dosen_user"
+DETAIL:  Key (nip)=(197909122008121002) is not present in table "users".
+edit_dosen error: SQLSTATE[23503]: Foreign key violation: 7 ERROR:  update or delete on table "users" violates foreign key constraint "fk_dosen_user" on table "dosen"
+DETAIL:  Key (username)=(199001272024062001.) is still referenced from table "dosen".
+edit_dosen error: SQLSTATE[23503]: Foreign key violation: 7 ERROR:  update or delete on table "users" violates foreign key constraint "fk_dosen_user" on table "dosen"
+DETAIL:  Key (username)=(199001272024062001.) is still referenced from table "dosen".
+Bimbingan columns: id, tgl, id_distribusi, draft, catatan
+Bimbingan columns: id, tgl, id_distribusi, draft, catatan
+Bimbingan columns: id, tgl, id_distribusi, draft, catatan
+Bimbingan columns: id, tgl, id_distribusi, draft, catatan
+Bimbingan columns: id, tgl, id_distribusi, draft, catatan
+Bimbingan columns: id, tgl, id_distribusi, draft, catatan
+Bimbingan columns: id, tgl, id_distribusi, draft, catatan
+Lira Distribution: {"npm":"2217051151","nama":"LIRA SEPTIYANI","judul_skripsi":"Implementasi Sistem Informasi Bimbingan Skripsi Berbasis Web Pada Program Studi S1 Ilmu Komputer Universitas Lampung","pembimbing1":"Tristiyanto, S.Kom., M.I.S., Ph.D","pembimbing2":"Muhammad Ikhsan, S.Kom., M.Cs.","pembahas1":"Dwi Sakethi, S.Si., M.Kom","pembahas2":null,"nomor_sk":"No: 1439\/UN26.17.06\/Tema\/2025","created_at":"2026-07-22 12:40:42.498265","id":1}
+VERIFIKASI POST received: Array
+(
+    [action] => verifikasi
+    [id] => 1
+    [status] => menunggu
+)
+Session: Array
+(
+    [username] => 198104142005011001
+    [role] => dosen
+    [otoritas] => dosen
+    [nama] => Tristiyanto, S.Kom., M.I.S., Ph.D
+)
+
+VERIFIKASI Query successful for status 'menunggu' on ID 1.
+VERIFIKASI POST received: Array
+(
+    [action] => verifikasi
+    [id] => 1
+    [status] => disetujui
+)
+Session: Array
+(
+    [username] => 198104142005011001
+    [role] => dosen
+    [otoritas] => dosen
+    [nama] => Tristiyanto, S.Kom., M.I.S., Ph.D
+)
+
+VERIFIKASI Query successful for status 'disetujui' on ID 1.
+VERIFIKASI POST received: Array
+(
+    [action] => verifikasi
+    [id] => 1
+    [status] => menunggu
+)
+Session: Array
+(
+    [username] => 198104142005011001
+    [role] => dosen
+    [otoritas] => dosen
+    [nama] => Tristiyanto, S.Kom., M.I.S., Ph.D
+)
+
+VERIFIKASI Query successful for status 'menunggu' on ID 1.
+VERIFIKASI POST received: Array
+(
+    [action] => verifikasi
+    [id] => 1
+    [status] => disetujui
+)
+Session: Array
+(
+    [username] => 198104142005011001
+    [role] => dosen
+    [otoritas] => dosen
+    [nama] => Tristiyanto, S.Kom., M.I.S., Ph.D
+    [swal_success] => Topik penelitian berhasil ditambahkan!
+)
+
+VERIFIKASI Query successful for status 'disetujui' on ID 1.
+VERIFIKASI POST received: Array
+(
+    [action] => verifikasi
+    [id] => 4
+    [status] => disetujui
+)
+Session: Array
+(
+    [username] => 198104142005011001
+    [role] => dosen
+    [otoritas] => dosen
+    [nama] => Tristiyanto, S.Kom., M.I.S., Ph.D
+    [flash_success] => Otoritas berhasil diubah menjadi Dosen Pembimbing.
+)
+
+VERIFIKASI Query successful for status 'disetujui' on ID 4.

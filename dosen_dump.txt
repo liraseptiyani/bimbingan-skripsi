@@ -1,0 +1,22 @@
+[
+    {
+        "nip": "197909122008121002",
+        "nama": "Bambang Hermanto, S.Kom., M.Cs"
+    },
+    {
+        "nip": "199001272024062001",
+        "nama": "Dhella Amelia, M.Kom"
+    },
+    {
+        "nip": "198105212006041002",
+        "nama": "Dr. Aristoteles, S.Si., M.Si"
+    },
+    {
+        "nip": "199411012024061002",
+        "nama": "Muhammad Ikhsan, S.Kom., M.Cs."
+    },
+    {
+        "nip": "198104142005011001",
+        "nama": "Tristiyanto, S.Kom., M.I.S., Ph.D"
+    }
+]

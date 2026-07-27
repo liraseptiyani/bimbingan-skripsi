@@ -1,0 +1,26 @@
+[
+    {
+        "npm": "2217051151",
+        "nama": "LIRA SEPTIYANI",
+        "judul_skripsi": "Implementasi Sistem Informasi Bimbingan Skripsi Berbasis Web Pada Program Studi S1 Ilmu Komputer Universitas Lampung",
+        "pembimbing1": "Tristiyanto, S.Kom., M.I.S., Ph.D",
+        "pembimbing2": "Muhammad Ikhsan, S.Kom., M.Cs.",
+        "pembahas1": "Dwi Sakethi, S.Si., M.Kom",
+        "pembahas2": null,
+        "nomor_sk": "No: 1439\/UN26.17.06\/Tema\/2025",
+        "created_at": "2026-07-22 12:40:42.498265",
+        "id": 1
+    },
+    {
+        "npm": "2257051015",
+        "nama": "Intan Maghfirah",
+        "judul_skripsi": "Pengembangan Website Layanan Administrasi Bengkel Mobil Berbasis Flutter (Studi Kasus: Jimu Mitsubisi)",
+        "pembimbing1": "Bambang Hermanto, S.Kom., M.Cs",
+        "pembimbing2": "Dhella Amelia, M.Kom",
+        "pembahas1": "Tristiyanto, S.Kom., M.I.S., Ph.D",
+        "pembahas2": null,
+        "nomor_sk": "No: 1440\/UN26.17.06\/Tema\/2025",
+        "created_at": "2026-07-22 18:50:12.790942",
+        "id": 2
+    }
+]
