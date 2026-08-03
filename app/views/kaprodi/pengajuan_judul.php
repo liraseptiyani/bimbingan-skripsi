@@ -464,7 +464,6 @@ require_once __DIR__ . '/../layouts/sidebar_kaprodi.php';
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
         <div>
             <h1 class="page-title" style="margin: 0;">Persetujuan Judul Skripsi</h1>
-            <p style="color: #64748b; font-size: 14px; margin-top: 4px;">Tinjau pengajuan judul mahasiswa, periksa kelengkapan berkas, dan terbitkan nomor SK</p>
         </div>
     </div>
 
@@ -598,7 +597,7 @@ require_once __DIR__ . '/../layouts/sidebar_kaprodi.php';
         if (totalData === 0) {
             const emptyRow = document.createElement('tr');
             emptyRow.className = 'no-data-row';
-            emptyRow.innerHTML = `<td colspan="6" style="text-align: center; color: #94a3b8; padding: 22px;">Tidak ada pengajuan judul yang cocok.</td>`;
+            emptyRow.innerHTML = `<td colspan="7" style="text-align: center; color: #94a3b8; padding: 22px;">Tidak ada pengajuan judul yang cocok.</td>`;
             tableBody.appendChild(emptyRow);
         } else {
             const start = (currentPage - 1) * rowsPerPage;

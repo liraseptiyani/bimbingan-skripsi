@@ -1,6 +1,14 @@
 <?php
 session_start();
 
+function getOnlyTime($tanggal_string) {
+    $parts = explode(',', $tanggal_string);
+    if (count($parts) >= 3) {
+        return trim(end($parts));
+    }
+    return $tanggal_string;
+}
+
 if (!isset($_SESSION['username'])) {
     header("Location: /bimbingan-skripsi/");
     exit;
@@ -58,9 +66,15 @@ $mahasiswa = [
     'judul_skripsi'        => $judulSkripsi,
 ];
 
-// Fetch forum messages from database
-$stmtF = $pdo->prepare("SELECT * FROM forum_bimbingan WHERE bimbingan_id = :b_id ORDER BY id ASC");
-$stmtF->execute([':b_id' => $id]);
+// Fetch forum messages from database (full thread history for this student)
+$stmtF = $pdo->prepare("
+    SELECT fb.* 
+    FROM forum_bimbingan fb
+    JOIN bimbingan b ON fb.bimbingan_id = b.id
+    WHERE REPLACE(b.npm, ' ', '') = REPLACE(:npm, ' ', '')
+    ORDER BY fb.id ASC
+");
+$stmtF->execute([':npm' => $npmMhs]);
 $pesan_forum = $stmtF->fetchAll(PDO::FETCH_ASSOC);
 
 require_once __DIR__ . '/../layouts/header.php';
@@ -82,24 +96,31 @@ require_once __DIR__ . '/../layouts/sidebar_mahasiswa.php';
     .back-link:hover { color: #285aa9; }
 
     .info-box {
-        background: #f4f8fc;
-        border-radius: 4px;
+        background: #eef3f9;
         padding: 24px 30px;
-        margin-bottom: 24px;
+        margin-bottom: 28px;
+        border-radius: 8px;
     }
     .info-row {
         display: flex;
-        gap: 20px;
-        margin-bottom: 12px;
-        font-size: 14.5px;
+        margin-bottom: 10px;
+    }
+    .info-row:last-child {
+        margin-bottom: 0;
     }
     .info-row .info-label {
         width: 180px;
-        flex-shrink: 0;
         color: #6a7fbf;
+        font-size: 14.5px;
         font-weight: 700;
+        flex-shrink: 0;
     }
-    .info-row .info-value { color: #222; }
+    .info-row .info-value {
+        flex: 1;
+        font-size: 14.5px;
+        color: #333;
+        line-height: 1.5;
+    }
 
     /* ================= FORUM CHAT BUBBLE SYSTEM ================= */
     .forum-chat-container {
@@ -109,7 +130,7 @@ require_once __DIR__ . '/../layouts/sidebar_mahasiswa.php';
         border: 1px solid #c8d7e6;
         border-radius: 12px;
         padding: 24px 20px;
-        max-height: 550px;
+        max-height: 650px;
         overflow-y: auto;
         display: flex;
         flex-direction: column;
@@ -148,7 +169,8 @@ require_once __DIR__ . '/../layouts/sidebar_mahasiswa.php';
 
     .chat-bubble {
         position: relative;
-        max-width: 75%;
+        max-width: 60%;
+        width: fit-content;
         padding: 10px 14px 8px 14px;
         box-shadow: 0 1px 3px rgba(40, 90, 169, 0.08);
         font-size: 14.5px;
@@ -197,14 +219,43 @@ require_once __DIR__ . '/../layouts/sidebar_mahasiswa.php';
         border-top-color: #ffffff;
     }
 
+    /* Message Reply Quote Styles */
+    .chat-quote-block {
+        background: rgba(0, 0, 0, 0.05);
+        border-left: 3px solid #285aa9;
+        padding: 6px 10px;
+        border-radius: 4px;
+        margin-top: 2px;
+        margin-bottom: 6px;
+        font-size: 12.5px;
+    }
+    .chat-quote-sender {
+        font-weight: 700;
+        color: #285aa9;
+        margin-bottom: 2px;
+    }
+    .chat-quote-body {
+        color: #475569;
+        font-size: 12px;
+        line-height: 1.4;
+        word-break: break-word;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%;
+    }
+
     /* Sender Info and Badges */
     .chat-bubble-header {
         display: flex;
         align-items: center;
         flex-wrap: wrap;
         gap: 6px;
-        margin-bottom: 6px;
+        margin-bottom: 0px;
         font-size: 12.5px;
+        line-height: 1.2;
     }
     .chat-sender-name {
         font-weight: 700;
@@ -294,14 +345,18 @@ require_once __DIR__ . '/../layouts/sidebar_mahasiswa.php';
 
     .chat-bubble-footer {
         display: flex;
-        justify-content: space-between;
+        justify-content: flex-end;
         align-items: center;
-        gap: 15px;
-        margin-top: 8px;
+        gap: 6px;
+        margin-top: 6px;
         font-size: 11px;
         color: #667781;
-        border-top: 1px dashed rgba(0, 0, 0, 0.05);
-        padding-top: 4px;
+        border-top: none;
+        padding-top: 0;
+    }
+    .chat-date-separator {
+        color: #cbd5e1;
+        font-size: 9px;
     }
     .chat-date {
         font-style: italic;
@@ -460,7 +515,15 @@ require_once __DIR__ . '/../layouts/sidebar_mahasiswa.php';
                     <span class="chat-sender-badge <?= $badge_class ?>"><?= $badge_text ?></span>
                 </div>
                 
-                <div class="chat-bubble-body"><?= nl2br(htmlspecialchars($pesan['isi'])) ?></div>
+                <div class="chat-bubble-body"><?php
+                    $clean_isi = htmlspecialchars(trim($pesan['isi']));
+                    $formatted_isi = preg_replace(
+                        '/\[quote=([^\]]+)\](.*?)\[\/quote\]\s*/s',
+                        '<div class="chat-quote-block"><div class="chat-quote-sender"><i class="fa-solid fa-quote-left" style="font-size:10px; margin-right:4px;"></i> $1</div><div class="chat-quote-body">$2</div></div>',
+                        $clean_isi
+                    );
+                    echo nl2br($formatted_isi);
+                ?></div>
                 
                 <?php if (!empty($pesan['file'])): ?>
                     <a href="/bimbingan-skripsi/public/uploads/draft/<?= htmlspecialchars($pesan['file']) ?>" class="chat-file-attachment" target="_blank">
@@ -473,10 +536,15 @@ require_once __DIR__ . '/../layouts/sidebar_mahasiswa.php';
                 <?php endif; ?>
                 
                 <div class="chat-bubble-footer">
-                    <span class="chat-date"><?= htmlspecialchars($pesan['tanggal']) ?></span>
-                    <span class="chat-action-reply" onclick="document.getElementById('inputPesan').focus()">
-                        <i class="fa-solid fa-reply"></i> Reply
+                    <span class="chat-date" title="<?= htmlspecialchars($pesan['tanggal']) ?>" style="cursor: help;">
+                        <?= htmlspecialchars(getOnlyTime($pesan['tanggal'])) ?>
                     </span>
+                    <?php if (($distribusi['status_bimbingan'] ?? 'aktif') !== 'selesai'): ?>
+                        <span class="chat-date-separator">•</span>
+                        <span class="chat-action-reply" onclick="setReplyTarget(<?= htmlspecialchars(json_encode($sender_display), ENT_QUOTES, 'UTF-8') ?>, <?= htmlspecialchars(json_encode($pesan['isi']), ENT_QUOTES, 'UTF-8') ?>)">
+                            <i class="fa-solid fa-reply"></i> Reply
+                        </span>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -484,25 +552,42 @@ require_once __DIR__ . '/../layouts/sidebar_mahasiswa.php';
     </div>
 
     <!-- ============ KOTAK BALAS PESAN ============ -->
-    <div class="reply-box">
-        <form id="formBalasForum" method="POST" action="/bimbingan-skripsi/app/controllers/BalasForumController.php" enctype="multipart/form-data">
-            <input type="hidden" name="bimbingan_id" value="<?= $id ?>">
+    <?php if (($distribusi['status_bimbingan'] ?? 'aktif') !== 'selesai'): ?>
+        <div class="reply-box">
+            <form id="formBalasForum" method="POST" action="/bimbingan-skripsi/app/controllers/BalasForumController.php" enctype="multipart/form-data">
+                <input type="hidden" name="bimbingan_id" value="<?= $id ?>">
 
-            <textarea name="pesan" id="inputPesan" placeholder="Tulis tanggapan / pertanyaan bimbingan..." required></textarea>
+                <!-- Quote Preview Container -->
+                <div id="replyPreviewContainer" style="display: none; background: #f8fafc; border-left: 4px solid #285aa9; padding: 8px 12px; margin-bottom: 12px; border-radius: 4px; justify-content: space-between; align-items: center; font-size: 13px; border: 1px solid #e2e8f0; border-left: 4px solid #285aa9;">
+                    <div style="min-width: 0;">
+                        <div style="font-weight: 700; color: #285aa9;" id="replyPreviewSender"></div>
+                        <div style="color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="replyPreviewText"></div>
+                    </div>
+                    <button type="button" onclick="cancelReply()" style="background: none; border: none; color: #ef4444; font-weight: bold; cursor: pointer; padding: 0 4px; font-size: 16px;">&times;</button>
+                </div>
+                <input type="hidden" id="hiddenReplySender" name="reply_sender" value="">
+                <input type="hidden" id="hiddenReplyText" name="reply_text" value="">
 
-            <div class="reply-footer">
-                <label class="attach-btn">
-                    <i class="fa-solid fa-paperclip"></i> Lampirkan File
-                    <input type="file" name="lampiran" id="inputLampiran">
-                    <span class="attach-filename" id="namaFileLampiran"></span>
-                </label>
+                <textarea name="pesan" id="inputPesan" placeholder="Tulis tanggapan / pertanyaan bimbingan..." required></textarea>
 
-                <button type="submit" class="btn-kirim">
-                    <i class="fa-solid fa-paper-plane"></i> Kirim
-                </button>
-            </div>
-        </form>
-    </div>
+                <div class="reply-footer">
+                    <label class="attach-btn">
+                        <i class="fa-solid fa-paperclip"></i> Lampirkan File
+                        <input type="file" name="lampiran" id="inputLampiran">
+                        <span class="attach-filename" id="namaFileLampiran"></span>
+                    </label>
+
+                    <button type="submit" class="btn-kirim">
+                        <i class="fa-solid fa-paper-plane"></i> Kirim
+                    </button>
+                </div>
+            </form>
+        </div>
+    <?php else: ?>
+        <div style="background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px; padding: 20px; text-align: center; color: #475569; font-weight: 500; font-size: 14.5px; margin-top: 20px;">
+            <i class="fa-solid fa-lock" style="color: #64748b; margin-right: 6px;"></i> Forum bimbingan dikunci karena status bimbingan Anda telah selesai / lulus.
+        </div>
+    <?php endif; ?>
 
 </div>
 
@@ -520,6 +605,40 @@ require_once __DIR__ . '/../layouts/sidebar_mahasiswa.php';
     const forumThread = document.getElementById('forumThread');
     if (forumThread) {
         forumThread.scrollTop = forumThread.scrollHeight;
+    }
+
+    function setReplyTarget(sender, text) {
+        // Strip out existing quotes to avoid nesting quotes inside previews
+        const cleanText = text.replace(/\[quote=.*?\][\s\S]*?\[\/quote\]/g, '').trim();
+        const truncatedText = cleanText.length > 80 ? cleanText.substring(0, 80) + '...' : cleanText;
+        
+        document.getElementById('replyPreviewContainer').style.display = 'flex';
+        document.getElementById('replyPreviewSender').textContent = sender;
+        document.getElementById('replyPreviewText').textContent = truncatedText;
+        
+        document.getElementById('hiddenReplySender').value = sender;
+        document.getElementById('hiddenReplyText').value = truncatedText;
+        
+        document.getElementById('inputPesan').focus();
+    }
+
+    function cancelReply() {
+        document.getElementById('replyPreviewContainer').style.display = 'none';
+        document.getElementById('hiddenReplySender').value = '';
+        document.getElementById('hiddenReplyText').value = '';
+    }
+
+    const formBalasForum = document.getElementById('formBalasForum');
+    if (formBalasForum) {
+        formBalasForum.addEventListener('submit', function () {
+            const sender = document.getElementById('hiddenReplySender').value;
+            const text = document.getElementById('hiddenReplyText').value;
+            const input = document.getElementById('inputPesan');
+            
+            if (sender && text) {
+                input.value = `[quote=${sender}]${text}[/quote]\n` + input.value;
+            }
+        });
     }
 </script>
 

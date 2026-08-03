@@ -168,29 +168,22 @@ require_once __DIR__ . '/../layouts/sidebar_kaprodi.php';
     table#judulTable {
         width: 100%;
         min-width: 1200px;
-        border-collapse: separate;
-        border-spacing: 0;
-        margin-top: 0;
-        border-radius: 12px;
-        overflow: hidden;
-        border: 1px solid #e2e8f0;
+        border-collapse: collapse;
+        margin-top: 16px;
     }
 
     table#judulTable th {
-        background: #f8fafc;
-        color: #475569;
+        background: #34495e;
+        color: #ffffff;
         font-weight: 600;
-        padding: 14px 18px;
-        font-size: 12px;
+        padding: 12px 16px;
+        font-size: 14px;
         text-align: left;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        border-bottom: 2px solid #e2e8f0;
     }
 
     table#judulTable td {
-        padding: 16px 18px;
-        border-bottom: 1px solid #f1f5f9;
+        padding: 14px 16px;
+        border-bottom: 1px solid #e2e8f0;
         font-size: 14px;
         color: #334155;
         vertical-align: middle;
@@ -202,10 +195,6 @@ require_once __DIR__ . '/../layouts/sidebar_kaprodi.php';
 
     table#judulTable tbody tr:hover {
         background: #f8fafc;
-    }
-
-    table#judulTable tbody tr:last-child td {
-        border-bottom: none;
     }
 
     .npm-badge {
@@ -501,6 +490,74 @@ require_once __DIR__ . '/../layouts/sidebar_kaprodi.php';
         color: #ffffff !important;
         border-color: #285aa9 !important;
     }
+
+    /* Modal Footer and Buttons Styling */
+    .modal-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 24px;
+        background: #f8fafc;
+        border-top: 1px solid #e2e8f0;
+        gap: 12px;
+        box-sizing: border-box;
+    }
+
+    .btn-cancel {
+        background: #f1f5f9;
+        border: 1px solid #cbd5e1;
+        color: #475569;
+        padding: 10px 18px;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.2s;
+    }
+
+    .btn-cancel:hover {
+        background: #e2e8f0;
+        color: #1e293b;
+        border-color: #cbd5e1;
+    }
+
+    .btn-print-sk {
+        background: #285aa9;
+        border: 1px solid #285aa9;
+        color: #ffffff;
+        padding: 10px 18px;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.2s;
+    }
+
+    .btn-print-sk:hover {
+        background: #1e4480;
+        border-color: #1e4480;
+    }
+
+    @media (max-width: 480px) {
+        .modal-footer {
+            flex-direction: column-reverse;
+            align-items: stretch;
+            padding: 14px 18px;
+        }
+        .btn-cancel, .btn-print-sk, #modal_print_action, #modal_print_action a {
+            width: 100% !important;
+            box-sizing: border-box;
+        }
+    }
 </style>
 
 <div class="content">
@@ -508,7 +565,6 @@ require_once __DIR__ . '/../layouts/sidebar_kaprodi.php';
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
         <div>
             <h1 class="page-title" style="margin: 0;">Riwayat SK Judul Skripsi</h1>
-            <p style="color: #64748b; font-size: 14px; margin-top: 4px;">Pantau data judul mahasiswa yang telah disetujui beserta Nomor SK penetapannya</p>
         </div>
     </div>
 
@@ -563,19 +619,14 @@ require_once __DIR__ . '/../layouts/sidebar_kaprodi.php';
                                  <?php 
                                  $isApproved = ($p['status'] === 'disetujui');
                                  $approvedType = $p['judul_disetujui'] ?? 'utama';
+                                 $displayTitle = ($isApproved && $approvedType === 'alternatif') ? $p['judul_alternatif'] : $p['judul'];
                                  ?>
-                                 <div style="font-weight: 600; color: #1e293b; display: flex; align-items: flex-start; gap: 6px;">
-                                     <?php if ($isApproved && $approvedType === 'utama'): ?>
-                                         <span class="badge-status disetujui" style="padding: 2px 8px; font-size: 11px; margin-top: 1px;"><i class="fa-solid fa-circle-check"></i> Utama</span>
-                                     <?php endif; ?>
-                                     <span><?= htmlspecialchars($p['judul']) ?></span>
+                                 <div style="font-weight: 600; color: #1e293b;">
+                                     <?= htmlspecialchars($displayTitle) ?>
                                  </div>
-                                 <?php if (!empty($p['judul_alternatif'])): ?>
-                                     <div style="font-size: 13px; color: #64748b; margin-top: 6px; font-style: italic; display: flex; align-items: flex-start; gap: 6px;">
-                                         <?php if ($isApproved && $approvedType === 'alternatif'): ?>
-                                             <span class="badge-status disetujui" style="padding: 2px 8px; font-size: 11px; margin-top: 1px; font-style: normal;"><i class="fa-solid fa-circle-check"></i> Alternatif</span>
-                                         <?php endif; ?>
-                                         <span>Alternatif: <?= htmlspecialchars($p['judul_alternatif']) ?></span>
+                                 <?php if (!$isApproved && !empty($p['judul_alternatif'])): ?>
+                                     <div style="font-size: 13px; color: #64748b; margin-top: 4px; font-style: italic;">
+                                         Alternatif: <?= htmlspecialchars($p['judul_alternatif']) ?>
                                      </div>
                                  <?php endif; ?>
                              </td>
@@ -599,14 +650,14 @@ require_once __DIR__ . '/../layouts/sidebar_kaprodi.php';
                                              <span style="font-family: monospace; font-weight: 600; color: #166534; background: #f0fdf4; padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(22, 101, 52, 0.1);"><?= htmlspecialchars($distData['nomor_sk'] ?? '-') ?></span>
                                          </div>
                                      </div>
-                                 <?php elseif ($p['status'] === 'ditolak'): ?>
-                                     <div style="color: #ef4444; font-size: 13px; font-style: italic; background: #fee2e2; border: 1px solid rgba(185,28,28,0.1); border-radius: 8px; padding: 10px 14px;">
-                                         <strong>Alasan Penolakan:</strong><br>
-                                         <?= !empty($p['alasan']) ? htmlspecialchars($p['alasan']) : 'Tidak ada alasan rinci yang dicantumkan.' ?>
-                                     </div>
-                                 <?php else: ?>
-                                     <span style="color: #64748b; font-style: italic; font-size: 13px;">Sedang diverifikasi di loket/Kaprodi.</span>
-                                 <?php endif; ?>
+                                  <?php elseif ($p['status'] === 'ditolak'): ?>
+                                      <div style="color: #ef4444; font-size: 13px; font-style: italic; background: #fee2e2; border: 1px solid rgba(185,28,28,0.1); border-radius: 8px; padding: 10px 14px;">
+                                          <strong>Alasan Penolakan:</strong><br>
+                                          <?= !empty($p['alasan']) ? htmlspecialchars($p['alasan']) : 'Tidak ada alasan rinci yang dicantumkan.' ?>
+                                      </div>
+                                  <?php else: ?>
+                                      <span style="color: #64748b; font-style: italic; font-size: 13px;">Sedang diverifikasi di loket/Kaprodi.</span>
+                                  <?php endif; ?>
                              </td>
                              <td style="text-align: center; white-space: nowrap;">
                                  <span class="badge-status <?= $p['status'] ?>"><?= $p['status'] ?></span>
@@ -661,12 +712,20 @@ require_once __DIR__ . '/../layouts/sidebar_kaprodi.php';
                     <div class="review-label">NPM</div>
                     <div class="review-value" id="view_npm_mhs">-</div>
                 </div>
+                <div class="review-row" id="row_judul_lama" style="display: none;">
+                    <div class="review-label">Judul Utama Awal</div>
+                    <div class="review-value" id="view_judul_lama" style="text-decoration: line-through; color: #64748b;">-</div>
+                </div>
+                <div class="review-row" id="row_judul_alt_lama" style="display: none;">
+                    <div class="review-label">Judul Alternatif Awal</div>
+                    <div class="review-value" id="view_judul_alt_lama" style="text-decoration: line-through; color: #64748b;">-</div>
+                </div>
                 <div class="review-row">
-                    <div class="review-label">Judul Utama</div>
+                    <div class="review-label" id="label_judul_utama">Judul Utama</div>
                     <div class="review-value" id="view_judul">-</div>
                 </div>
                 <div class="review-row" id="row_judul_alt">
-                    <div class="review-label">Judul Alternatif</div>
+                    <div class="review-label" id="label_judul_alt">Judul Alternatif</div>
                     <div class="review-value" id="view_judul_alternatif">-</div>
                 </div>
                 <div class="review-row" id="row_deskripsi">
@@ -717,14 +776,14 @@ require_once __DIR__ . '/../layouts/sidebar_kaprodi.php';
                         <div class="review-value" id="view_sk_akhir">-</div>
                     </div>
                     <div class="review-row" id="row_alasan_akhir">
-                        <div class="review-label">Alasan Tolak</div>
+                        <div class="review-label" id="label_alasan_akhir">Alasan Tolak</div>
                         <div class="review-value" id="view_alasan_akhir" style="color:#ef4444; font-style:italic;">-</div>
                     </div>
                 </div>
             </div>
 
         </div>
-        <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+        <div class="modal-footer">
             <button type="button" class="btn-cancel" onclick="closeAllModals()">Tutup</button>
             <div id="modal_print_action"></div>
         </div>
@@ -767,24 +826,40 @@ require_once __DIR__ . '/../layouts/sidebar_kaprodi.php';
         
         // Show Judul and highlight which one is approved
         const altRow = document.getElementById('row_judul_alt');
-        if (p.judul_alternatif) {
-            altRow.style.display = 'grid';
-        } else {
-            altRow.style.display = 'none';
-        }
+        const rowJudulLama = document.getElementById('row_judul_lama');
+        const rowJudulAltLama = document.getElementById('row_judul_alt_lama');
+        const labelJudulUtama = document.getElementById('label_judul_utama');
+        const labelJudulAlt = document.getElementById('label_judul_alt');
 
-        if (p.status === 'disetujui' && p.judul_disetujui === 'alternatif') {
-            document.getElementById('view_judul').textContent = p.judul;
-            document.getElementById('view_judul_alternatif').innerHTML = `${p.judul_alternatif} <span class="badge-status disetujui" style="padding: 1px 6px; font-size: 10px; margin-left: 6px;"><i class="fa-solid fa-circle-check"></i> Disetujui</span>`;
-        } else if (p.status === 'disetujui') {
-            document.getElementById('view_judul').innerHTML = `${p.judul} <span class="badge-status disetujui" style="padding: 1px 6px; font-size: 10px; margin-left: 6px;"><i class="fa-solid fa-circle-check"></i> Disetujui</span>`;
-            if (p.judul_alternatif) {
-                document.getElementById('view_judul_alternatif').textContent = p.judul_alternatif;
-            }
+        if (p.status === 'disetujui') {
+            labelJudulUtama.textContent = 'Judul Skripsi';
+            const displayTitle = (p.judul_disetujui === 'alternatif') ? p.judul_alternatif : p.judul;
+            document.getElementById('view_judul').textContent = displayTitle;
+            altRow.style.display = 'none';
+            rowJudulLama.style.display = 'none';
+            rowJudulAltLama.style.display = 'none';
         } else {
+            labelJudulUtama.textContent = 'Judul Skripsi';
             document.getElementById('view_judul').textContent = p.judul;
             if (p.judul_alternatif) {
+                altRow.style.display = 'grid';
+                labelJudulAlt.textContent = 'Judul Alternatif';
                 document.getElementById('view_judul_alternatif').textContent = p.judul_alternatif;
+            } else {
+                altRow.style.display = 'none';
+            }
+            if (p.judul_lama) {
+                rowJudulLama.style.display = 'grid';
+                document.getElementById('view_judul_lama').textContent = p.judul_lama;
+                if (p.judul_alternatif_lama) {
+                    rowJudulAltLama.style.display = 'grid';
+                    document.getElementById('view_judul_alt_lama').textContent = p.judul_alternatif_lama;
+                } else {
+                    rowJudulAltLama.style.display = 'none';
+                }
+            } else {
+                rowJudulLama.style.display = 'none';
+                rowJudulAltLama.style.display = 'none';
             }
         }
         
@@ -839,11 +914,20 @@ require_once __DIR__ . '/../layouts/sidebar_kaprodi.php';
             document.getElementById('row_sk_akhir').style.display = 'none';
             document.getElementById('row_alasan_akhir').style.display = 'grid';
             document.getElementById('view_alasan_akhir').textContent = p.alasan || '-';
+
+            const labelAlasanAkhir = document.getElementById('label_alasan_akhir');
+            if (p.status === 'revisi') {
+                labelAlasanAkhir.textContent = 'Catatan Revisi';
+                document.getElementById('view_alasan_akhir').style.color = '#7e22ce';
+            } else {
+                labelAlasanAkhir.textContent = 'Alasan Tolak';
+                document.getElementById('view_alasan_akhir').style.color = '#ef4444';
+            }
         }
 
         const printActionDiv = document.getElementById('modal_print_action');
         if (p.status === 'disetujui') {
-            printActionDiv.innerHTML = `<a href="cetak_sk.php?id=${p.id}" target="_blank" style="background: #285aa9; border: 1px solid #285aa9; color: #ffffff; padding: 10px 18px; border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;"><i class="fa-solid fa-print"></i> Cetak SK</a>`;
+            printActionDiv.innerHTML = `<a href="cetak_sk.php?id=${p.id}" target="_blank" class="btn-print-sk"><i class="fa-solid fa-print"></i> Cetak SK</a>`;
         } else {
             printActionDiv.innerHTML = '';
         }

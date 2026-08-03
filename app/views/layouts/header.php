@@ -246,9 +246,12 @@ body.sidebar-collapsed .content {
 .card{
     background:#ffffff;
     border-top:4px solid #69a86e;
-    box-shadow:0 2px 5px rgba(0,0,0,.1);
-    padding:20px;
-    border-radius:4px;
+    border-left:1px solid #e2e8f0;
+    border-right:1px solid #e2e8f0;
+    border-bottom:1px solid #e2e8f0;
+    box-shadow:0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+    padding:24px;
+    border-radius:16px;
 }
 
 /* =====================================================

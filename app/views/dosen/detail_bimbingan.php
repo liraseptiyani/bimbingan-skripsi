@@ -1,6 +1,14 @@
 <?php
 session_start();
 
+function getOnlyTime($tanggal_string) {
+    $parts = explode(',', $tanggal_string);
+    if (count($parts) >= 3) {
+        return trim(end($parts));
+    }
+    return $tanggal_string;
+}
+
 // ==========================================================
 // PROTEKSI HALAMAN: hanya dosen yang boleh mengakses
 // ==========================================================
@@ -73,9 +81,15 @@ $mahasiswa = [
     'judul_skripsi'        => $judulSkripsi,
 ];
 
-// Fetch forum messages from database
-$stmtF = $pdo->prepare("SELECT * FROM forum_bimbingan WHERE bimbingan_id = :b_id ORDER BY id ASC");
-$stmtF->execute([':b_id' => $id]);
+// Fetch forum messages from database (full thread history for this student)
+$stmtF = $pdo->prepare("
+    SELECT fb.* 
+    FROM forum_bimbingan fb
+    JOIN bimbingan b ON fb.bimbingan_id = b.id
+    WHERE REPLACE(b.npm, ' ', '') = REPLACE(:npm, ' ', '')
+    ORDER BY fb.id ASC
+");
+$stmtF->execute([':npm' => $npmMhs]);
 $pesan_forum = $stmtF->fetchAll(PDO::FETCH_ASSOC);
 
 require_once __DIR__ . '/../layouts/header.php';
@@ -145,7 +159,7 @@ require_once __DIR__ . '/../layouts/sidebar_dosen.php';
         border: 1px solid #c8d7e6;
         border-radius: 12px;
         padding: 24px 20px;
-        max-height: 550px;
+        max-height: 650px;
         overflow-y: auto;
         display: flex;
         flex-direction: column;
@@ -184,7 +198,8 @@ require_once __DIR__ . '/../layouts/sidebar_dosen.php';
 
     .chat-bubble {
         position: relative;
-        max-width: 75%;
+        max-width: 60%;
+        width: fit-content;
         padding: 10px 14px 8px 14px;
         box-shadow: 0 1px 3px rgba(40, 90, 169, 0.08);
         font-size: 14.5px;
@@ -233,14 +248,43 @@ require_once __DIR__ . '/../layouts/sidebar_dosen.php';
         border-top-color: #ffffff;
     }
 
+    /* Message Reply Quote Styles */
+    .chat-quote-block {
+        background: rgba(0, 0, 0, 0.05);
+        border-left: 3px solid #285aa9;
+        padding: 6px 10px;
+        border-radius: 4px;
+        margin-top: 2px;
+        margin-bottom: 6px;
+        font-size: 12.5px;
+    }
+    .chat-quote-sender {
+        font-weight: 700;
+        color: #285aa9;
+        margin-bottom: 2px;
+    }
+    .chat-quote-body {
+        color: #475569;
+        font-size: 12px;
+        line-height: 1.4;
+        word-break: break-word;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%;
+    }
+
     /* Sender Info and Badges */
     .chat-bubble-header {
         display: flex;
         align-items: center;
         flex-wrap: wrap;
         gap: 6px;
-        margin-bottom: 6px;
+        margin-bottom: 0px;
         font-size: 12.5px;
+        line-height: 1.2;
     }
     .chat-sender-name {
         font-weight: 700;
@@ -330,14 +374,18 @@ require_once __DIR__ . '/../layouts/sidebar_dosen.php';
 
     .chat-bubble-footer {
         display: flex;
-        justify-content: space-between;
+        justify-content: flex-end;
         align-items: center;
-        gap: 15px;
-        margin-top: 8px;
+        gap: 6px;
+        margin-top: 6px;
         font-size: 11px;
         color: #667781;
-        border-top: 1px dashed rgba(0, 0, 0, 0.05);
-        padding-top: 4px;
+        border-top: none;
+        padding-top: 0;
+    }
+    .chat-date-separator {
+        color: #cbd5e1;
+        font-size: 9px;
     }
     .chat-date {
         font-style: italic;
@@ -541,7 +589,15 @@ require_once __DIR__ . '/../layouts/sidebar_dosen.php';
                         <span class="chat-sender-badge <?= $badge_class ?>"><?= $badge_text ?></span>
                     </div>
                     
-                    <div class="chat-bubble-body"><?= nl2br(htmlspecialchars($pesan['isi'])) ?></div>
+                    <div class="chat-bubble-body"><?php
+                        $clean_isi = htmlspecialchars(trim($pesan['isi']));
+                        $formatted_isi = preg_replace(
+                            '/\[quote=([^\]]+)\](.*?)\[\/quote\]\s*/s',
+                            '<div class="chat-quote-block"><div class="chat-quote-sender"><i class="fa-solid fa-quote-left" style="font-size:10px; margin-right:4px;"></i> $1</div><div class="chat-quote-body">$2</div></div>',
+                            $clean_isi
+                        );
+                        echo nl2br($formatted_isi);
+                    ?></div>
                     
                     <?php if (!empty($pesan['file'])): ?>
                         <a href="/bimbingan-skripsi/public/uploads/draft/<?= htmlspecialchars($pesan['file']) ?>" class="chat-file-attachment" target="_blank">
@@ -554,8 +610,11 @@ require_once __DIR__ . '/../layouts/sidebar_dosen.php';
                     <?php endif; ?>
                     
                     <div class="chat-bubble-footer">
-                        <span class="chat-date"><?= htmlspecialchars($pesan['tanggal']) ?></span>
-                        <span class="chat-action-reply" onclick="document.getElementById('inputPesan').focus()">
+                        <span class="chat-date" title="<?= htmlspecialchars($pesan['tanggal']) ?>" style="cursor: help;">
+                            <?= htmlspecialchars(getOnlyTime($pesan['tanggal'])) ?>
+                        </span>
+                        <span class="chat-date-separator">•</span>
+                        <span class="chat-action-reply" onclick="setReplyTarget(<?= htmlspecialchars(json_encode($sender_display), ENT_QUOTES, 'UTF-8') ?>, <?= htmlspecialchars(json_encode($pesan['isi']), ENT_QUOTES, 'UTF-8') ?>)">
                             <i class="fa-solid fa-reply"></i> Reply
                         </span>
                     </div>
@@ -569,6 +628,17 @@ require_once __DIR__ . '/../layouts/sidebar_dosen.php';
     <div class="reply-box">
         <form id="formBalasForum" method="POST" action="/bimbingan-skripsi/app/controllers/BalasForumController.php" enctype="multipart/form-data">
             <input type="hidden" name="bimbingan_id" value="<?= $id ?>">
+
+            <!-- Quote Preview Container -->
+            <div id="replyPreviewContainer" style="display: none; background: #f8fafc; border-left: 4px solid #285aa9; padding: 8px 12px; margin-bottom: 12px; border-radius: 4px; justify-content: space-between; align-items: center; font-size: 13px; border: 1px solid #e2e8f0; border-left: 4px solid #285aa9;">
+                <div style="min-width: 0;">
+                    <div style="font-weight: 700; color: #285aa9;" id="replyPreviewSender"></div>
+                    <div style="color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="replyPreviewText"></div>
+                </div>
+                <button type="button" onclick="cancelReply()" style="background: none; border: none; color: #ef4444; font-weight: bold; cursor: pointer; padding: 0 4px; font-size: 16px;">&times;</button>
+            </div>
+            <input type="hidden" id="hiddenReplySender" name="reply_sender" value="">
+            <input type="hidden" id="hiddenReplyText" name="reply_text" value="">
 
             <textarea name="pesan" id="inputPesan" placeholder="Tulis balasan / catatan revisi..." required></textarea>
 
@@ -609,6 +679,40 @@ require_once __DIR__ . '/../layouts/sidebar_dosen.php';
     const forumThread = document.getElementById('forumThread');
     if (forumThread) {
         forumThread.scrollTop = forumThread.scrollHeight;
+    }
+
+    function setReplyTarget(sender, text) {
+        // Strip out existing quotes to avoid nesting quotes inside previews
+        const cleanText = text.replace(/\[quote=.*?\][\s\S]*?\[\/quote\]/g, '').trim();
+        const truncatedText = cleanText.length > 80 ? cleanText.substring(0, 80) + '...' : cleanText;
+        
+        document.getElementById('replyPreviewContainer').style.display = 'flex';
+        document.getElementById('replyPreviewSender').textContent = sender;
+        document.getElementById('replyPreviewText').textContent = truncatedText;
+        
+        document.getElementById('hiddenReplySender').value = sender;
+        document.getElementById('hiddenReplyText').value = truncatedText;
+        
+        document.getElementById('inputPesan').focus();
+    }
+
+    function cancelReply() {
+        document.getElementById('replyPreviewContainer').style.display = 'none';
+        document.getElementById('hiddenReplySender').value = '';
+        document.getElementById('hiddenReplyText').value = '';
+    }
+
+    const formBalasForum = document.getElementById('formBalasForum');
+    if (formBalasForum) {
+        formBalasForum.addEventListener('submit', function () {
+            const sender = document.getElementById('hiddenReplySender').value;
+            const text = document.getElementById('hiddenReplyText').value;
+            const input = document.getElementById('inputPesan');
+            
+            if (sender && text) {
+                input.value = `[quote=${sender}]${text}[/quote]\n` + input.value;
+            }
+        });
     }
 </script>
 

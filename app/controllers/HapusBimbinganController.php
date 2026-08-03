@@ -11,6 +11,18 @@ $bimbingan_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 $isMahasiswaAccount = (($_SESSION['role'] ?? '') === 'mahasiswa');
 $npmMhs  = $isMahasiswaAccount ? ($_SESSION['username'] ?? '2217051151') : '2217051151';
 
+// Check bimbingan status from database
+try {
+    $stmtCheck = $pdo->prepare("SELECT status_bimbingan FROM distribusi_mahasiswa WHERE REPLACE(npm, ' ', '') = REPLACE(:npm, ' ', '') LIMIT 1");
+    $stmtCheck->execute([':npm' => $npmMhs]);
+    $statusBimbingan = $stmtCheck->fetchColumn();
+    if ($statusBimbingan === 'selesai') {
+        $_SESSION['swal_error'] = 'Anda tidak dapat menghapus bimbingan karena status bimbingan Anda telah selesai/lulus!';
+        header("Location: /bimbingan-skripsi/app/views/mahasiswa/bimbingan.php");
+        exit;
+    }
+} catch (PDOException $e) {}
+
 if ($bimbingan_id <= 0) {
     $_SESSION['swal_error'] = 'ID bimbingan tidak valid!';
     header("Location: /bimbingan-skripsi/app/views/mahasiswa/bimbingan.php");

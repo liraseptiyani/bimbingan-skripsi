@@ -14,6 +14,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $isMahasiswaAccount = (($_SESSION['role'] ?? '') === 'mahasiswa');
     $npmMhs  = $isMahasiswaAccount ? ($_SESSION['username'] ?? '2217051151') : '2217051151';
 
+    // Check bimbingan status from database
+    try {
+        $stmtCheck = $pdo->prepare("SELECT status_bimbingan FROM distribusi_mahasiswa WHERE REPLACE(npm, ' ', '') = REPLACE(:npm, ' ', '') LIMIT 1");
+        $stmtCheck->execute([':npm' => $npmMhs]);
+        $statusBimbingan = $stmtCheck->fetchColumn();
+        if ($statusBimbingan === 'selesai') {
+            $_SESSION['swal_error'] = 'Anda tidak dapat mengubah bimbingan karena status bimbingan Anda telah selesai/lulus!';
+            header("Location: /bimbingan-skripsi/app/views/mahasiswa/bimbingan.php");
+            exit;
+        }
+    } catch (PDOException $e) {}
+
     if ($bimbingan_id <= 0) {
         $_SESSION['swal_error'] = 'ID bimbingan tidak valid!';
         header("Location: /bimbingan-skripsi/app/views/mahasiswa/bimbingan.php");
@@ -40,7 +52,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $nama_file = $bimb['file_draft'];
         // Handle upload file draft PDF if a new file is uploaded
-        if (isset($_FILES['draft']) && $_FILES['draft']['error'] === UPLOAD_ERR_OK) {
+        if (isset($_FILES['draft']) && $_FILES['draft']['error'] !== UPLOAD_ERR_NO_FILE) {
+            if ($_FILES['draft']['error'] !== UPLOAD_ERR_OK) {
+                $_SESSION['swal_error'] = 'Gagal mengunggah file draft! Error Code: ' . $_FILES['draft']['error'];
+                header("Location: /bimbingan-skripsi/app/views/mahasiswa/bimbingan.php");
+                exit;
+            }
+
+            // Validate that the file is a PDF
+            $file_ext = strtolower(pathinfo($_FILES['draft']['name'], PATHINFO_EXTENSION));
+            if ($file_ext !== 'pdf') {
+                $_SESSION['swal_error'] = 'Hanya file PDF yang diperbolehkan!';
+                header("Location: /bimbingan-skripsi/app/views/mahasiswa/bimbingan.php");
+                exit;
+            }
+
             $upload_dir = dirname(__DIR__, 2) . '/public/uploads/draft/';
             if (!is_dir($upload_dir)) {
                 mkdir($upload_dir, 0777, true);
@@ -53,7 +79,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $file_basename = basename($_FILES['draft']['name']);
             $nama_file = time() . '_' . $file_basename;
             $target_file = $upload_dir . $nama_file;
-            move_uploaded_file($_FILES['draft']['tmp_name'], $target_file);
+            if (!move_uploaded_file($_FILES['draft']['tmp_name'], $target_file)) {
+                $_SESSION['swal_error'] = 'Gagal memindahkan file ke folder uploads!';
+                header("Location: /bimbingan-skripsi/app/views/mahasiswa/bimbingan.php");
+                exit;
+            }
         }
 
         // Update bimbingan record and reset reply statuses
@@ -77,9 +107,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ]);
         }
 
+        // Update Session bimbingan_list if exists
+        if (isset($_SESSION['bimbingan_list'])) {
+            foreach ($_SESSION['bimbingan_list'] as &$item) {
+                if ($item['id'] == $bimbingan_id) {
+                    $item['file_draft'] = $nama_file;
+                    $item['status_balasan'] = 'belum_dibalas';
+                }
+            }
+            unset($item);
+        }
+
+        // Update Session forum_bimbingan if exists
+        if (isset($_SESSION['forum_bimbingan'][$bimbingan_id])) {
+            if (isset($_SESSION['forum_bimbingan'][$bimbingan_id][0])) {
+                $_SESSION['forum_bimbingan'][$bimbingan_id][0]['isi'] = !empty($pesan) ? $pesan : 'Mengunggah draft bimbingan baru.';
+                $_SESSION['forum_bimbingan'][$bimbingan_id][0]['file'] = $nama_file;
+            }
+        }
+
         $_SESSION['swal_success'] = 'Bimbingan berhasil diperbarui!';
-    } catch (PDOException $e) {
-        $_SESSION['swal_error'] = 'Database Error: ' . $e->getMessage();
+    } catch (Exception $e) {
+        $_SESSION['swal_error'] = 'Error: ' . $e->getMessage();
     }
 }
 

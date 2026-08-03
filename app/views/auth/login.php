@@ -27,7 +27,7 @@ $remembered_checked  = isset($_COOKIE['remember_checked']) ? 'checked' : '';
     <title>Login — Sistem Bimbingan Skripsi Universitas Lampung</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         *, *::before, *::after {
             box-sizing: border-box;
@@ -109,6 +109,7 @@ $remembered_checked  = isset($_COOKIE['remember_checked']) ? 'checked' : '';
         .logo-bar {
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 12px;
             margin-bottom: auto;
             padding-bottom: 24px;
@@ -140,7 +141,7 @@ $remembered_checked  = isset($_COOKIE['remember_checked']) ? 'checked' : '';
         }
 
         .logo-text .univ-name {
-            font-family: 'Cinzel', serif;
+            font-family: 'Source Sans 3', sans-serif;
             font-size: 13px;
             font-weight: 600;
             color: var(--text-dark);
@@ -162,23 +163,25 @@ $remembered_checked  = isset($_COOKIE['remember_checked']) ? 'checked' : '';
         /* Heading */
         .form-heading {
             margin-bottom: 40px;
+            text-align: center;
         }
 
         .form-heading .subtitle {
-            font-size: 17px;
+            font-size: 21px;
             font-weight: 300;
-            color: var(--text-mid);
+            color: #718096;
             letter-spacing: 0.02em;
-            margin-bottom: 4px;
+            margin-bottom: 6px;
         }
 
         .form-heading h1 {
-            font-family: 'Cinzel', serif;
-            font-size: 26px;
-            font-weight: 600;
+            font-family: 'Source Sans 3', sans-serif;
+            font-size: 32px;
+            font-weight: 700;
             color: var(--unila-blue);
-            letter-spacing: 0.03em;
+            letter-spacing: 0.02em;
             line-height: 1.25;
+            margin-top: 4px;
         }
 
         /* Error alert */
@@ -370,6 +373,7 @@ $remembered_checked  = isset($_COOKIE['remember_checked']) ? 'checked' : '';
             .page { grid-template-columns: 1fr; }
             .panel-left { display: none; }
             .panel-right { padding: 32px 28px; }
+            .logo-bar { justify-content: center; }
         }
     </style>
 </head>
@@ -467,7 +471,7 @@ $remembered_checked  = isset($_COOKIE['remember_checked']) ? 'checked' : '';
                         <input type="checkbox" name="remember" value="1" <?= $remembered_checked ?>>
                         Ingat Saya
                     </label>
-                    <a href="#" class="forgot-link">Lupa Password?</a>
+                    <!-- <a href="#" class="forgot-link">Lupa Password?</a> -->
                 </div>
 
                 <!-- Submit -->

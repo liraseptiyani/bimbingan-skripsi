@@ -91,6 +91,11 @@ if ($dospem1 !== '-' && $dospem1 !== 'Belum ditentukan') {
     }
 }
 
+$statusMhs = 'Aktif';
+if (isset($dist['status_bimbingan']) && $dist['status_bimbingan'] === 'selesai') {
+    $statusMhs = 'Lulus';
+}
+
 $mahasiswa = [
     'npm'      => $npmMhs,
     'nama'     => $namaMhs,
@@ -98,7 +103,7 @@ $mahasiswa = [
     'angkatan' => $angkatanMhs,
     'semester' => $semesterMhs,
     'ipk'      => '3.55',
-    'status'   => 'Aktif',
+    'status'   => $statusMhs,
     'dospem1'  => $dospem1,
     'dospem2'  => $dospem2,
     'pembahas' => $pembahas,
@@ -375,7 +380,15 @@ include __DIR__ . '/../layouts/topbar.php';
     background: var(--primary-color);
     z-index: 2;
     transition: width 0.5s ease;
-    width: <?= (($currentStep - 1) / 3) * 100 ?>%;
+    width: <?php
+    $progressStepForLine = min($currentStep, 4);
+    if ($progressStepForLine <= 1) {
+        echo '0%';
+    } else {
+        $fraction = ($progressStepForLine - 1) / 3;
+        echo "calc(" . round($fraction, 4) . " * (100% - 80px))";
+    }
+    ?>;
 }
 
 .milestone-step {
@@ -589,7 +602,11 @@ include __DIR__ . '/../layouts/topbar.php';
                         <?= htmlspecialchars($mahasiswa['prodi']) ?>
                     </div>
                     <div class="welcome-badge">
-                        <i class="fa-solid fa-toggle-on" style="color: #22c55e;"></i>
+                        <?php if ($mahasiswa['status'] === 'Lulus'): ?>
+                            <i class="fa-solid fa-circle-check" style="color: #22c55e;"></i>
+                        <?php else: ?>
+                            <i class="fa-solid fa-toggle-on" style="color: #22c55e;"></i>
+                        <?php endif; ?>
                         Status: <?= htmlspecialchars($mahasiswa['status']) ?>
                     </div>
                 </div>
@@ -602,29 +619,14 @@ include __DIR__ . '/../layouts/topbar.php';
                 <i class="fa-solid fa-id-card-clip"></i>
                 Profil Akademik
             </div>
-            <div>
-                <div class="profile-row">
+            <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: auto; margin-top: auto;">
+                <div class="profile-row" style="padding: 10px 0;">
+                    <span class="profile-label"><i class="fa-solid fa-user"></i> Nama</span>
+                    <span class="profile-val"><?= htmlspecialchars($mahasiswa['nama']) ?></span>
+                </div>
+                <div class="profile-row" style="padding: 10px 0; border-bottom: none;">
                     <span class="profile-label"><i class="fa-solid fa-id-card"></i> NPM</span>
                     <span class="profile-val"><?= htmlspecialchars($mahasiswa['npm']) ?></span>
-                </div>
-                <div class="profile-row">
-                    <span class="profile-label"><i class="fa-solid fa-calendar-day"></i> Angkatan</span>
-                    <span class="profile-val"><?= htmlspecialchars($mahasiswa['angkatan']) ?></span>
-                </div>
-                <div class="profile-row">
-                    <span class="profile-label"><i class="fa-solid fa-hourglass-half"></i> Semester</span>
-                    <span class="profile-val">Semester <?= htmlspecialchars($mahasiswa['semester']) ?></span>
-                </div>
-            </div>
-
-            <!-- IPK display -->
-            <div class="ipk-bar-wrapper">
-                <div class="ipk-bar-header">
-                    <span>Indeks Prestasi Kumulatif (IPK)</span>
-                    <span style="color: var(--primary-color); font-weight: 700;"><?= htmlspecialchars($mahasiswa['ipk']) ?></span>
-                </div>
-                <div class="ipk-bar-outer">
-                    <div class="ipk-bar-inner" style="width: <?= ($mahasiswa['ipk'] / 4.0) * 100 ?>%;"></div>
                 </div>
             </div>
         </div>

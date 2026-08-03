@@ -1,6 +1,14 @@
 <?php
 session_start();
 
+function getOnlyTime($tanggal_string) {
+    $parts = explode(',', $tanggal_string);
+    if (count($parts) >= 3) {
+        return trim(end($parts));
+    }
+    return $tanggal_string;
+}
+
 // ==========================================================
 // PROTEKSI HALAMAN: hanya dosen dengan otoritas aktif kaprodi
 // ==========================================================
@@ -44,9 +52,15 @@ $info_skripsi = [
     'judul_skripsi'      => $judulSkripsi,
 ];
 
-// Fetch forum messages from database
-$stmtF = $pdo->prepare("SELECT * FROM forum_bimbingan WHERE bimbingan_id = :b_id ORDER BY id ASC");
-$stmtF->execute([':b_id' => $id]);
+// Fetch forum messages from database (full thread history for this student)
+$stmtF = $pdo->prepare("
+    SELECT fb.* 
+    FROM forum_bimbingan fb
+    JOIN bimbingan b ON fb.bimbingan_id = b.id
+    WHERE REPLACE(b.npm, ' ', '') = REPLACE(:npm, ' ', '')
+    ORDER BY fb.id ASC
+");
+$stmtF->execute([':npm' => $npm]);
 $forum_messages = $stmtF->fetchAll(PDO::FETCH_ASSOC);
 
 require_once __DIR__ . '/../layouts/header.php';
@@ -82,30 +96,34 @@ require_once __DIR__ . '/../layouts/sidebar_kaprodi.php';
         color: #285aa9;
     }
 
-    /* --- Info skripsi --- */
     .info-skripsi {
-        background: #eef4fb;
+        background: #eef3f9;
+        padding: 24px 30px;
+        margin-bottom: 28px;
         border-radius: 8px;
-        padding: 20px 24px;
-        margin-bottom: 26px;
-        border: 1px solid rgba(40, 90, 169, 0.1);
     }
 
     .info-skripsi .info-row {
-        display: grid;
-        grid-template-columns: 190px 1fr;
-        gap: 6px;
-        padding: 5px 0;
-        font-size: 14.5px;
+        display: flex;
+        margin-bottom: 10px;
+    }
+
+    .info-skripsi .info-row:last-child {
+        margin-bottom: 0;
     }
 
     .info-skripsi .info-label {
-        color: #285aa9;
-        font-weight: 600;
+        width: 190px;
+        color: #6a7fbf;
+        font-size: 14.5px;
+        font-weight: 700;
+        flex-shrink: 0;
     }
 
     .info-skripsi .info-value {
-        color: #334155;
+        flex: 1;
+        font-size: 14.5px;
+        color: #333;
         line-height: 1.5;
     }
 
@@ -117,7 +135,7 @@ require_once __DIR__ . '/../layouts/sidebar_kaprodi.php';
         border: 1px solid #c8d7e6;
         border-radius: 12px;
         padding: 24px 20px;
-        max-height: 550px;
+        max-height: 650px;
         overflow-y: auto;
         display: flex;
         flex-direction: column;
@@ -156,7 +174,8 @@ require_once __DIR__ . '/../layouts/sidebar_kaprodi.php';
 
     .chat-bubble {
         position: relative;
-        max-width: 75%;
+        max-width: 60%;
+        width: fit-content;
         padding: 10px 14px 8px 14px;
         box-shadow: 0 1px 3px rgba(40, 90, 169, 0.08);
         font-size: 14.5px;
@@ -205,14 +224,43 @@ require_once __DIR__ . '/../layouts/sidebar_kaprodi.php';
         border-top-color: #ffffff;
     }
 
+    /* Message Reply Quote Styles */
+    .chat-quote-block {
+        background: rgba(0, 0, 0, 0.05);
+        border-left: 3px solid #285aa9;
+        padding: 6px 10px;
+        border-radius: 4px;
+        margin-top: 2px;
+        margin-bottom: 6px;
+        font-size: 12.5px;
+    }
+    .chat-quote-sender {
+        font-weight: 700;
+        color: #285aa9;
+        margin-bottom: 2px;
+    }
+    .chat-quote-body {
+        color: #475569;
+        font-size: 12px;
+        line-height: 1.4;
+        word-break: break-word;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%;
+    }
+
     /* Sender Info and Badges */
     .chat-bubble-header {
         display: flex;
         align-items: center;
         flex-wrap: wrap;
         gap: 6px;
-        margin-bottom: 6px;
+        margin-bottom: 0px;
         font-size: 12.5px;
+        line-height: 1.2;
     }
     .chat-sender-name {
         font-weight: 700;
@@ -302,14 +350,14 @@ require_once __DIR__ . '/../layouts/sidebar_kaprodi.php';
 
     .chat-bubble-footer {
         display: flex;
-        justify-content: space-between;
+        justify-content: flex-end;
         align-items: center;
-        gap: 15px;
-        margin-top: 8px;
+        gap: 6px;
+        margin-top: 6px;
         font-size: 11px;
         color: #667781;
-        border-top: 1px dashed rgba(0, 0, 0, 0.05);
-        padding-top: 4px;
+        border-top: none;
+        padding-top: 0;
     }
     .chat-date {
         font-style: italic;
@@ -389,14 +437,22 @@ require_once __DIR__ . '/../layouts/sidebar_kaprodi.php';
                     }
                 }
             ?>
-            <div class="chat-row <?= $is_student ? 'chat-other' : 'chat-me' ?>">
+            <div class="chat-row <?= $is_student ? 'chat-me' : 'chat-other' ?>">
                 <div class="chat-bubble">
                     <div class="chat-bubble-header">
                         <span class="chat-sender-name"><?= htmlspecialchars($sender_display) ?></span>
                         <span class="chat-sender-badge <?= $badge_class ?>"><?= $badge_text ?></span>
                     </div>
                     
-                    <div class="chat-bubble-body"><?= nl2br(htmlspecialchars($pesan['isi'])) ?></div>
+                    <div class="chat-bubble-body"><?php
+                        $clean_isi = htmlspecialchars(trim($pesan['isi']));
+                        $formatted_isi = preg_replace(
+                            '/\[quote=([^\]]+)\](.*?)\[\/quote\]\s*/s',
+                            '<div class="chat-quote-block"><div class="chat-quote-sender"><i class="fa-solid fa-quote-left" style="font-size:10px; margin-right:4px;"></i> $1</div><div class="chat-quote-body">$2</div></div>',
+                            $clean_isi
+                        );
+                        echo nl2br($formatted_isi);
+                    ?></div>
                     
                     <?php if (!empty($pesan['file'])): ?>
                         <a href="/bimbingan-skripsi/public/uploads/draft/<?= htmlspecialchars($pesan['file']) ?>" class="chat-file-attachment" target="_blank">
@@ -408,8 +464,10 @@ require_once __DIR__ . '/../layouts/sidebar_kaprodi.php';
                         </a>
                     <?php endif; ?>
                     
-                    <div class="chat-bubble-footer" style="justify-content: flex-end;">
-                        <span class="chat-date"><?= htmlspecialchars($pesan['tanggal']) ?></span>
+                    <div class="chat-bubble-footer">
+                        <span class="chat-date" title="<?= htmlspecialchars($pesan['tanggal']) ?>" style="cursor: help;">
+                            <?= htmlspecialchars(getOnlyTime($pesan['tanggal'])) ?>
+                        </span>
                     </div>
                 </div>
             </div>

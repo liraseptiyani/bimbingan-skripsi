@@ -20,8 +20,36 @@ require_once dirname(__DIR__, 3) . '/config/koneksi.php';
 
 $npm_mahasiswa = str_replace(' ', '', $_SESSION['username'] ?? '');
 
+// Cek apakah mahasiswa sudah disetujui di salah satu topik
+$hasApprovedTopic = false;
+$approvedTopicDetails = null;
+try {
+    $stmtApproved = $pdo->prepare("SELECT COUNT(*) FROM minat_topik WHERE mahasiswa_npm = :npm_mahasiswa AND status = 'disetujui'");
+    $stmtApproved->execute([':npm_mahasiswa' => $npm_mahasiswa]);
+    $hasApprovedTopic = $stmtApproved->fetchColumn() > 0;
+    
+    if ($hasApprovedTopic) {
+        $stmtApprovedTopic = $pdo->prepare("
+            SELECT tp.topik, d.nama AS nama_dosen
+            FROM minat_topik mt
+            JOIN topik_penelitian tp ON mt.topik_id = tp.id
+            JOIN dosen d ON REPLACE(tp.nip_dosen, ' ', '') = REPLACE(d.nip, ' ', '')
+            WHERE mt.mahasiswa_npm = :npm_mahasiswa AND mt.status = 'disetujui'
+            LIMIT 1
+        ");
+        $stmtApprovedTopic->execute([':npm_mahasiswa' => $npm_mahasiswa]);
+        $approvedTopicDetails = $stmtApprovedTopic->fetch(PDO::FETCH_ASSOC);
+    }
+} catch (PDOException $e) {}
+
 // Tangani proses simpan / update alasan tertarik
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['topik_id'])) {
+    if ($hasApprovedTopic) {
+        $_SESSION['swal_error'] = 'Anda tidak dapat mengajukan topik lain karena Anda sudah disetujui untuk salah satu topik penelitian!';
+        header('Location: /bimbingan-skripsi/app/views/mahasiswa/topik_mahasiswa.php');
+        exit;
+    }
+
     $topik_id = (int)$_POST['topik_id'];
     $alasan = trim($_POST['alasan'] ?? '');
 
@@ -343,133 +371,170 @@ table thead th {
     font-size: 14px;
 }
 
-/* ================= MODAL DETAIL TOPIK ================= */
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0, 0, 0, 0.4);
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 99999;
-}
+    /* ================= MODAL DETAIL TOPIK ================= */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(15, 23, 42, 0.5);
+        backdrop-filter: blur(4px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 100000;
+    }
 
-.modal-card {
-    background: #ffffff;
-    width: 680px;
-    max-width: 92%;
-    border-radius: 6px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.25);
-    padding: 30px 35px;
-    animation: fadeInModal 0.25s ease-out;
-}
+    .modal-container {
+        background: #ffffff;
+        border-radius: 16px;
+        width: 600px;
+        max-width: 90%;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        border: 1px solid #e2e8f0;
+        overflow: hidden;
+        animation: slideUp 0.3s ease-out;
+    }
 
-@keyframes fadeInModal {
-    from { opacity: 0; transform: translateY(-15px); }
-    to { opacity: 1; transform: translateY(0); }
-}
+    @keyframes slideUp {
+        from {
+            transform: translateY(20px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
 
-.modal-title {
-    text-align: center;
-    font-size: 20px;
-    font-weight: 600;
-    color: #222;
-    margin-bottom: 25px;
-}
+    .modal-header {
+        background: #285aa9;
+        color: #ffffff;
+        padding: 18px 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
 
-.modal-form-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
+    .modal-header h3 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+    }
 
-.modal-form-row {
-    display: flex;
-    align-items: flex-start;
-    gap: 15px;
-}
+    .modal-close {
+        background: none;
+        border: none;
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 20px;
+        cursor: pointer;
+    }
 
-.modal-form-row label {
-    width: 150px;
-    flex-shrink: 0;
-    font-size: 14.5px;
-    font-weight: 700;
-    color: #5568b2;
-    padding-top: 8px;
-}
+    .modal-body {
+        padding: 24px;
+        max-height: 480px;
+        overflow-y: auto;
+    }
 
-.modal-form-row label span.required {
-    color: #e53e3e;
-}
+    /* Detail Review Section */
+    .detail-review {
+        background: #eef4fb;
+        border-radius: 8px;
+        padding: 16px 20px;
+        margin-bottom: 0px;
+        border: 1px solid rgba(40, 90, 169, 0.1);
+    }
 
-.modal-input-field {
-    flex: 1;
-    width: 100%;
-    border: 1px solid #dcdfe6;
-    border-radius: 4px;
-    padding: 9px 12px;
-    font-size: 14px;
-    color: #333;
-    background: #ffffff;
-    outline: none;
-    transition: border-color 0.2s;
-}
+    .detail-review .review-row {
+        display: grid;
+        grid-template-columns: 150px 1fr;
+        gap: 6px;
+        padding: 8px 0;
+        font-size: 13.5px;
+        border-bottom: 1px solid rgba(40, 90, 169, 0.05);
+    }
 
-.modal-input-field:focus {
-    border-color: #285aa9;
-}
+    .detail-review .review-row:last-child {
+        border-bottom: none;
+    }
 
-textarea.modal-input-field {
-    resize: vertical;
-    font-family: inherit;
-    line-height: 1.5;
-}
+    .detail-review .review-label {
+        color: #285aa9;
+        font-weight: 600;
+    }
 
-.modal-buttons {
-    display: flex;
-    justify-content: flex-end;
-    gap: 12px;
-    margin-top: 25px;
-}
+    .detail-review .review-value {
+        color: #334155;
+        line-height: 1.45;
+        text-align: left;
+    }
 
-.btn-modal-back {
-    background: #285aa9;
-    color: #ffffff;
-    border: none;
-    padding: 9px 18px;
-    border-radius: 4px;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-}
+    .modal-input-field {
+        width: 100%;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        padding: 12px 14px;
+        font-size: 14px;
+        outline: none;
+        transition: border-color 0.2s;
+        box-sizing: border-box;
+    }
 
-.btn-modal-back:hover {
-    background: #1e4687;
-}
+    .modal-input-field:focus {
+        border-color: #285aa9;
+    }
 
-.btn-modal-save {
-    background: #4ea968;
-    color: #ffffff;
-    border: none;
-    padding: 9px 20px;
-    border-radius: 4px;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-}
+    textarea.modal-input-field {
+        resize: vertical;
+        font-family: inherit;
+        line-height: 1.5;
+    }
 
-.btn-modal-save:hover {
-    background: #3f9056;
-}
+    .btn-cancel {
+        background: #f1f5f9;
+        color: #475569;
+        border: 1px solid #cbd5e1;
+        padding: 10px 18px;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .btn-cancel:hover {
+        background: #cbd5e1;
+    }
+
+    .btn-modal-save {
+        background: #285aa9;
+        color: #ffffff;
+        border: none;
+        padding: 10px 18px;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s;
+    }
+
+    .btn-modal-save:hover {
+        background: #1e4687;
+    }
+
+    .modal-footer {
+        padding: 16px 24px;
+        background: #f8fafc;
+        border-top: 1px solid #e2e8f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+    }
 
 </style>
 </head>
@@ -479,6 +544,15 @@ textarea.modal-input-field {
 <!-- CONTENT -->
 
 <div class="content">
+
+    <?php if ($approvedTopicDetails): ?>
+        <div style="background: #eefaf2; border-left: 4px solid #68a86f; border-top: 1px solid rgba(104, 168, 111, 0.15); border-right: 1px solid rgba(104, 168, 111, 0.15); border-bottom: 1px solid rgba(104, 168, 111, 0.15); border-radius: 4px; padding: 11px 16px; margin-bottom: 20px; color: #1b4332; display: flex; align-items: center; gap: 10px; font-size: 13.5px; box-shadow: 0 1px 2px rgba(0,0,0,0.03);">
+            <i class="fa-solid fa-circle-check" style="font-size: 16px; color: #68a86f;"></i>
+            <div>
+                <strong>Pengajuan Disetujui!</strong> Anda telah disetujui untuk topik <strong>"<?= htmlspecialchars($approvedTopicDetails['topik']) ?>"</strong> oleh dosen <strong><?= htmlspecialchars($approvedTopicDetails['nama_dosen']) ?></strong>.
+            </div>
+        </div>
+    <?php endif; ?>
 
     <div class="title">
         Daftar Topik Penelitian
@@ -501,7 +575,7 @@ textarea.modal-input-field {
                     <th>Dosen</th>
                     <th>Topik</th>
                     <th>Deskripsi</th>
-                    <th>Tenggat</th>
+                    <th style="width: 140px; white-space: nowrap;">Tenggat</th>
                     <th>Kuota</th>
                     <th>Aksi</th>
                     <th>Status</th>
@@ -538,7 +612,7 @@ textarea.modal-input-field {
 
                     <td><?= htmlspecialchars($row['deskripsi']) ?></td>
 
-                    <td><?= !empty($row['tenggat_tanggal']) ? htmlspecialchars($row['tenggat_tanggal']) : '-' ?></td>
+                    <td style="white-space: nowrap;"><?= !empty($row['tenggat_tanggal']) ? htmlspecialchars($row['tenggat_tanggal']) : '-' ?></td>
 
                     <td><?= htmlspecialchars($row['kuota']) ?></td>
 
@@ -550,7 +624,9 @@ textarea.modal-input-field {
                                 data-deskripsi="<?= htmlspecialchars($row['deskripsi']) ?>"
                                 data-alasan="<?= htmlspecialchars($alasanVal) ?>"
                                 data-full="<?= $isFull ?>"
-                                data-expired="<?= $isExpiredStr ?>">
+                                data-expired="<?= $isExpiredStr ?>"
+                                data-hasapproved="<?= $hasApprovedTopic ? 'true' : 'false' ?>"
+                                data-status="<?= htmlspecialchars($st) ?>">
                             <i class="fa fa-eye"></i>
                         </button>
                     </td>
@@ -593,39 +669,38 @@ textarea.modal-input-field {
 
 <!-- ================= MODAL DETAIL TOPIK PENELITIAN ================= -->
 <div class="modal-overlay" id="modalTopikOverlay">
-    <div class="modal-card">
-        <h3 class="modal-title">Detail Topik Penelitian</h3>
-
+    <div class="modal-container">
+        <div class="modal-header">
+            <h3>Detail Topik Penelitian</h3>
+            <button type="button" class="modal-close" id="btnHeaderClose">&times;</button>
+        </div>
         <form id="formDetailTopik" method="POST" action="/bimbingan-skripsi/app/views/mahasiswa/topik_mahasiswa.php">
-            <input type="hidden" name="topik_id" id="modalTopikId">
+            <div class="modal-body">
+                <input type="hidden" name="topik_id" id="modalTopikId">
 
-            <div class="modal-form-grid">
-                <div class="modal-form-row">
-                    <label>Dosen</label>
-                    <input type="text" id="modalDosen" class="modal-input-field" readonly>
+                <div class="detail-review">
+                    <div class="review-row">
+                        <div class="review-label">Dosen</div>
+                        <div class="review-value" id="view_dosen">-</div>
+                    </div>
+                    <div class="review-row">
+                        <div class="review-label">Topik</div>
+                        <div class="review-value" id="view_topik">-</div>
+                    </div>
+                    <div class="review-row">
+                        <div class="review-label">Deskripsi</div>
+                        <div class="review-value" id="view_deskripsi">-</div>
+                    </div>
                 </div>
 
-                <div class="modal-form-row">
-                    <label>Topik</label>
-                    <input type="text" id="modalTopik" class="modal-input-field" readonly>
-                </div>
-
-                <div class="modal-form-row">
-                    <label>Deskripsi</label>
-                    <textarea id="modalDeskripsi" class="modal-input-field" rows="2" readonly></textarea>
-                </div>
-
-                <div class="modal-form-row">
-                    <label>Alasan Tertarik<span class="required">*</span></label>
+                <div style="margin-top: 20px;">
+                    <label style="font-weight: 600; color: #285aa9; display: block; margin-bottom: 8px; font-size: 14px;">Alasan Tertarik <span style="color: #ef4444;">*</span></label>
                     <textarea id="modalAlasan" name="alasan" class="modal-input-field" rows="4" required placeholder="Saya tertarik pada topik ini karena..."></textarea>
                 </div>
             </div>
 
-            <div class="modal-buttons">
-                <button type="button" class="btn-modal-back" id="btnCloseModal">
-                    <i class="fa-solid fa-chevron-left"></i> Kembali ke daftar
-                </button>
-
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel" id="btnCloseModal">Tutup</button>
                 <button type="submit" class="btn-modal-save">
                     <i class="fa-solid fa-floppy-disk"></i> Simpan
                 </button>
@@ -638,11 +713,9 @@ textarea.modal-input-field {
 <script>
     const modalOverlay = document.getElementById('modalTopikOverlay');
     const modalTopikId = document.getElementById('modalTopikId');
-    const modalDosen   = document.getElementById('modalDosen');
-    const modalTopik   = document.getElementById('modalTopik');
-    const modalDeskripsi = document.getElementById('modalDeskripsi');
     const modalAlasan  = document.getElementById('modalAlasan');
     const btnCloseModal = document.getElementById('btnCloseModal');
+    const btnHeaderClose = document.getElementById('btnHeaderClose');
     const formDetailTopik = document.getElementById('formDetailTopik');
 
     // Buka Modal saat tombol Aksi (Mata) diklik
@@ -655,15 +728,31 @@ textarea.modal-input-field {
             const alasan = this.getAttribute('data-alasan');
             const isFull = this.getAttribute('data-full') === 'true';
             const isExpired = this.getAttribute('data-expired') === 'true';
+            const hasApproved = this.getAttribute('data-hasapproved') === 'true';
+            const status = this.getAttribute('data-status') || '';
 
             modalTopikId.value = id;
-            modalDosen.value = dosen;
-            modalTopik.value = topik;
-            modalDeskripsi.value = deskripsi;
+            document.getElementById('view_dosen').textContent = dosen;
+            document.getElementById('view_topik').textContent = topik;
+            document.getElementById('view_deskripsi').textContent = deskripsi;
             modalAlasan.value = alasan;
 
             const btnSave = document.querySelector('.btn-modal-save');
-            if (isExpired) {
+            if (status === 'disetujui') {
+                btnSave.disabled = true;
+                btnSave.style.opacity = '0.5';
+                btnSave.style.cursor = 'not-allowed';
+                btnSave.innerHTML = '<i class="fa-solid fa-check-double"></i> Disetujui';
+                modalAlasan.readOnly = true;
+                modalAlasan.placeholder = "Topik ini telah disetujui oleh dosen.";
+            } else if (hasApproved) {
+                btnSave.disabled = true;
+                btnSave.style.opacity = '0.5';
+                btnSave.style.cursor = 'not-allowed';
+                btnSave.innerHTML = '<i class="fa-solid fa-lock"></i> Terkunci';
+                modalAlasan.readOnly = true;
+                modalAlasan.placeholder = "Anda tidak dapat mengajukan topik karena sudah disetujui pada topik penelitian lain.";
+            } else if (isExpired) {
                 btnSave.disabled = true;
                 btnSave.style.opacity = '0.5';
                 btnSave.style.cursor = 'not-allowed';
@@ -677,6 +766,13 @@ textarea.modal-input-field {
                 btnSave.innerHTML = '<i class="fa-solid fa-ban"></i> Kuota Penuh';
                 modalAlasan.readOnly = true;
                 modalAlasan.placeholder = "Kuota topik bimbingan dosen ini sudah penuh.";
+            } else if (status !== '') {
+                btnSave.disabled = true;
+                btnSave.style.opacity = '0.5';
+                btnSave.style.cursor = 'not-allowed';
+                btnSave.innerHTML = '<i class="fa-solid fa-check"></i> Sudah Diajukan';
+                modalAlasan.readOnly = true;
+                modalAlasan.placeholder = "Anda sudah mengajukan minat untuk topik penelitian ini.";
             } else {
                 btnSave.disabled = false;
                 btnSave.style.opacity = '1';
@@ -690,8 +786,38 @@ textarea.modal-input-field {
         });
     });
 
-    // Tutup Modal via Tombol "Kembali ke daftar"
+    // Form submit confirmation with SweetAlert2
+    let isConfirmedSubmit = false;
+    formDetailTopik.addEventListener('submit', function(e) {
+        if (isConfirmedSubmit) {
+            return;
+        }
+        e.preventDefault();
+        
+        Swal.fire({
+            title: 'Apakah Anda yakin?',
+            text: "Anda akan mengajukan minat pada topik penelitian ini. Pengajuan tidak dapat diubah kembali setelah disimpan.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#285aa9',
+            cancelButtonColor: '#ef4444',
+            confirmButtonText: 'Ya, Simpan!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                isConfirmedSubmit = true;
+                formDetailTopik.submit();
+            }
+        });
+    });
+
+    // Tutup Modal via Tombol "Tutup"
     btnCloseModal.addEventListener('click', function() {
+        modalOverlay.style.display = 'none';
+    });
+
+    // Tutup Modal via Tombol "x" di header
+    btnHeaderClose.addEventListener('click', function() {
         modalOverlay.style.display = 'none';
     });
 
@@ -739,7 +865,7 @@ textarea.modal-input-field {
         if (totalData === 0) {
             const emptyRow = document.createElement('tr');
             emptyRow.className = 'no-data-row';
-            emptyRow.innerHTML = `<td colspan="7" style="text-align:center; color:#94a3b8; padding:22px !important;">Tidak ada topik yang cocok.</td>`;
+            emptyRow.innerHTML = `<td colspan="8" style="text-align:center; color:#94a3b8; padding:22px !important;">Tidak ada topik yang cocok.</td>`;
             tableBody.appendChild(emptyRow);
         } else {
             const start = (currentPage - 1) * rowsPerPage;

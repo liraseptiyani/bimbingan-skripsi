@@ -230,7 +230,6 @@ require_once __DIR__ . '/../layouts/sidebar_mahasiswa.php';
 
     <div style="margin-bottom: 24px;">
         <h1 class="page-title" style="margin: 0;">Pengajuan Judul Skripsi</h1>
-        <p style="color: #64748b; font-size: 14px; margin-top: 4px;">Penuhi berkas administrasi dan daftarkan rencana judul skripsi Anda</p>
     </div>
 
     <!-- PETUNJUK ALUR -->

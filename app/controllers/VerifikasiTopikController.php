@@ -31,7 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             // Get info about applicant and topic ownership
             $stmtCheck = $pdo->prepare("
-                SELECT tp.nip_dosen, tp.kuota_max, mt.topik_id, mt.status AS current_status
+                SELECT tp.nip_dosen, tp.kuota_max, mt.topik_id, mt.status AS current_status, mt.mahasiswa_npm
                 FROM minat_topik mt
                 JOIN topik_penelitian tp ON mt.topik_id = tp.id
                 WHERE mt.id = :id
@@ -50,8 +50,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 exit;
             }
 
-            // Check quota if changing status to 'disetujui'
+            // Checks when changing status to 'disetujui'
             if ($status === 'disetujui') {
+                // Check if this student is already approved for another topic
+                $stmtCheckOther = $pdo->prepare("
+                    SELECT COUNT(*) 
+                    FROM minat_topik 
+                    WHERE mahasiswa_npm = :npm AND status = 'disetujui' AND id != :id
+                ");
+                $stmtCheckOther->execute([':npm' => $info['mahasiswa_npm'], ':id' => $id]);
+                if ($stmtCheckOther->fetchColumn() > 0) {
+                    echo json_encode(['success' => false, 'message' => 'Mahasiswa ini sudah disetujui untuk topik penelitian lain!']);
+                    exit;
+                }
+
+                // Check quota
                 $stmtCount = $pdo->prepare("SELECT COUNT(*) FROM minat_topik WHERE topik_id = :topik_id AND status = 'disetujui'");
                 $stmtCount->execute([':topik_id' => $info['topik_id']]);
                 $currentApproved = (int)$stmtCount->fetchColumn();
@@ -69,8 +82,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ':id' => $id
             ]);
 
-            // Auto-reject other applicants if the quota is now full
+            // Post-approval actions (auto-reject others)
             if ($status === 'disetujui') {
+                // Auto-reject other pending applications of this student
+                $stmtRejectOthersMhs = $pdo->prepare("
+                    UPDATE minat_topik 
+                    SET status = 'ditolak' 
+                    WHERE mahasiswa_npm = :npm AND id != :id AND status = 'menunggu'
+                ");
+                $stmtRejectOthersMhs->execute([
+                    ':npm' => $info['mahasiswa_npm'],
+                    ':id' => $id
+                ]);
+
+                // Auto-reject other applicants if the quota is now full
                 $stmtCount = $pdo->prepare("SELECT COUNT(*) FROM minat_topik WHERE topik_id = :topik_id AND status = 'disetujui'");
                 $stmtCount->execute([':topik_id' => $info['topik_id']]);
                 $currentApproved = (int)$stmtCount->fetchColumn();

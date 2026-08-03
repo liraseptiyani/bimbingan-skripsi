@@ -36,6 +36,21 @@ $otoritas = $_SESSION['otoritas'] ?? $_SESSION['role'] ?? 'mahasiswa';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $bimbingan_id = isset($_POST['bimbingan_id']) ? (int)$_POST['bimbingan_id'] : 0;
+
+    if ($otoritas === 'mahasiswa') {
+        $isMahasiswaAccount = (($_SESSION['role'] ?? '') === 'mahasiswa');
+        $npmMhs  = $isMahasiswaAccount ? ($_SESSION['username'] ?? '2217051151') : '2217051151';
+        try {
+            $stmtCheckStatus = $pdo->prepare("SELECT status_bimbingan FROM distribusi_mahasiswa WHERE REPLACE(npm, ' ', '') = REPLACE(:npm, ' ', '') LIMIT 1");
+            $stmtCheckStatus->execute([':npm' => $npmMhs]);
+            $statusBimbingan = $stmtCheckStatus->fetchColumn();
+            if ($statusBimbingan === 'selesai') {
+                $_SESSION['swal_error'] = 'Anda tidak dapat mengirim tanggapan bimbingan karena status bimbingan Anda telah selesai/lulus!';
+                header("Location: /bimbingan-skripsi/app/views/mahasiswa/detail_bimbingan.php?id=" . $bimbingan_id);
+                exit;
+            }
+        } catch (PDOException $e) {}
+    }
     $pesan = trim($_POST['pesan'] ?? '');
     $nama_file = '';
 

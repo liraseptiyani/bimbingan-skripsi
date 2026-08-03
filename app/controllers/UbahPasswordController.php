@@ -28,6 +28,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
+    if (strlen($password_baru) < 8) {
+        echo json_encode(['success' => false, 'message' => 'Kata sandi baru minimal harus terdiri dari 8 karakter!']);
+        exit;
+    }
+
+    if (strlen($password_baru) > 100) {
+        echo json_encode(['success' => false, 'message' => 'Kata sandi baru tidak boleh lebih dari 100 karakter!']);
+        exit;
+    }
+
     try {
         // Fetch current password
         $stmt = $pdo->prepare("SELECT password FROM users WHERE username = :username LIMIT 1");
@@ -39,15 +49,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         }
 
-        if ($current_password !== $password_lama) {
+        if (!password_verify($password_lama, $current_password)) {
             echo json_encode(['success' => false, 'message' => 'Kata sandi lama Anda salah!']);
             exit;
         }
 
+        // Hash the new password
+        $hashed_password = password_hash($password_baru, PASSWORD_DEFAULT);
+
         // Update password in users table
         $stmtUpdate = $pdo->prepare("UPDATE users SET password = :new_pass WHERE username = :username");
         $stmtUpdate->execute([
-            ':new_pass' => $password_baru,
+            ':new_pass' => $hashed_password,
             ':username' => $username
         ]);
 

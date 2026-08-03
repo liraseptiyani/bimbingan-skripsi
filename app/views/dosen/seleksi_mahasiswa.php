@@ -116,28 +116,33 @@ require_once __DIR__ . '/../layouts/sidebar_dosen.php';
     /* Info card matches info-skripsi in riwayat_detail.php */
     .info-skripsi {
         background: #eef4fb;
-        border-radius: 8px;
-        padding: 20px 24px;
-        margin-bottom: 26px;
-        border: 1px solid rgba(40, 90, 169, 0.1);
+        padding: 28px 35px;
+        margin-bottom: 28px;
+        border-left: 4px solid #d9e3f0;
     }
 
     .info-skripsi .info-row {
-        display: grid;
-        grid-template-columns: 190px 1fr;
-        gap: 8px;
-        padding: 6px 0;
-        font-size: 14px;
+        display: flex;
+        margin-bottom: 20px;
+    }
+
+    .info-skripsi .info-row:last-child {
+        margin-bottom: 0;
     }
 
     .info-skripsi .info-label {
-        color: #285aa9;
-        font-style: italic;
+        width: 190px;
+        color: #7d8bc2;
+        font-size: 15px;
         font-weight: 500;
+        flex-shrink: 0;
     }
 
     .info-skripsi .info-value {
-        color: #222;
+        flex: 1;
+        font-size: 15px;
+        color: #333;
+        line-height: 1.8;
     }
 
     /* Section Title */

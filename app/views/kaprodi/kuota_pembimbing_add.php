@@ -143,9 +143,9 @@ include '../layouts/topbar.php';
             <div class="form-group">
                 <label>Universitas <span class="req">*</span></label>
                 <select name="universitas" required>
-                    <option value="" disabled selected>Pilih Universitas</option>
+                    <option value="" disabled>Pilih Universitas</option>
                     <?php foreach ($listUniversitas as $u): ?>
-                        <option value="<?= htmlspecialchars($u) ?>"><?= htmlspecialchars($u) ?></option>
+                        <option value="<?= htmlspecialchars($u) ?>" selected><?= htmlspecialchars($u) ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>

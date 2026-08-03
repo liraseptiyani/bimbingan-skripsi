@@ -251,7 +251,6 @@ require_once __DIR__ . '/../layouts/sidebar_kaprodi.php';
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
         <div>
             <h1 class="page-title" style="margin: 0;">Topik Penelitian</h1>
-            <p class="welcome-text">Daftar usulan topik penelitian skripsi dari seluruh dosen</p>
         </div>
     </div>
 

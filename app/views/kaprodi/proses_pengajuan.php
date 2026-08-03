@@ -29,6 +29,23 @@ try {
         header("Location: /bimbingan-skripsi/app/views/kaprodi/pengajuan_judul.php");
         exit;
     }
+
+    // Fetch existing distribution details (if any) to pre-fill pembimbing and pembahas
+    $dist = null;
+    try {
+        $stmtDist = $pdo->prepare("SELECT * FROM distribusi_mahasiswa WHERE REPLACE(npm, ' ', '') = REPLACE(:npm, ' ', '') LIMIT 1");
+        $stmtDist->execute([':npm' => $p['mahasiswa_npm']]);
+        $dist = $stmtDist->fetch(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        // ignore
+    }
+
+    // Setup selected values for dropdowns
+    $selectedP1 = $dist['pembimbing1'] ?? $p['pembimbing1'] ?? '';
+    $selectedP2 = $dist['pembimbing2'] ?? $p['pembimbing2'] ?? '';
+    $selectedPb1 = $dist['pembahas1'] ?? '';
+    $selectedPb2 = $dist['pembahas2'] ?? '';
+
 } catch (PDOException $e) {
     header("Location: /bimbingan-skripsi/app/views/kaprodi/pengajuan_judul.php");
     exit;
@@ -47,6 +64,12 @@ require_once __DIR__ . '/../layouts/header.php';
 require_once __DIR__ . '/../layouts/topbar.php';
 require_once __DIR__ . '/../layouts/sidebar_kaprodi.php';
 
+?>
+
+<!-- Select2 CSS CDN -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+<?php
 function renderDocCard($filename, $label, $isDocx = false) {
     if (!$filename) {
         return '
@@ -386,6 +409,40 @@ function renderDocCard($filename, $label, $isDocx = false) {
         opacity: 0.6;
         cursor: not-allowed;
     }
+
+    /* Custom Select2 premium overrides to match template */
+    .select2-container .select2-selection--single {
+        height: 38px !important;
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 6px !important;
+        display: flex;
+        align-items: center;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        color: #1e293b !important;
+        font-size: 13.5px !important;
+        padding-left: 6px !important;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 36px !important;
+        right: 6px !important;
+    }
+    .select2-dropdown {
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 6px !important;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+    }
+    .select2-results__option {
+        font-size: 13.5px !important;
+        padding: 8px 10px !important;
+    }
+    .select2-search__field {
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 4px !important;
+        outline: none !important;
+        padding: 6px 8px !important;
+        font-size: 13.5px !important;
+    }
 </style>
 
 <div class="content">
@@ -416,8 +473,29 @@ function renderDocCard($filename, $label, $isDocx = false) {
         <div class="card" style="margin-bottom: 0;">
             <h3 class="card-title"><i class="fa-solid fa-book-bookmark"></i> Judul yang Diajukan</h3>
             <div style="display: flex; flex-direction: column; gap: 10px;">
-                <div class="form-group" style="margin-bottom: 0;">
-                    <label style="font-size: 12px; color: #64748b; margin-bottom: 4px;">Judul Utama</label>
+                <?php if (!empty($p['judul_lama'])): ?>
+                    <div style="background: #fffbeb; border: 1px solid #f59e0b; border-radius: 8px; padding: 10px 14px; font-size: 13px; color: #b45309; margin-bottom: 10px; line-height: 1.4;">
+                        <i class="fa-solid fa-circle-info"></i> <strong>Informasi Perbaikan Judul:</strong><br>
+                        Mahasiswa telah mengajukan perbaikan judul baru berdasarkan catatan revisi sebelumnya. Di bawah ini ditampilkan riwayat judul awal dan judul perbaikan saat ini.
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label style="font-size: 12px; color: #94a3b8; margin-bottom: 4px;">Judul Utama Awal (Lama)</label>
+                        <div style="background: #f1f5f9; border: 1px dashed #cbd5e1; border-radius: 6px; padding: 8px 12px; font-size: 13px; color: #64748b; line-height: 1.4; text-decoration: line-through;">
+                            <?= htmlspecialchars($p['judul_lama']) ?>
+                        </div>
+                    </div>
+                    <?php if (!empty($p['judul_alternatif_lama'])): ?>
+                        <div class="form-group" style="margin-bottom: 0; margin-top: 4px;">
+                            <label style="font-size: 12px; color: #94a3b8; margin-bottom: 4px;">Judul Alternatif Awal (Lama)</label>
+                            <div style="background: #f1f5f9; border: 1px dashed #cbd5e1; border-radius: 6px; padding: 8px 12px; font-size: 13px; color: #64748b; line-height: 1.4; font-style: italic; text-decoration: line-through;">
+                                <?= htmlspecialchars($p['judul_alternatif_lama']) ?>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+                <?php endif; ?>
+
+                <div class="form-group" style="margin-bottom: 0; margin-top: <?= !empty($p['judul_lama']) ? '12px' : '0' ?>;">
+                    <label style="font-size: 12px; color: #64748b; margin-bottom: 4px;"><?= !empty($p['judul_lama']) ? 'Judul Utama Baru (Perbaikan)' : 'Judul Utama' ?></label>
                     <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 8px 12px; font-size: 13.5px; font-weight: 600; color: #1e293b; line-height: 1.4; max-height: 56px; overflow-y: auto;">
                         <?= htmlspecialchars($p['judul']) ?>
                     </div>
@@ -425,7 +503,7 @@ function renderDocCard($filename, $label, $isDocx = false) {
                 
                 <?php if (!empty($p['judul_alternatif'])): ?>
                     <div class="form-group" style="margin-bottom: 0; margin-top: 4px;">
-                        <label style="font-size: 12px; color: #64748b; margin-bottom: 4px;">Judul Alternatif</label>
+                        <label style="font-size: 12px; color: #64748b; margin-bottom: 4px;"><?= !empty($p['judul_lama']) ? 'Judul Alternatif Baru (Perbaikan)' : 'Judul Alternatif' ?></label>
                         <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 8px 12px; font-size: 13.5px; font-weight: 600; color: #64748b; line-height: 1.4; font-style: italic; max-height: 56px; overflow-y: auto;">
                             <?= htmlspecialchars($p['judul_alternatif']) ?>
                         </div>
@@ -478,40 +556,40 @@ function renderDocCard($filename, $label, $isDocx = false) {
                         
                         <div class="form-group">
                             <label for="pembimbing1">Dosen Pembimbing 1 <span style="color:#ef4444;">*</span></label>
-                            <select id="pembimbing1" name="pembimbing1">
+                            <select id="pembimbing1" name="pembimbing1" class="searchable-select">
                                 <option value="">-- Pilih Pembimbing 1 --</option>
                                 <?php foreach ($daftar_dosen as $d): ?>
-                                    <option value="<?= htmlspecialchars($d['nama']) ?>"><?= htmlspecialchars($d['nama']) ?></option>
+                                    <option value="<?= htmlspecialchars($d['nama']) ?>" <?= $selectedP1 === $d['nama'] ? 'selected' : '' ?>><?= htmlspecialchars($d['nama']) ?></option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
                         
                         <div class="form-group">
                             <label for="pembimbing2">Dosen Pembimbing 2</label>
-                            <select id="pembimbing2" name="pembimbing2">
+                            <select id="pembimbing2" name="pembimbing2" class="searchable-select">
                                 <option value="">-- Pilih Pembimbing 2 (Boleh Kosong) --</option>
                                 <?php foreach ($daftar_dosen as $d): ?>
-                                    <option value="<?= htmlspecialchars($d['nama']) ?>"><?= htmlspecialchars($d['nama']) ?></option>
+                                    <option value="<?= htmlspecialchars($d['nama']) ?>" <?= $selectedP2 === $d['nama'] ? 'selected' : '' ?>><?= htmlspecialchars($d['nama']) ?></option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
                         
                         <div class="form-group">
-                            <label for="pembahas1">Dosen Pembahas 1 (Opsional)</label>
-                            <select id="pembahas1" name="pembahas1">
+                            <label for="pembahas1">Dosen Pembahas 1 <span style="color:#ef4444;">*</span></label>
+                            <select id="pembahas1" name="pembahas1" required class="searchable-select">
                                 <option value="">-- Pilih Dosen Pembahas 1 --</option>
                                 <?php foreach ($daftar_dosen as $d): ?>
-                                    <option value="<?= htmlspecialchars($d['nama']) ?>"><?= htmlspecialchars($d['nama']) ?></option>
+                                    <option value="<?= htmlspecialchars($d['nama']) ?>" <?= $selectedPb1 === $d['nama'] ? 'selected' : '' ?>><?= htmlspecialchars($d['nama']) ?></option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
                         
                         <div class="form-group">
-                            <label for="pembahas2">Dosen Pembahas 2 (Opsional)</label>
-                            <select id="pembahas2" name="pembahas2">
-                                <option value="">-- Pilih Dosen Pembahas 2 --</option>
+                            <label for="pembahas2">Dosen Pembahas 2</label>
+                            <select id="pembahas2" name="pembahas2" class="searchable-select">
+                                <option value="">-- Pilih Dosen Pembahas 2 (Boleh Kosong) --</option>
                                 <?php foreach ($daftar_dosen as $d): ?>
-                                    <option value="<?= htmlspecialchars($d['nama']) ?>"><?= htmlspecialchars($d['nama']) ?></option>
+                                    <option value="<?= htmlspecialchars($d['nama']) ?>" <?= $selectedPb2 === $d['nama'] ? 'selected' : '' ?>><?= htmlspecialchars($d['nama']) ?></option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
@@ -521,7 +599,7 @@ function renderDocCard($filename, $label, $isDocx = false) {
                     <div class="decision-panel" id="panelTolak">
                         <div class="form-group">
                             <label for="alasan">Alasan Penolakan <span style="color:#ef4444;">*</span></label>
-                            <textarea id="alasan" name="alasan" rows="5" placeholder="Tuliskan secara detail alasan penolakan judul skripsi mahasiswa agar mahasiswa dapat memperbaikinya..."></textarea>
+                            <textarea id="alasan" name="alasan" rows="5" placeholder="Tuliskan secara detail alasan penolakan judul skripsi mahasiswa..."></textarea>
                         </div>
                     </div>
                     
@@ -560,6 +638,17 @@ function renderDocCard($filename, $label, $isDocx = false) {
     </div>
 
 </div>
+<!-- jQuery and Select2 JS CDN -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('.searchable-select').select2({
+            width: '100%',
+            dropdownAutoWidth: true
+        });
+    });
+</script>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
@@ -596,12 +685,22 @@ function renderDocCard($filename, $label, $isDocx = false) {
             const p1 = document.getElementById('pembimbing1').value;
             const p2 = document.getElementById('pembimbing2').value;
             const pb1 = document.getElementById('pembahas1').value;
+            const pb2 = document.getElementById('pembahas2').value;
 
             if (p1 === "") {
                 Swal.fire({
                     icon: 'warning',
                     title: 'Formulir Kurang Lengkap',
                     text: 'Mohon lengkapi Dosen Pembimbing 1!',
+                    confirmButtonColor: '#285aa9'
+                });
+                return;
+            }
+            if (pb1 === "") {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Formulir Kurang Lengkap',
+                    text: 'Mohon lengkapi Dosen Pembahas 1!',
                     confirmButtonColor: '#285aa9'
                 });
                 return;
@@ -619,7 +718,25 @@ function renderDocCard($filename, $label, $isDocx = false) {
                 Swal.fire({
                     icon: 'warning',
                     title: 'Dosen Pembahas Merangkap',
-                    text: 'Dosen Pembahas tidak boleh merangkap sebagai Pembimbing mahasiswa tersebut!',
+                    text: 'Dosen Pembahas 1 tidak boleh merangkap sebagai Pembimbing mahasiswa tersebut!',
+                    confirmButtonColor: '#285aa9'
+                });
+                return;
+            }
+            if (pb2 !== "" && (p1 === pb2 || p2 === pb2)) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Dosen Pembahas Merangkap',
+                    text: 'Dosen Pembahas 2 tidak boleh merangkap sebagai Pembimbing mahasiswa tersebut!',
+                    confirmButtonColor: '#285aa9'
+                });
+                return;
+            }
+            if (pb1 !== "" && pb2 !== "" && pb1 === pb2) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Dosen Pembahas Sama',
+                    text: 'Pembahas 1 dan Pembahas 2 tidak boleh orang yang sama!',
                     confirmButtonColor: '#285aa9'
                 });
                 return;

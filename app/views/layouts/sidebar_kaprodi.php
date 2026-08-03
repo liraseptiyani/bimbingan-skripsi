@@ -2,7 +2,9 @@
 $current = basename($_SERVER['PHP_SELF']);
 $pengajuanJudulActive = in_array($current, [
     'pengajuan_judul.php',
-    'pengajuan_riwayat.php'
+    'pengajuan_riwayat.php',
+    'proses_pengajuan.php',
+    'riwayat_detail.php'
 ]);
 ?>
 
@@ -134,12 +136,12 @@ $pengajuanJudulActive = in_array($current, [
         <!-- SUBMENU PENGAJUAN JUDUL -->
         <div id="submenuJudul" class="submenu <?= $pengajuanJudulActive ? 'show' : '' ?>">
             <a href="/bimbingan-skripsi/app/views/kaprodi/pengajuan_judul.php"
-               class="<?= $current == 'pengajuan_judul.php' ? 'active' : '' ?>">
+               class="<?= in_array($current, ['pengajuan_judul.php', 'proses_pengajuan.php']) ? 'active' : '' ?>">
                 <i class="fa-solid fa-angle-right"></i>
                 Persetujuan Judul
             </a>
             <a href="/bimbingan-skripsi/app/views/kaprodi/pengajuan_riwayat.php"
-               class="<?= $current == 'pengajuan_riwayat.php' ? 'active' : '' ?>">
+               class="<?= in_array($current, ['pengajuan_riwayat.php', 'riwayat_detail.php']) ? 'active' : '' ?>">
                 <i class="fa-solid fa-angle-right"></i>
                 Riwayat SK Judul
             </a>

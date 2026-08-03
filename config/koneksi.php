@@ -1,4 +1,5 @@
 <?php
+date_default_timezone_set('Asia/Jakarta');
 
 $host = "ep-twilight-base-ao8gz75j-pooler.c-2.ap-southeast-1.aws.neon.tech";
 $port = "5432";
@@ -13,6 +14,7 @@ try {
     $pdo = new PDO($dsn, $user, $password);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     $pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, true);
+    $pdo->exec("SET timezone = 'Asia/Jakarta'");
 
     // Auto-initialize Dosen schema
     try {
@@ -201,7 +203,8 @@ try {
 
         } catch (Exception $ex) {}
 
-        // Seed initial data if tables are empty
+        // Seed initial data if tables are empty (disabled to allow total database clearing)
+        /*
         $countQueryB = $pdo->query("SELECT COUNT(*) FROM bimbingan");
         $countB = $countQueryB ? $countQueryB->fetchColumn() : 0;
         if ($countB == 0) {
@@ -212,6 +215,7 @@ try {
             $pdo->exec("INSERT INTO forum_bimbingan (bimbingan_id, pengirim, pengirim_nama, isi, file, tanggal) 
                 VALUES ($b_id, 'mahasiswa', 'LIRA SEPTIYANI', 'Assalamualaikum Pak, Izin mengirimkan Draft Bab 1 saya. Mohon koreksinya pak, terima kasih.', 'Draft Bab1-Lira.pdf', 'Monday, 4 Mei 2026, 10:14 AM')");
         }
+        */
     } catch (PDOException $e) {
         // Silent catch
     }
@@ -267,7 +271,9 @@ try {
         'file_bab1' => 'VARCHAR(255) DEFAULT NULL',
         'file_bab1_alt' => 'VARCHAR(255) DEFAULT NULL',
         'judul_disetujui' => "VARCHAR(50) DEFAULT 'utama'",
-        'tanggal_persetujuan' => "TIMESTAMP DEFAULT NULL"
+        'tanggal_persetujuan' => "TIMESTAMP DEFAULT NULL",
+        'judul_lama' => "TEXT DEFAULT NULL",
+        'judul_alternatif_lama' => "TEXT DEFAULT NULL"
     ];
 
     foreach ($columnsToAdd as $col => $type) {

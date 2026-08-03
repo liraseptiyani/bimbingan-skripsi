@@ -206,19 +206,23 @@ if ($otoritas_aktif === 'kaprodi') {
     }
 
     .btn-primary {
-        display: inline-block;
         background: #285aa9;
         color: #ffffff;
         border: none;
-        padding: 10px 22px;
-        border-radius: 5px;
+        padding: 11px 20px;
+        border-radius: 8px;
         font-size: 14px;
-        font-weight: 500;
+        font-weight: 600;
         cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: background-color 0.2s;
+        width: auto;
     }
 
     .btn-primary:hover {
-        background: #1f478a;
+        background: #1e4480;
     }
 
     /* --- Ubah kata sandi: dibungkus kotak biru seperti referensi --- */
@@ -321,28 +325,30 @@ if ($otoritas_aktif === 'kaprodi') {
         </div>
 
         <!-- ============ KOLOM KANAN: Ubah Kata Sandi ============ -->
-        <div class="card table-card">
-            <div class="card-subtitle">Ubah Kata Sandi</div>
+        <div class="card table-card" style="border-top-color: #285aa9;">
+            <div class="card-subtitle">
+                <i class="fa-solid fa-key"></i> Ubah Kata Sandi
+            </div>
 
             <form id="formPassword" action="/bimbingan-skripsi/app/controllers/UbahPasswordController.php" method="POST">
-                <div class="password-box">
-                    <div class="form-group">
-                        <label>Kata Sandi Lama*</label>
-                        <input type="password" class="form-input" name="password_lama" placeholder="Masukkan Kata Sandi Lama" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Kata Sandi Baru*</label>
-                        <input type="password" class="form-input" name="password_baru" placeholder="Masukkan Kata Sandi Baru" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Konfirmasi Kata Sandi*</label>
-                        <input type="password" class="form-input" name="password_konfirmasi" placeholder="Konfirmasi Kata Sandi" required>
-                    </div>
+                <div class="form-group">
+                    <label for="password_lama">Kata Sandi Lama <span style="color: #ef4444;">*</span></label>
+                    <input type="password" class="form-input" id="password_lama" name="password_lama" placeholder="Masukkan kata sandi lama" required>
                 </div>
 
-                <button type="submit" class="btn-primary">Kirim</button>
+                <div class="form-group">
+                    <label for="password_baru">Kata Sandi Baru <span style="color: #ef4444;">*</span></label>
+                    <input type="password" class="form-input" id="password_baru" name="password_baru" placeholder="Masukkan kata sandi baru" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password_konfirmasi">Konfirmasi Kata Sandi <span style="color: #ef4444;">*</span></label>
+                    <input type="password" class="form-input" id="password_konfirmasi" name="password_konfirmasi" placeholder="Ulangi kata sandi baru" required>
+                </div>
+
+                <button type="submit" class="btn-primary" style="margin-top: 10px;">
+                    <i class="fa-solid fa-paper-plane"></i> Kirim
+                </button>
             </form>
         </div>
 

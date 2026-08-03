@@ -62,6 +62,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $npmMhs  = $isMahasiswaAccount ? ($_SESSION['username'] ?? '2217051151') : '2217051151';
         $namaMhs = $isMahasiswaAccount ? ($_SESSION['nama'] ?? 'LIRA SEPTIYANI') : 'LIRA SEPTIYANI';
 
+        // Check bimbingan status from database
+        try {
+            $stmtCheck = $pdo->prepare("SELECT status_bimbingan FROM distribusi_mahasiswa WHERE REPLACE(npm, ' ', '') = REPLACE(:npm, ' ', '') LIMIT 1");
+            $stmtCheck->execute([':npm' => $npmMhs]);
+            $statusBimbingan = $stmtCheck->fetchColumn();
+            if ($statusBimbingan === 'selesai') {
+                $_SESSION['swal_error'] = 'Anda tidak dapat menambah bimbingan karena status bimbingan Anda telah selesai/lulus!';
+                header("Location: /bimbingan-skripsi/app/views/mahasiswa/bimbingan.php");
+                exit;
+            }
+        } catch (PDOException $e) {}
+
         $bimbingan_id = time();
 
         // 1. Simpan ke database jika tersedia

@@ -25,7 +25,8 @@ try {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )");
 
-    // 2. Seed data if table is empty
+    // 2. Seed data if table is empty (disabled to allow total database clearing)
+    /*
     $countQuery = $pdo->query("SELECT COUNT(*) FROM distribusi_mahasiswa");
     $count = $countQuery ? $countQuery->fetchColumn() : 0;
     if ($count == 0) {
@@ -58,6 +59,7 @@ try {
             ]);
         }
     }
+    */
 } catch (PDOException $e) {
     // Fail silently
 }
@@ -68,7 +70,12 @@ $daftarMahasiswa = [];
 try {
     if (!empty($cari)) {
         $sql = "SELECT dm.*, pj.id AS pengajuan_id FROM distribusi_mahasiswa dm
-                LEFT JOIN pengajuan_judul pj ON REPLACE(pj.mahasiswa_npm, ' ', '') = REPLACE(dm.npm, ' ', '')
+                LEFT JOIN (
+                    SELECT DISTINCT ON (mahasiswa_npm) id, mahasiswa_npm 
+                    FROM pengajuan_judul 
+                    WHERE status = 'disetujui' 
+                    ORDER BY mahasiswa_npm, id DESC
+                ) pj ON REPLACE(pj.mahasiswa_npm, ' ', '') = REPLACE(dm.npm, ' ', '')
                 WHERE dm.npm LIKE :cari 
                    OR dm.nama LIKE :cari 
                    OR dm.pembimbing1 LIKE :cari 
@@ -79,7 +86,12 @@ try {
         $daftarMahasiswa = $stmt->fetchAll(PDO::FETCH_ASSOC);
     } else {
         $sql = "SELECT dm.*, pj.id AS pengajuan_id FROM distribusi_mahasiswa dm
-                LEFT JOIN pengajuan_judul pj ON REPLACE(pj.mahasiswa_npm, ' ', '') = REPLACE(dm.npm, ' ', '')
+                LEFT JOIN (
+                    SELECT DISTINCT ON (mahasiswa_npm) id, mahasiswa_npm 
+                    FROM pengajuan_judul 
+                    WHERE status = 'disetujui' 
+                    ORDER BY mahasiswa_npm, id DESC
+                ) pj ON REPLACE(pj.mahasiswa_npm, ' ', '') = REPLACE(dm.npm, ' ', '')
                 ORDER BY dm.created_at DESC";
         $stmt = $pdo->query($sql);
         $daftarMahasiswa = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -127,26 +139,15 @@ include '../layouts/topbar.php';
     .filter-angkatan {
         appearance: none;
         -webkit-appearance: none;
-        padding: 9px 34px 9px 34px;
-        border: 1px solid #d1d5db;
-        border-radius: 4px;
+        padding: 9px 34px 9px 14px;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
         font-size: 14px;
-        color: #444;
-        background: #fafafa;
+        color: #334155;
+        background: #fff;
         min-width: 170px;
         cursor: pointer;
-    }
-
-    .filter-angkatan-wrap::before {
-        content: "\f0b0";
-        font-family: "Font Awesome 6 Free";
-        font-weight: 900;
-        position: absolute;
-        left: 14px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #888;
-        pointer-events: none;
+        transition: border-color 0.2s;
     }
 
     .filter-angkatan-wrap::after {
@@ -156,7 +157,7 @@ include '../layouts/topbar.php';
         top: 50%;
         transform: translateY(-50%);
         font-size: 10px;
-        color: #888;
+        color: #64748b;
         pointer-events: none;
     }
 
@@ -344,6 +345,130 @@ include '../layouts/topbar.php';
     .pagination-buttons button:hover:not(.active):not(:disabled) {
         background: #f1f5f9;
     }
+
+    /* Modal Overlay & Card Container */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(15, 23, 42, 0.5);
+        backdrop-filter: blur(4px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 100000;
+    }
+
+    .modal-container {
+        background: #ffffff;
+        border-radius: 16px;
+        width: 600px;
+        max-width: 90%;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        border: 1px solid #e2e8f0;
+        overflow: hidden;
+        animation: slideUp 0.3s ease-out;
+    }
+
+    @keyframes slideUp {
+        from {
+            transform: translateY(20px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    .modal-header {
+        background: #285aa9;
+        color: #ffffff;
+        padding: 18px 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .modal-header h3 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+    }
+
+    .modal-close {
+        background: none;
+        border: none;
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 20px;
+        cursor: pointer;
+    }
+
+    .modal-body {
+        padding: 24px;
+        max-height: 480px;
+        overflow-y: auto;
+    }
+
+    /* Detail Review Section */
+    .detail-review {
+        background: #eef4fb;
+        border-radius: 8px;
+        padding: 16px 20px;
+        margin-bottom: 0px;
+        border: 1px solid rgba(40, 90, 169, 0.1);
+    }
+
+    .detail-review .review-row {
+        display: grid;
+        grid-template-columns: 150px 1fr;
+        gap: 6px;
+        padding: 8px 0;
+        font-size: 13.5px;
+        border-bottom: 1px solid rgba(40, 90, 169, 0.05);
+    }
+
+    .detail-review .review-row:last-child {
+        border-bottom: none;
+    }
+
+    .detail-review .review-label {
+        color: #285aa9;
+        font-weight: 600;
+    }
+
+    .detail-review .review-value {
+        color: #334155;
+        line-height: 1.45;
+    }
+
+    .btn-cancel {
+        background: #f1f5f9;
+        color: #475569;
+        border: 1px solid #cbd5e1;
+        padding: 10px 18px;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .btn-cancel:hover {
+        background: #cbd5e1;
+    }
+
+    .modal-footer {
+        padding: 16px 24px;
+        background: #f8fafc;
+        border-top: 1px solid #e2e8f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+    }
 </style>
 
 <div class="content">
@@ -408,9 +533,9 @@ include '../layouts/topbar.php';
                     </td>
                     <td class="text-center">
                         <div class="aksi-group">
-                            <a href="distribusi_mahasiswa_detail.php?npm=<?= urlencode($m['npm']) ?>" class="btn-aksi btn-lihat" title="Lihat Detail">
+                            <button type="button" class="btn-aksi btn-lihat" title="Lihat Detail" onclick='bukaModalDetail(<?= htmlspecialchars(json_encode($m), ENT_QUOTES, 'UTF-8') ?>)'>
                                 <i class="fas fa-eye"></i>
-                            </a>
+                            </button>
                             <a href="distribusi_mahasiswa_edit.php?npm=<?= urlencode($m['npm']) ?>" class="btn-aksi btn-edit" title="Edit">
                                 <i class="fas fa-pen"></i>
                             </a>
@@ -435,6 +560,59 @@ include '../layouts/topbar.php';
             </select>
 
             <div class="pagination-buttons" id="paginationButtons"></div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL DETAIL DISTRIBUSI MAHASISWA -->
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal-container">
+        <div class="modal-header">
+            <h3>Detail Distribusi Mahasiswa</h3>
+            <button class="modal-close" onclick="closeAllModals()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="detail-review">
+                <div class="review-row">
+                    <div class="review-label">Nama Mahasiswa</div>
+                    <div class="review-value" id="view_nama">-</div>
+                </div>
+                <div class="review-row">
+                    <div class="review-label">NPM</div>
+                    <div class="review-value" id="view_npm">-</div>
+                </div>
+                <div class="review-row">
+                    <div class="review-label">Judul Skripsi</div>
+                    <div class="review-value" id="view_judul">-</div>
+                </div>
+                <div class="review-row">
+                    <div class="review-label">Pembimbing 1</div>
+                    <div class="review-value" id="view_pembimbing1">-</div>
+                </div>
+                <div class="review-row" id="row_pembimbing2">
+                    <div class="review-label">Pembimbing 2</div>
+                    <div class="review-value" id="view_pembimbing2">-</div>
+                </div>
+                <div class="review-row">
+                    <div class="review-label">Pembahas 1</div>
+                    <div class="review-value" id="view_pembahas1">-</div>
+                </div>
+                <div class="review-row" id="row_pembahas2">
+                    <div class="review-label">Pembahas 2</div>
+                    <div class="review-value" id="view_pembahas2">-</div>
+                </div>
+                <div class="review-row">
+                    <div class="review-label">Nomor SK</div>
+                    <div class="review-value" id="view_nomor_sk">-</div>
+                </div>
+                <div class="review-row" id="row_file_sk">
+                    <div class="review-label">File SK</div>
+                    <div class="review-value" id="view_file_sk">-</div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn-cancel" onclick="closeAllModals()">Tutup</button>
         </div>
     </div>
 </div>
@@ -513,7 +691,7 @@ include '../layouts/topbar.php';
         if (totalData === 0) {
             const emptyRow = document.createElement('tr');
             emptyRow.className = 'no-data-row';
-            emptyRow.innerHTML = `<td colspan="5" style="text-align:center; color:#94a3b8; padding:22px !important;">Tidak ada data distribusi yang cocok.</td>`;
+            emptyRow.innerHTML = `<td colspan="6" style="text-align:center; color:#94a3b8; padding:22px !important;">Tidak ada data distribusi yang cocok.</td>`;
             tableBody.appendChild(emptyRow);
         } else {
             const start = (currentPage - 1) * rowsPerPage;
@@ -563,6 +741,51 @@ include '../layouts/topbar.php';
     rowsPerPageSel.addEventListener('change', () => { currentPage = 1; renderTable(); });
 
     renderTable();
+
+    // Modal Action detail
+    const modalOverlay = document.getElementById('modalOverlay');
+
+    function bukaModalDetail(m) {
+        document.getElementById('view_nama').textContent = m.nama;
+        document.getElementById('view_npm').textContent = m.npm;
+        document.getElementById('view_judul').textContent = m.judul_skripsi;
+        document.getElementById('view_pembimbing1').textContent = m.pembimbing1;
+        
+        const rowP2 = document.getElementById('row_pembimbing2');
+        if (m.pembimbing2 && m.pembimbing2.trim() !== '') {
+            rowP2.style.display = 'grid';
+            document.getElementById('view_pembimbing2').textContent = m.pembimbing2;
+        } else {
+            rowP2.style.display = 'none';
+        }
+
+        document.getElementById('view_pembahas1').textContent = m.pembahas1;
+
+        const rowPb2 = document.getElementById('row_pembahas2');
+        if (m.pembahas2 && m.pembahas2.trim() !== '') {
+            rowPb2.style.display = 'grid';
+            document.getElementById('view_pembahas2').textContent = m.pembahas2;
+        } else {
+            rowPb2.style.display = 'none';
+        }
+
+        document.getElementById('view_nomor_sk').textContent = m.nomor_sk;
+
+        const rowFileSk = document.getElementById('row_file_sk');
+        const viewFileSk = document.getElementById('view_file_sk');
+        if (m.pengajuan_id) {
+            rowFileSk.style.display = 'grid';
+            viewFileSk.innerHTML = `<a href="cetak_sk.php?id=${m.pengajuan_id}" target="_blank" style="background: #eef4fb; color: #285aa9; border: 1px solid rgba(40, 90, 169, 0.2); padding: 6px 12px; border-radius: 30px; font-size: 12px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s; text-decoration: none; width: fit-content;"><i class="fa-solid fa-file-pdf" style="color: #dc2626;"></i> Cetak / Unduh SK PDF</a>`;
+        } else {
+            rowFileSk.style.display = 'none';
+        }
+
+        modalOverlay.style.display = 'flex';
+    }
+
+    function closeAllModals() {
+        modalOverlay.style.display = 'none';
+    }
 </script>
 
 <?php include '../layouts/footer.php'; ?>

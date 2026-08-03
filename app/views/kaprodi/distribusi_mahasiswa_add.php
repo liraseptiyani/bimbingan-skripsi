@@ -34,7 +34,7 @@ foreach ($listDosen as $namaDosen) {
     $p2OptionsHtml .= '<option value="' . htmlspecialchars($namaDosen) . '">' . htmlspecialchars($namaDosen) . '</option>';
 }
 
-$pb1OptionsHtml = '<option value="" selected>Pilih Pembahas 1 (Opsional)</option>';
+$pb1OptionsHtml = '<option value="" disabled selected>Pilih Pembahas 1</option>';
 foreach ($listDosen as $namaDosen) {
     $pb1OptionsHtml .= '<option value="' . htmlspecialchars($namaDosen) . '">' . htmlspecialchars($namaDosen) . '</option>';
 }
@@ -213,7 +213,7 @@ include '../layouts/topbar.php';
                             <th>Judul Skripsi (Opsional)</th>
                             <th style="width: 190px;">Pembimbing 1 *</th>
                             <th style="width: 190px;">Pembimbing 2</th>
-                            <th style="width: 190px;">Pembahas 1</th>
+                            <th style="width: 190px;">Pembahas 1 *</th>
                             <th style="width: 190px;">Pembahas 2</th>
                             <th style="width: 60px; text-align: center;">Aksi</th>
                         </tr>
@@ -241,7 +241,7 @@ include '../layouts/topbar.php';
                                 </select>
                             </td>
                             <td>
-                                <select name="pembahas1[]" class="searchable-select">
+                                <select name="pembahas1[]" required class="searchable-select">
                                     <?= $pb1OptionsHtml ?>
                                 </select>
                             </td>
@@ -329,7 +329,7 @@ include '../layouts/topbar.php';
                 </select>
             </td>
             <td>
-                <select name="pembahas1[]" class="searchable-select">
+                <select name="pembahas1[]" required class="searchable-select">
                     ${pb1Options}
                 </select>
             </td>

@@ -76,41 +76,37 @@ $data = $stmtBimb->fetchAll(PDO::FETCH_ASSOC);
     margin-bottom:25px;
 }
 
-/* CARD INFO */
+/* INFO CARD & TABLE CARD OVERRIDES */
 
-.info-card{
-    background:#eef4fb;
-    padding:28px 35px;
-    margin-bottom:35px;
-    border-left:4px solid #d9e3f0;
+.info-card {
+    background: #eef3f9;
+    padding: 24px 30px;
+    margin-bottom: 28px;
+    border-radius: 8px;
 }
 
-.info-row{
-    display:flex;
-    margin-bottom:20px;
+.info-row {
+    display: flex;
+    margin-bottom: 10px;
 }
 
-.info-label{
-    width:200px;
-    color:#7d8bc2;
-    font-size:15px;
-    font-weight:500;
+.info-row:last-child {
+    margin-bottom: 0;
 }
 
-.info-value{
-    flex:1;
-    font-size:15px;
-    color:#333;
-    line-height:1.8;
+.info-label {
+    width: 180px;
+    color: #6a7fbf;
+    font-size: 14.5px;
+    font-weight: 700;
+    flex-shrink: 0;
 }
 
-/* TABLE CARD */
-
-.table-card{
-    background:#fff;
-    border-top:4px solid #69a86e;
-    box-shadow:0 2px 8px rgba(0,0,0,.1);
-    padding:18px;
+.info-value {
+    flex: 1;
+    font-size: 14.5px;
+    color: #333;
+    line-height: 1.5;
 }
 
 /* HEADER TABLE */
@@ -440,6 +436,26 @@ table thead th {
 
         <div class="info-row">
             <div class="info-label">
+                Nama
+            </div>
+
+            <div class="info-value">
+                <?= htmlspecialchars($namaMhs) ?>
+            </div>
+        </div>
+
+        <div class="info-row">
+            <div class="info-label">
+                NPM
+            </div>
+
+            <div class="info-value">
+                <?= htmlspecialchars($npmMhs) ?>
+            </div>
+        </div>
+
+        <div class="info-row">
+            <div class="info-label">
                 Pembimbing Utama
             </div>
 
@@ -485,7 +501,7 @@ table thead th {
 
     <!-- TABEL RIWAYAT -->
 
-    <div class="table-card">
+    <div class="card table-card">
 
         <div class="table-header">
 
@@ -500,10 +516,16 @@ table thead th {
                 </button>
             </div>
 
-            <button class="btn-add" id="btnTambahBimbingan">
-                <i class="fa fa-plus"></i>
-                Tambah
-            </button>
+            <?php if (($distribusi['status_bimbingan'] ?? 'aktif') !== 'selesai'): ?>
+                <button class="btn-add" id="btnTambahBimbingan">
+                    <i class="fa fa-plus"></i>
+                    Tambah
+                </button>
+            <?php else: ?>
+                <span style="color: #15803d; font-weight: 600; font-size: 13.5px; background: #ecfdf5; padding: 8px 14px; border-radius: 6px; border: 1px solid rgba(21, 128, 61, 0.15); display: inline-flex; align-items: center; gap: 6px;">
+                    <i class="fa-solid fa-circle-check"></i> Status Bimbingan Selesai / Lulus
+                </span>
+            <?php endif; ?>
 
         </div>
 
@@ -577,9 +599,9 @@ table thead th {
                             <a href="/bimbingan-skripsi/app/views/mahasiswa/detail_bimbingan.php?id=<?= $row['id'] ?>" class="btn-aksi btn-lihat" title="Lihat Detail">
                                 <i class="fa-solid fa-eye"></i>
                             </a>
-                            <?php if (($row['status_pembimbing1'] ?? '') !== 'sudah_dibalas' && ($row['status_pembimbing2'] ?? '') !== 'sudah_dibalas'): ?>
+                            <?php if (($distribusi['status_bimbingan'] ?? 'aktif') !== 'selesai' && ($row['status_pembimbing1'] ?? '') !== 'sudah_dibalas' && ($row['status_pembimbing2'] ?? '') !== 'sudah_dibalas'): ?>
                                 <button type="button" class="btn-aksi btn-edit" title="Edit" 
-                                        onclick="bukaModalEdit(<?= $row['id'] ?>, '<?= htmlspecialchars(addslashes($row['file_draft']), ENT_QUOTES) ?>', '<?= htmlspecialchars(addslashes($initialPesan), ENT_QUOTES) ?>')">
+                                        onclick="bukaModalEdit(<?= $row['id'] ?>, <?= htmlspecialchars(json_encode($row['file_draft']), ENT_QUOTES, 'UTF-8') ?>, <?= htmlspecialchars(json_encode($initialPesan), ENT_QUOTES, 'UTF-8') ?>)">
                                     <i class="fa-solid fa-pen-to-square"></i>
                                 </button>
                                 <a href="/bimbingan-skripsi/app/controllers/HapusBimbinganController.php?id=<?= $row['id'] ?>" 
@@ -809,6 +831,19 @@ table thead th {
     });
 </script>
 <?php unset($_SESSION['swal_success']); endif; ?>
+
+<?php if (isset($_SESSION['swal_error'])): ?>
+<script>
+    Swal.fire({
+        icon: 'error',
+        title: 'Gagal!',
+        text: '<?= htmlspecialchars($_SESSION['swal_error']) ?>',
+        timer: 3000,
+        showConfirmButton: true,
+        confirmButtonColor: '#e05252'
+    });
+</script>
+<?php unset($_SESSION['swal_error']); endif; ?>
 
 </body>
 </html>

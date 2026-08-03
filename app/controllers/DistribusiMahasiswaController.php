@@ -137,7 +137,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Increment Nomor SK sequentially
                 $nomor_sk = incrementSkNumber($nomor_sk_awal, $successCount);
 
-                if (empty($npm) || empty($pembimbing1)) {
+                if (empty($npm) || empty($pembimbing1) || empty($pembahas1)) {
                     continue; 
                 }
 
@@ -211,7 +211,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $nomor_sk = getNextNomorSk($pdo);
         }
 
-        if (empty($npm_lama) || empty($npm) || empty($nama) || empty($pembimbing1) || empty($nomor_sk)) {
+        if (empty($npm_lama) || empty($npm) || empty($nama) || empty($pembimbing1) || empty($pembahas1) || empty($nomor_sk)) {
             $_SESSION['swal_error'] = 'Harap isi semua field yang wajib (*)!';
             header("Location: /bimbingan-skripsi/app/views/kaprodi/distribusi_mahasiswa_edit.php?npm=" . urlencode($npm_lama));
             exit;

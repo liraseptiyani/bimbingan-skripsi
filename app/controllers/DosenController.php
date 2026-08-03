@@ -90,15 +90,13 @@ function ensureDosenTablesExist($pdo) {
                     ':prodi' => 'Ilmu Komputer'
                 ]);
 
-                // Check if user already exists
-                $userCheck = $pdo->prepare("SELECT COUNT(*) FROM users WHERE username = :username");
-                $userCheck->execute([':username' => $d['nip']]);
                 if ($userCheck->fetchColumn() == 0) {
                     $cleanPassword = str_replace(' ', '', $d['nip']);
+                    $hashedPassword = password_hash($cleanPassword, PASSWORD_DEFAULT);
                     $stmtUser = $pdo->prepare("INSERT INTO users (username, password, role, otoritas) VALUES (:username, :password, :role, :otoritas)");
                     $stmtUser->execute([
                         ':username' => $d['nip'],
-                        ':password' => $cleanPassword,
+                        ':password' => $hashedPassword,
                         ':role' => 'dosen',
                         ':otoritas' => $d['otoritas']
                     ]);
@@ -190,6 +188,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         }
 
+        if (strlen($password) < 8) {
+            $_SESSION['swal_error'] = 'Password minimal harus terdiri dari 8 karakter!';
+            header("Location: /bimbingan-skripsi/app/views/kaprodi/kuota_pembimbing_add.php");
+            exit;
+        }
+
+        if (strlen($password) > 100) {
+            $_SESSION['swal_error'] = 'Password tidak boleh lebih dari 100 karakter!';
+            header("Location: /bimbingan-skripsi/app/views/kaprodi/kuota_pembimbing_add.php");
+            exit;
+        }
+
         try {
             // Clean NIP (no spaces)
             $nip = str_replace(' ', '', $nip);
@@ -216,10 +226,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             // 1. Insert to users table first (auto register)
+            $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
             $stmtUser = $pdo->prepare("INSERT INTO users (username, password, role, otoritas) VALUES (:username, :password, :role, :otoritas)");
             $stmtUser->execute([
                 ':username' => $nip,
-                ':password' => $password,
+                ':password' => $hashedPassword,
                 ':role' => 'dosen',
                 ':otoritas' => $otoritas
             ]);

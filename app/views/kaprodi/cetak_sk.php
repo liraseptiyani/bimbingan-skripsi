@@ -72,9 +72,6 @@ $pb1 = $dist['pembahas1'] ?? $p['pembahas1'] ?? '-';
 $pb2 = $dist['pembahas2'] ?? $p['pembahas2'] ?? null;
 
 $judul_disetujui = ($p['judul_disetujui'] === 'alternatif' && !empty($p['judul_alternatif'])) ? $p['judul_alternatif'] : $p['judul'];
-if ($dist && !empty($dist['judul_skripsi'])) {
-    $judul_disetujui = $dist['judul_skripsi'];
-}
 
 // Date helpers
 function formatSkDate($dateStr) {

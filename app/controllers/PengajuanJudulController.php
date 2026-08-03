@@ -214,8 +214,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $pb2 = trim($_POST['pembahas2'] ?? '');
         $judul_disetujui_pilihan = trim($_POST['judul_disetujui_pilihan'] ?? 'utama');
 
-        if ($id <= 0 || empty($p1)) {
-            echo json_encode(['success' => false, 'message' => 'Field Pembimbing 1 wajib diisi!']);
+        if ($id <= 0 || empty($p1) || empty($pb1)) {
+            echo json_encode(['success' => false, 'message' => 'Field Pembimbing 1 dan Pembahas 1 wajib diisi!']);
             exit;
         }
 
@@ -274,10 +274,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ':id' => $id
             ]);
 
-            // Auto-generate next Nomor SK sequentially
-            $sk = $getNextNomorSk($pdo);
-
-            // Upsert in distribusi_mahasiswa
+            // Check if already exists in distribusi_mahasiswa to reuse existing Nomor SK
             // First, make sure the table exists
             $pdo->exec("CREATE TABLE IF NOT EXISTS distribusi_mahasiswa (
                 npm VARCHAR(50) PRIMARY KEY,
@@ -300,17 +297,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } catch (PDOException $e) {}
 
             // Check if already exists in distribusi_mahasiswa
-            $stmtCheckD = $pdo->prepare("SELECT COUNT(*) FROM distribusi_mahasiswa WHERE REPLACE(npm, ' ', '') = REPLACE(:npm, ' ', '')");
+            $stmtCheckD = $pdo->prepare("SELECT nomor_sk FROM distribusi_mahasiswa WHERE REPLACE(npm, ' ', '') = REPLACE(:npm, ' ', '') LIMIT 1");
             $stmtCheckD->execute([':npm' => $pengajuan['mahasiswa_npm']]);
-            $exists = ((int)$stmtCheckD->fetchColumn() > 0);
+            $existingSk = $stmtCheckD->fetchColumn();
+            $exists = ($existingSk !== false);
 
             if ($exists) {
+                $sk = $existingSk; // Reuse existing SK
                 $stmtUpsert = $pdo->prepare("
                     UPDATE distribusi_mahasiswa 
                     SET nama = :nama, judul_skripsi = :judul, pembimbing1 = :p1, pembimbing2 = :p2, pembahas1 = :pb1, pembahas2 = :pb2, nomor_sk = :sk
                     WHERE REPLACE(npm, ' ', '') = REPLACE(:npm, ' ', '')
                 ");
             } else {
+                // Auto-generate next Nomor SK sequentially
+                $sk = $getNextNomorSk($pdo);
                 $stmtUpsert = $pdo->prepare("
                     INSERT INTO distribusi_mahasiswa (npm, nama, judul_skripsi, pembimbing1, pembimbing2, pembahas1, pembahas2, nomor_sk)
                     VALUES (:npm, :nama, :judul, :p1, :p2, :pb1, :pb2, :sk)
@@ -356,6 +357,94 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmtUpdate->execute([
                 ':alasan' => $alasan,
                 ':id' => $id
+            ]);
+
+            echo json_encode(['success' => true]);
+            exit;
+        } catch (PDOException $e) {
+            echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
+            exit;
+        }
+    }
+
+    if ($action === 'perbaikan') {
+        // MAHASISWA SUBMIT CORRECTION
+        if (($_SESSION['role'] ?? '') !== 'mahasiswa') {
+            echo json_encode(['success' => false, 'message' => 'Hanya mahasiswa yang dapat melakukan perbaikan judul!']);
+            exit;
+        }
+
+        $id = (int)($_POST['id'] ?? 0);
+        $npm = $_SESSION['username'];
+        $judul_baru = trim($_POST['judul'] ?? '');
+        $judul_alt_baru = trim($_POST['judul_alternatif'] ?? '');
+
+        if ($id <= 0 || empty($judul_baru)) {
+            echo json_encode(['success' => false, 'message' => 'Judul utama wajib diisi!']);
+            exit;
+        }
+
+        try {
+            // First fetch the old approved record
+            $stmtCheck = $pdo->prepare("SELECT * FROM pengajuan_judul WHERE id = :id AND mahasiswa_npm = :npm");
+            $stmtCheck->execute([':id' => $id, ':npm' => $npm]);
+            $oldSub = $stmtCheck->fetch(PDO::FETCH_ASSOC);
+
+            if (!$oldSub) {
+                echo json_encode(['success' => false, 'message' => 'Pengajuan tidak ditemukan!']);
+                exit;
+            }
+
+            if ($oldSub['status'] !== 'disetujui') {
+                echo json_encode(['success' => false, 'message' => 'Pengajuan tidak dalam status disetujui!']);
+                exit;
+            }
+
+            // Insert a new record in pengajuan_judul
+            $stmtInsert = $pdo->prepare("
+                INSERT INTO pengajuan_judul (
+                    mahasiswa_npm, mahasiswa_nama, deskripsi, 
+                    judul, judul_alternatif, 
+                    judul_lama, judul_alternatif_lama,
+                    pembimbing1, pembimbing2, status, alasan,
+                    file_krs, file_transkrip, file_proposal, file_ktm, 
+                    file_form_tema, file_bukti_ukt, file_krs_terakhir, 
+                    file_form_verifikasi, file_bukti_acc, file_form_penetapan, 
+                    file_bab1, file_bab1_alt
+                ) VALUES (
+                    :mahasiswa_npm, :mahasiswa_nama, :deskripsi, 
+                    :judul_baru, :judul_alt_baru, 
+                    :judul_lama, :judul_alternatif_lama,
+                    :pembimbing1, :pembimbing2, 'menunggu', NULL,
+                    :file_krs, :file_transkrip, :file_proposal, :file_ktm, 
+                    :file_form_tema, :file_bukti_ukt, :file_krs_terakhir, 
+                    :file_form_verifikasi, :file_bukti_acc, :file_form_penetapan, 
+                    :file_bab1, :file_bab1_alt
+                )
+            ");
+            
+            $stmtInsert->execute([
+                ':mahasiswa_npm' => $oldSub['mahasiswa_npm'],
+                ':mahasiswa_nama' => $oldSub['mahasiswa_nama'],
+                ':deskripsi' => $oldSub['deskripsi'],
+                ':judul_baru' => $judul_baru,
+                ':judul_alt_baru' => $judul_alt_baru ?: null,
+                ':judul_lama' => $oldSub['judul'],
+                ':judul_alternatif_lama' => $oldSub['judul_alternatif'],
+                ':pembimbing1' => $oldSub['pembimbing1'],
+                ':pembimbing2' => $oldSub['pembimbing2'],
+                ':file_krs' => $oldSub['file_krs'],
+                ':file_transkrip' => $oldSub['file_transkrip'],
+                ':file_proposal' => $oldSub['file_proposal'],
+                ':file_ktm' => $oldSub['file_ktm'],
+                ':file_form_tema' => $oldSub['file_form_tema'],
+                ':file_bukti_ukt' => $oldSub['file_bukti_ukt'],
+                ':file_krs_terakhir' => $oldSub['file_krs_terakhir'],
+                ':file_form_verifikasi' => $oldSub['file_form_verifikasi'],
+                ':file_bukti_acc' => $oldSub['file_bukti_acc'],
+                ':file_form_penetapan' => $oldSub['file_form_penetapan'],
+                ':file_bab1' => $oldSub['file_bab1'],
+                ':file_bab1_alt' => $oldSub['file_bab1_alt']
             ]);
 
             echo json_encode(['success' => true]);

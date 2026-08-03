@@ -283,13 +283,28 @@ require_once __DIR__ . '/../layouts/sidebar_kaprodi.php';
     }
 
     .filter-angkatan {
-        padding: 9px 14px;
+        appearance: none;
+        -webkit-appearance: none;
+        padding: 9px 34px 9px 14px;
         border: 1px solid var(--border-color);
         border-radius: 6px;
         font-size: 14px;
         color: var(--text-dark);
         min-width: 180px;
         background-color: #fff;
+        cursor: pointer;
+        transition: border-color 0.2s;
+    }
+
+    .filter-angkatan-wrap::after {
+        content: "\25BC";
+        position: absolute;
+        right: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 10px;
+        color: #64748b;
+        pointer-events: none;
     }
 
     .table-toolbar .search {
@@ -540,7 +555,6 @@ require_once __DIR__ . '/../layouts/sidebar_kaprodi.php';
                     <th>Nama</th>
                     <th style="width: 100px;">Jenjang</th>
                     <th>Program Studi</th>
-                    <th style="width: 110px; text-align: center;">Semester</th>
                     <th style="width: 120px; text-align: center;">Status</th>
                 </tr>
             </thead>
@@ -565,7 +579,6 @@ require_once __DIR__ . '/../layouts/sidebar_kaprodi.php';
                     <td><strong><?= htmlspecialchars($mhs['nama']) ?></strong></td>
                     <td><?= htmlspecialchars($mhs['jenjang']) ?></td>
                     <td><?= htmlspecialchars($mhs['prodi']) ?></td>
-                    <td style="text-align: center;">Semester <?= $mhs['semester'] ?></td>
                     <td style="text-align: center;"><span class="status-badge <?= $statusClass ?>"><?= $statusText ?></span></td>
                 </tr>
                 <?php endforeach; ?>
@@ -631,7 +644,7 @@ require_once __DIR__ . '/../layouts/sidebar_kaprodi.php';
         if (totalData === 0) {
             const emptyRow = document.createElement('tr');
             emptyRow.className = 'no-data-row';
-            emptyRow.innerHTML = `<td colspan="6">Tidak ada data mahasiswa yang cocok.</td>`;
+            emptyRow.innerHTML = `<td colspan="5">Tidak ada data mahasiswa yang cocok.</td>`;
             tableBody.appendChild(emptyRow);
         } else {
             const start = (currentPage - 1) * rowsPerPage;

@@ -201,9 +201,9 @@ include '../layouts/topbar.php';
             </div>
 
             <div class="form-group">
-                <label>Pembahas 1</label>
-                <select name="pembahas1" class="searchable-select">
-                    <option value="" selected>Pilih Pembahas 1 (Opsional)</option>
+                <label>Pembahas 1 <span class="req">*</span></label>
+                <select name="pembahas1" required class="searchable-select">
+                    <option value="" disabled>Pilih Pembahas 1</option>
                     <?php foreach ($listDosen as $namaDosen): ?>
                         <option value="<?= htmlspecialchars($namaDosen) ?>" <?= ($mhs['pembahas1'] ?? '') === $namaDosen ? 'selected' : '' ?>><?= htmlspecialchars($namaDosen) ?></option>
                     <?php endforeach; ?>
@@ -213,7 +213,7 @@ include '../layouts/topbar.php';
             <div class="form-group">
                 <label>Pembahas 2</label>
                 <select name="pembahas2" class="searchable-select">
-                    <option value="">Pilih Pembahas 2 (Optional)</option>
+                    <option value="">Pilih Pembahas 2 (Boleh Kosong)</option>
                     <?php foreach ($listDosen as $namaDosen): ?>
                         <option value="<?= htmlspecialchars($namaDosen) ?>" <?= ($mhs['pembahas2'] ?? '') === $namaDosen ? 'selected' : '' ?>><?= htmlspecialchars($namaDosen) ?></option>
                     <?php endforeach; ?>

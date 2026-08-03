@@ -43,12 +43,32 @@ try {
     }
 } catch (PDOException $e) {}
 
-// Fetch active thesis title from distribusi_mahasiswa
+// Fetch active thesis title, advisors, and examiners from distribusi_mahasiswa
 $judulSkripsi = '-';
+$pembimbing1 = '-';
+$pembimbing2 = '-';
+$pembahas = '-';
 try {
-    $stmt = $pdo->prepare("SELECT judul_skripsi FROM distribusi_mahasiswa WHERE REPLACE(npm, ' ', '') = REPLACE(:npm, ' ', '') LIMIT 1");
+    $stmt = $pdo->prepare("SELECT * FROM distribusi_mahasiswa WHERE REPLACE(npm, ' ', '') = REPLACE(:npm, ' ', '') LIMIT 1");
     $stmt->execute([':npm' => $npmMhs]);
-    $judulSkripsi = $stmt->fetchColumn() ?: '-';
+    $dist = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($dist) {
+        $judulSkripsi = $dist['judul_skripsi'] ?: '-';
+        $pembimbing1 = $dist['pembimbing1'] ?: '-';
+        $pembimbing2 = $dist['pembimbing2'] ?: '-';
+        
+        $p1 = $dist['pembahas1'] ?? '';
+        $p2 = $dist['pembahas2'] ?? '';
+        if (!empty($p1) && !empty($p2)) {
+            $pembahas = $p1 . ' / ' . $p2;
+        } elseif (!empty($p1)) {
+            $pembahas = $p1;
+        } elseif (!empty($p2)) {
+            $pembahas = $p2;
+        } else {
+            $pembahas = '-';
+        }
+    }
 } catch (PDOException $e) {}
 
 // Dynamic Initials Avatar
@@ -65,11 +85,9 @@ foreach ($words as $w) {
 $profil = [
     'nama'         => $namaMhs,
     'npm'          => $npmMhs,
-    'prodi'        => 'S1 Ilmu Komputer',
-    'fakultas'     => 'Matematika dan Ilmu Pengetahuan Alam',
-    'universitas'  => 'Universitas Lampung',
-    'angkatan'     => $angkatanMhs,
-    'semester'     => $semesterMhs,
+    'pembimbing1'  => $pembimbing1,
+    'pembimbing2'  => $pembimbing2,
+    'pembahas'     => $pembahas,
     'judul'        => $judulSkripsi
 ];
 
@@ -83,15 +101,9 @@ require_once __DIR__ . '/../layouts/sidebar_mahasiswa.php';
 
     .profil-grid {
         display: grid;
-        grid-template-columns: 1.2fr 0.8fr;
+        grid-template-columns: 1fr 1fr;
         gap: 24px;
         align-items: start;
-    }
-
-    @media (max-width: 992px) {
-        .profil-grid {
-            grid-template-columns: 1fr;
-        }
     }
 
     .profil-left {
@@ -102,32 +114,16 @@ require_once __DIR__ . '/../layouts/sidebar_mahasiswa.php';
 
     .card.table-card {
         border-top: 4px solid #69a86e;
-        background: #ffffff;
-        border-radius: 16px;
-        padding: 24px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
-        border-left: 1px solid #e2e8f0;
-        border-right: 1px solid #e2e8f0;
-        border-bottom: 1px solid #e2e8f0;
     }
 
     .card-subtitle {
         font-size: 16px;
         font-weight: 600;
-        color: #1e293b;
+        color: #222;
         margin-bottom: 18px;
-        border-bottom: 1px solid #e2e8f0;
-        padding-bottom: 8px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
     }
 
-    .card-subtitle i {
-        color: #285aa9;
-    }
-
-    /* --- Avatar --- */
+    /* --- Foto profil --- */
     .avatar-wrap {
         display: flex;
         justify-content: center;
@@ -135,18 +131,15 @@ require_once __DIR__ . '/../layouts/sidebar_mahasiswa.php';
     }
 
     .avatar-circle {
-        width: 120px;
-        height: 120px;
+        width: 130px;
+        height: 130px;
         border-radius: 50%;
-        background: #eef4fb;
-        border: 2px solid rgba(40, 90, 169, 0.2);
-        color: #285aa9;
+        background: #e2e5ea;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 46px;
-        font-weight: 700;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        color: #b6bcc6;
+        font-size: 56px;
     }
 
     .avatar-label {
@@ -159,10 +152,10 @@ require_once __DIR__ . '/../layouts/sidebar_mahasiswa.php';
         position: absolute;
         top: 0;
         left: 0;
-        width: 120px;
-        height: 120px;
+        width: 130px;
+        height: 130px;
         border-radius: 50%;
-        background: rgba(0,0,0,0.4);
+        background: rgba(0,0,0,0.3);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -176,67 +169,62 @@ require_once __DIR__ . '/../layouts/sidebar_mahasiswa.php';
 
     .avatar-overlay i {
         color: #ffffff;
-        font-size: 24px;
+        font-size: 26px;
     }
 
-    /* --- Info List --- */
+    /* --- Info profil (nama, npm, dsb) --- */
     .info-list {
         display: flex;
         flex-direction: column;
-        gap: 12px;
+        gap: 10px;
     }
 
     .info-row {
         display: grid;
-        grid-template-columns: 150px 1fr;
-        gap: 12px;
-        font-size: 14.5px;
-        border-bottom: 1px dashed #f1f5f9;
-        padding-bottom: 8px;
+        grid-template-columns: 140px 1fr;
+        align-items: center;
+        background: #eef4fb;
+        border-radius: 5px;
+        padding: 11px 14px;
+        font-size: 14px;
     }
 
-    .info-row:last-child {
-        border-bottom: none;
-        padding-bottom: 0;
-    }
-
-    .info-label {
-        color: #64748b;
+    .info-row .info-label {
+        color: #285aa9;
         font-weight: 600;
     }
 
-    .info-value {
-        color: #1e293b;
-        line-height: 1.5;
+    .info-row .info-value {
+        color: #333;
     }
 
     /* --- Form sandi --- */
     .form-group {
-        margin-bottom: 16px;
+        margin-bottom: 14px;
     }
 
     .form-group label {
         display: block;
-        margin-bottom: 6px;
         font-size: 13.5px;
         font-weight: 600;
-        color: #334155;
+        color: #333;
+        margin-bottom: 6px;
     }
 
     .form-input {
         width: 100%;
-        border: 1px solid #cbd5e1;
-        border-radius: 8px;
-        padding: 10px 14px;
+        padding: 10px 12px;
+        border: 1px solid #d1d5db;
+        border-radius: 5px;
         font-size: 14px;
-        color: #334155;
-        box-sizing: border-box;
-        transition: border-color 0.2s;
+        color: #333;
+        background: #ffffff;
     }
 
     .form-input:focus {
         outline: none;
         border-color: #285aa9;
+        box-shadow: 0 0 0 3px rgba(40, 90, 169, 0.12);
     }
 
     .btn-primary {
@@ -252,21 +240,23 @@ require_once __DIR__ . '/../layouts/sidebar_mahasiswa.php';
         align-items: center;
         gap: 8px;
         transition: background-color 0.2s;
-        width: 100%;
-        justify-content: center;
+        width: auto;
     }
 
     .btn-primary:hover {
         background: #1e4480;
     }
+
+    @media (max-width: 860px) {
+        .profil-grid {
+            grid-template-columns: 1fr;
+        }
+    }
 </style>
 
 <div class="content">
 
-    <div style="margin-bottom: 24px;">
-        <h1 class="page-title" style="margin: 0;">Profil Mahasiswa</h1>
-        <p style="color: #64748b; font-size: 14px; margin-top: 4px;">Informasi akademik mahasiswa (sinkronisasi SIAKADU) dan keamanan akun</p>
-    </div>
+    <h1 class="page-title">Profil Saya</h1>
 
     <div class="profil-grid">
 
@@ -277,10 +267,10 @@ require_once __DIR__ . '/../layouts/sidebar_mahasiswa.php';
                     <input type="hidden" name="action" value="ubah_foto">
                     <label class="avatar-label">
                         <?php if (!empty($fotoPath)): ?>
-                            <img src="<?= htmlspecialchars($fotoPath) ?>" alt="Foto Profil" style="width:120px; height:120px; border-radius:50%; object-fit:cover; border:2px solid rgba(40, 90, 169, 0.2); display:block; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                            <img src="<?= htmlspecialchars($fotoPath) ?>" alt="Foto Profil" style="width:130px; height:130px; border-radius:50%; object-fit:cover; border:2px solid #ddd; display:block;">
                         <?php else: ?>
                             <div class="avatar-circle">
-                                <?= htmlspecialchars($initials) ?>
+                                <i class="fa-solid fa-user"></i>
                             </div>
                         <?php endif; ?>
                         <div class="avatar-overlay">
@@ -293,36 +283,28 @@ require_once __DIR__ . '/../layouts/sidebar_mahasiswa.php';
 
             <div class="info-list">
                 <div class="info-row">
-                    <div class="info-label">Nama Lengkap</div>
-                    <div class="info-value" style="font-weight: 600; color: #0f172a;"><?= htmlspecialchars($profil['nama']) ?></div>
+                    <div class="info-label">Nama</div>
+                    <div class="info-value"><?= htmlspecialchars($profil['nama']) ?></div>
                 </div>
                 <div class="info-row">
                     <div class="info-label">NPM</div>
-                    <div class="info-value" style="font-family: monospace; font-size: 15px;"><?= htmlspecialchars($profil['npm']) ?></div>
+                    <div class="info-value"><?= htmlspecialchars($profil['npm']) ?></div>
                 </div>
                 <div class="info-row">
-                    <div class="info-label">Program Studi</div>
-                    <div class="info-value"><?= htmlspecialchars($profil['prodi']) ?></div>
+                    <div class="info-label">Pembimbing 1</div>
+                    <div class="info-value"><?= htmlspecialchars($profil['pembimbing1']) ?></div>
                 </div>
                 <div class="info-row">
-                    <div class="info-label">Fakultas</div>
-                    <div class="info-value"><?= htmlspecialchars($profil['fakultas']) ?></div>
+                    <div class="info-label">Pembimbing 2</div>
+                    <div class="info-value"><?= htmlspecialchars($profil['pembimbing2']) ?></div>
                 </div>
                 <div class="info-row">
-                    <div class="info-label">Universitas</div>
-                    <div class="info-value"><?= htmlspecialchars($profil['universitas']) ?></div>
-                </div>
-                <div class="info-row">
-                    <div class="info-label">Angkatan</div>
-                    <div class="info-value"><?= htmlspecialchars($profil['angkatan']) ?></div>
-                </div>
-                <div class="info-row">
-                    <div class="info-label">Semester Aktif</div>
-                    <div class="info-value">Semester <?= htmlspecialchars($profil['semester']) ?></div>
+                    <div class="info-label">Dosen Pembahas</div>
+                    <div class="info-value"><?= htmlspecialchars($profil['pembahas']) ?></div>
                 </div>
                 <div class="info-row">
                     <div class="info-label">Judul Skripsi</div>
-                    <div class="info-value" style="font-style: italic; color: #0f172a;"><?= htmlspecialchars($profil['judul']) ?></div>
+                    <div class="info-value" style="font-style: italic;"><?= htmlspecialchars($profil['judul']) ?></div>
                 </div>
             </div>
         </div>
@@ -348,7 +330,7 @@ require_once __DIR__ . '/../layouts/sidebar_mahasiswa.php';
                 </div>
 
                 <button type="submit" class="btn-primary" style="margin-top: 10px;">
-                    <i class="fa-solid fa-floppy-disk"></i> Perbarui Kata Sandi
+                    <i class="fa-solid fa-paper-plane"></i> Kirim
                 </button>
             </form>
         </div>
@@ -400,7 +382,7 @@ require_once __DIR__ . '/../layouts/sidebar_mahasiswa.php';
                 .then(res => res.json())
                 .then(data => {
                     btnSubmit.disabled = false;
-                    btnSubmit.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Perbarui Kata Sandi';
+                    btnSubmit.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Kirim';
 
                     if (data.success) {
                         Swal.fire({
@@ -421,7 +403,7 @@ require_once __DIR__ . '/../layouts/sidebar_mahasiswa.php';
                 })
                 .catch(err => {
                     btnSubmit.disabled = false;
-                    btnSubmit.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Perbarui Kata Sandi';
+                    btnSubmit.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Kirim';
 
                     Swal.fire({
                         icon: 'error',

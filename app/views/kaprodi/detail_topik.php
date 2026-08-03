@@ -109,16 +109,14 @@ require_once __DIR__ . '/../layouts/sidebar_kaprodi.php';
 
     .info-skripsi {
         background: #eef4fb;
-        border-radius: 8px;
-        padding: 20px 24px;
-        margin-bottom: 26px;
-        border: 1px solid rgba(40, 90, 169, 0.1);
+        padding: 28px 35px;
+        margin-bottom: 28px;
+        border-left: 4px solid #d9e3f0;
     }
 
     .info-skripsi .info-row {
         display: flex;
-        margin-bottom: 14px;
-        font-size: 14.5px;
+        margin-bottom: 20px;
     }
 
     .info-skripsi .info-row:last-child {
@@ -126,15 +124,18 @@ require_once __DIR__ . '/../layouts/sidebar_kaprodi.php';
     }
 
     .info-skripsi .info-label {
-        width: 220px;
-        font-weight: 600;
-        color: #285aa9;
+        width: 190px;
+        color: #7d8bc2;
+        font-size: 15px;
+        font-weight: 500;
         flex-shrink: 0;
     }
 
     .info-skripsi .info-value {
-        color: #334155;
-        line-height: 1.5;
+        flex: 1;
+        font-size: 15px;
+        color: #333;
+        line-height: 1.8;
     }
 
     .section-title {
