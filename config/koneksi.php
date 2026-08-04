@@ -1,11 +1,21 @@
 <?php
 date_default_timezone_set('Asia/Jakarta');
 
-$host = "ep-twilight-base-ao8gz75j-pooler.c-2.ap-southeast-1.aws.neon.tech";
-$port = "5432";
-$dbname = "neondb";
-$user = "neondb_owner";
-$password = "npg_umw8ZUzN5Fef";
+$dbUrl = getenv('DATABASE_URL');
+if ($dbUrl) {
+    $dbparts = parse_url($dbUrl);
+    $host = $dbparts['host'] ?? '';
+    $port = $dbparts['port'] ?? '5432';
+    $user = $dbparts['user'] ?? '';
+    $password = $dbparts['pass'] ?? '';
+    $dbname = isset($dbparts['path']) ? ltrim($dbparts['path'], '/') : '';
+} else {
+    $host = getenv('PGHOST') ?: "ep-twilight-base-ao8gz75j-pooler.c-2.ap-southeast-1.aws.neon.tech";
+    $port = getenv('PGPORT') ?: "5432";
+    $dbname = getenv('PGDATABASE') ?: "neondb";
+    $user = getenv('PGUSER') ?: "neondb_owner";
+    $password = getenv('PGPASSWORD') ?: "npg_umw8ZUzN5Fef";
+}
 
 try {
 

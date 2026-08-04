@@ -5,11 +5,11 @@ session_start();
 if (isset($_SESSION['user_id'])) {
     $role = $_SESSION['user_role'];
     $routes = [
-        'admin'     => '/bimbingan-skripsi/app/Views/admin/dashboard.php',
-        'dosen'     => '/bimbingan-skripsi/app/Views/dosen/dashboard.php',
-        'mahasiswa' => '/bimbingan-skripsi/app/Views/mahasiswa/dashboard.php',
+        'admin'     => 'app/views/admin/dashboard.php',
+        'dosen'     => 'app/views/dosen/dashboard.php',
+        'mahasiswa' => 'app/views/mahasiswa/dashboard.php',
     ];
-    header('Location: ' . ($routes[$role] ?? '/bimbingan-skripsi/public/index.php'));
+    header('Location: ' . ($routes[$role] ?? 'public/index.php'));
     exit;
 }
 
@@ -384,7 +384,7 @@ $remembered_checked  = isset($_COOKIE['remember_checked']) ? 'checked' : '';
     <!-- LEFT: Foto Gedung Rektorat -->
     <div class="panel-left">
         <img
-            src="/bimbingan-skripsi/public/img/rektorat.jpg"
+            src="public/img/rektorat.jpg"
             alt="Gedung Rektorat Universitas Lampung"
         >
     </div>
@@ -394,7 +394,7 @@ $remembered_checked  = isset($_COOKIE['remember_checked']) ? 'checked' : '';
 
         <!-- Logo Bar -->
         <div class="logo-bar">
-            <img src="/bimbingan-skripsi/public/img/be-strong-2023.png" alt="Logo Unila">
+            <img src="public/img/be-strong-2023.png" alt="Logo Unila">
             <div class="logo-divider"></div>
         </div>
 
@@ -418,7 +418,7 @@ $remembered_checked  = isset($_COOKIE['remember_checked']) ? 'checked' : '';
             </div>
             <?php endif; ?>
 
-            <form method="POST" action="/bimbingan-skripsi/app/controllers/AuthController.php" id="loginForm">
+            <form method="POST" action="app/controllers/AuthController.php" id="loginForm">
 
                 <!-- Username -->
                 <div class="field">
