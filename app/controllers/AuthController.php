@@ -13,21 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $password = trim($_POST['password'] ?? '');
 
     try {
-        
-        echo "<pre>";
-
-        echo "Database : " . $pdo->query("SELECT current_database()")->fetchColumn() . "\n";
-        echo "User DB  : " . $pdo->query("SELECT current_user")->fetchColumn() . "\n";
-        echo "Jumlah User : " . $pdo->query("SELECT COUNT(*) FROM users")->fetchColumn() . "\n\n";
-
-        $stmt = $pdo->query("SELECT username FROM users ORDER BY username");
-
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            echo $row['username'] . PHP_EOL;
-        }
-
-        exit;
-                // Login
+       // Login
         $sql = "
             SELECT *
             FROM users
