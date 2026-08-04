@@ -31,6 +31,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
+        echo "<pre>";
+
+        echo "Username input: ";
+        var_dump($username);
+
+        echo "Password input: ";
+        var_dump($password);
+
+        echo "Data user:\n";
+        var_dump($user);
+
+        if ($user) {
+            echo "Password verify: ";
+            var_dump(password_verify($password, $user['password']));
+        }
+
+        exit;
+
         if ($user) {
 
             // Remember me cookies (only username is saved for security)
