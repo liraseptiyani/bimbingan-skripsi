@@ -92,7 +92,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['topik_id'])) {
     exit;
 }
 
-$stmt = $pdo->query("SELECT tp.*, d.nama AS nama_dosen FROM topik_penelitian tp JOIN dosen d ON REPLACE(tp.nip_dosen, ' ', '') = REPLACE(d.nip, ' ', '') ORDER BY tp.created_at DESC");
+$stmt = $pdo->query("SELECT tp.*, d.nama AS nama_dosen FROM topik_penelitian tp JOIN dosen d ON REPLACE(tp.nip_dosen, ' ', '') = REPLACE(d.nip, ' ', '') WHERE tp.status = 'disetujui' ORDER BY tp.created_at DESC");
 $topik_raw = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 $topik = [];
@@ -113,6 +113,7 @@ foreach ($topik_raw as $t) {
         'dosen' => $t['nama_dosen'],
         'judul' => $t['topik'],
         'deskripsi' => $t['deskripsi'],
+        'kategori' => $t['kategori'] ?? '',
         'tenggat_tanggal' => $t['tenggat_tanggal'] ?: '',
         'kuota' => $terisi . '/' . $t['kuota_max'],
         'kuota_terisi' => (int)$terisi,
@@ -575,6 +576,7 @@ table thead th {
                     <th>Dosen</th>
                     <th>Topik</th>
                     <th>Deskripsi</th>
+                    <th>Kategori</th>
                     <th style="width: 140px; white-space: nowrap;">Tenggat</th>
                     <th>Kuota</th>
                     <th>Aksi</th>
@@ -602,6 +604,7 @@ table thead th {
 
                 <tr data-dosen="<?= htmlspecialchars(strtolower($row['dosen'])) ?>" 
                     data-topik="<?= htmlspecialchars(strtolower($row['judul'])) ?>" 
+                    data-kategori="<?= htmlspecialchars(strtolower($row['kategori'])) ?>" 
                     data-deskripsi="<?= htmlspecialchars(strtolower($row['deskripsi'])) ?>">
 
                     <td><?= $i+1 ?></td>
@@ -611,6 +614,8 @@ table thead th {
                     <td><?= htmlspecialchars($row['judul']) ?></td>
 
                     <td><?= htmlspecialchars($row['deskripsi']) ?></td>
+
+                    <td><?= htmlspecialchars($row['kategori'] ?: '-') ?></td>
 
                     <td style="white-space: nowrap;"><?= !empty($row['tenggat_tanggal']) ? htmlspecialchars($row['tenggat_tanggal']) : '-' ?></td>
 
@@ -622,6 +627,7 @@ table thead th {
                                 data-dosen="<?= htmlspecialchars($row['dosen']) ?>"
                                 data-topik="<?= htmlspecialchars($row['judul']) ?>"
                                 data-deskripsi="<?= htmlspecialchars($row['deskripsi']) ?>"
+                                data-kategori="<?= htmlspecialchars($row['kategori'] ?? '') ?>"
                                 data-alasan="<?= htmlspecialchars($alasanVal) ?>"
                                 data-full="<?= $isFull ?>"
                                 data-expired="<?= $isExpiredStr ?>"
@@ -691,6 +697,10 @@ table thead th {
                         <div class="review-label">Deskripsi</div>
                         <div class="review-value" id="view_deskripsi">-</div>
                     </div>
+                    <div class="review-row">
+                        <div class="review-label">Kategori</div>
+                        <div class="review-value" id="view_kategori">-</div>
+                    </div>
                 </div>
 
                 <div style="margin-top: 20px;">
@@ -725,6 +735,7 @@ table thead th {
             const dosen = this.getAttribute('data-dosen');
             const topik = this.getAttribute('data-topik');
             const deskripsi = this.getAttribute('data-deskripsi');
+            const kategori = this.getAttribute('data-kategori') || '-';
             const alasan = this.getAttribute('data-alasan');
             const isFull = this.getAttribute('data-full') === 'true';
             const isExpired = this.getAttribute('data-expired') === 'true';
@@ -735,6 +746,7 @@ table thead th {
             document.getElementById('view_dosen').textContent = dosen;
             document.getElementById('view_topik').textContent = topik;
             document.getElementById('view_deskripsi').textContent = deskripsi;
+            document.getElementById('view_kategori').textContent = kategori;
             modalAlasan.value = alasan;
 
             const btnSave = document.querySelector('.btn-modal-save');
@@ -844,8 +856,9 @@ table thead th {
             if (row.classList.contains('no-data-row')) return false;
             const dosen = row.dataset.dosen || '';
             const topik = row.dataset.topik || '';
+            const kategori = row.dataset.kategori || '';
             const deskripsi = row.dataset.deskripsi || '';
-            return dosen.includes(keyword) || topik.includes(keyword) || deskripsi.includes(keyword);
+            return dosen.includes(keyword) || topik.includes(keyword) || kategori.includes(keyword) || deskripsi.includes(keyword);
         });
     }
 
@@ -865,7 +878,7 @@ table thead th {
         if (totalData === 0) {
             const emptyRow = document.createElement('tr');
             emptyRow.className = 'no-data-row';
-            emptyRow.innerHTML = `<td colspan="8" style="text-align:center; color:#94a3b8; padding:22px !important;">Tidak ada topik yang cocok.</td>`;
+            emptyRow.innerHTML = `<td colspan="9" style="text-align:center; color:#94a3b8; padding:22px !important;">Tidak ada topik yang cocok.</td>`;
             tableBody.appendChild(emptyRow);
         } else {
             const start = (currentPage - 1) * rowsPerPage;

@@ -221,16 +221,120 @@ body{
 }
 
 /* Collapse States */
+/* Collapse States */
 body.sidebar-collapsed .sidebar {
-    left: -270px !important;
+    width: 70px !important;
+    overflow-x: hidden !important;
 }
 
 body.sidebar-collapsed .topbar {
-    left: 0 !important;
+    left: 70px !important;
 }
 
 body.sidebar-collapsed .content {
-    margin-left: 0 !important;
+    margin-left: 70px !important;
+}
+
+/* Sidebar Internal Elements when Collapsed */
+body.sidebar-collapsed .sidebar .logo {
+    padding: 0 !important;
+    justify-content: center !important;
+    gap: 0 !important;
+}
+
+body.sidebar-collapsed .sidebar .logo img {
+    margin: 0 !important;
+    width: 35px !important;
+    transition: all 0.3s ease;
+}
+
+body.sidebar-collapsed .sidebar .logo h3 {
+    display: none !important;
+}
+
+body.sidebar-collapsed .sidebar .menu {
+    padding: 12px 6px !important;
+}
+
+body.sidebar-collapsed .sidebar .menu a,
+body.sidebar-collapsed .sidebar .menu button,
+body.sidebar-collapsed .sidebar .menu .menu-btn {
+    font-size: 0 !important;
+    padding: 14px 0 !important;
+    justify-content: center !important;
+    gap: 0 !important;
+    width: 100% !important;
+}
+
+body.sidebar-collapsed .sidebar .menu a i,
+body.sidebar-collapsed .sidebar .menu button i,
+body.sidebar-collapsed .sidebar .menu .menu-btn i {
+    font-size: 18px !important;
+    margin: 0 !important;
+}
+
+body.sidebar-collapsed .sidebar .menu button i.arrow,
+body.sidebar-collapsed .sidebar .menu .menu-btn i.arrow {
+    display: none !important;
+}
+
+body.sidebar-collapsed .sidebar .submenu {
+    display: none !important;
+}
+
+/* Hover Expand behavior when sidebar is collapsed */
+body.sidebar-collapsed .sidebar:hover {
+    width: 270px !important;
+    box-shadow: 10px 0 30px rgba(0,0,0,0.15) !important;
+}
+
+body.sidebar-collapsed .sidebar:hover .logo {
+    padding: 0 18px !important;
+    justify-content: flex-start !important;
+    gap: 15px !important;
+}
+
+body.sidebar-collapsed .sidebar:hover .logo img {
+    width: 45px !important;
+}
+
+body.sidebar-collapsed .sidebar:hover .logo h3 {
+    display: block !important;
+}
+
+body.sidebar-collapsed .sidebar:hover .menu {
+    padding: 12px !important;
+}
+
+body.sidebar-collapsed .sidebar:hover .menu a,
+body.sidebar-collapsed .sidebar:hover .menu button,
+body.sidebar-collapsed .sidebar:hover .menu .menu-btn {
+    font-size: 15px !important;
+    padding: 14px 18px !important;
+    justify-content: flex-start !important;
+    gap: 15px !important;
+}
+
+body.sidebar-collapsed .sidebar:hover .menu a i,
+body.sidebar-collapsed .sidebar:hover .menu button i,
+body.sidebar-collapsed .sidebar:hover .menu .menu-btn i {
+    font-size: 15px !important;
+}
+
+body.sidebar-collapsed .sidebar:hover .menu button i.arrow,
+body.sidebar-collapsed .sidebar:hover .menu .menu-btn i.arrow {
+    display: inline-block !important;
+}
+
+body.sidebar-collapsed .sidebar:hover .submenu.show {
+    display: block !important;
+}
+
+body.sidebar-collapsed .sidebar:hover .submenu a {
+    font-size: 14px !important;
+    padding: 12px 18px !important;
+    justify-content: flex-start !important;
+    gap: 10px !important;
 }
 
 .page-title{

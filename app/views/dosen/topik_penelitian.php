@@ -45,6 +45,8 @@ foreach ($topik_penelitian_raw as $t) {
         'id'         => $t['id'],
         'topik'      => $t['topik'],
         'deskripsi'  => $t['deskripsi'],
+        'kategori'   => $t['kategori'] ?? '',
+        'status'     => $t['status'] ?? 'menunggu',
         'tenggat_tanggal' => $t['tenggat_tanggal'] ?: '',
         'kuota_terisi' => (int)$terisi,
         'kuota_max'    => (int)$t['kuota_max'],
@@ -335,7 +337,8 @@ require_once __DIR__ . '/../layouts/sidebar_dosen.php';
         left: 0;
         right: 0;
         bottom: 0;
-        background: rgba(0, 0, 0, .55);
+        background: rgba(15, 23, 42, 0.5);
+        backdrop-filter: blur(4px);
         z-index: 20000;
         align-items: center;
         justify-content: center;
@@ -346,99 +349,136 @@ require_once __DIR__ . '/../layouts/sidebar_dosen.php';
         display: flex;
     }
 
-    .modal-box {
+    .modal-container {
         background: #ffffff;
-        width: 100%;
-        max-width: 560px;
-        border-radius: 6px;
-        border-top: 4px solid #69a86e;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, .25);
-        padding: 30px 35px;
+        border-radius: 16px;
+        width: 600px;
+        max-width: 90%;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        border: 1px solid #e2e8f0;
+        overflow: hidden;
+        animation: slideUp 0.3s ease-out;
     }
 
-    .modal-title {
-        text-align: center;
-        font-size: 20px;
-        font-weight: 600;
-        color: #222;
-        margin-bottom: 26px;
+    @keyframes slideUp {
+        from {
+            transform: translateY(20px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
     }
 
-    /* --- Form Tambah/Edit --- */
-
-    .form-group {
+    .modal-header {
+        background: #285aa9;
+        color: #ffffff;
+        padding: 18px 24px;
         display: flex;
-        align-items: flex-start;
-        gap: 18px;
-        margin-bottom: 18px;
+        justify-content: space-between;
+        align-items: center;
     }
 
-    .form-group label {
-        width: 110px;
-        flex-shrink: 0;
-        padding-top: 10px;
-        font-size: 14.5px;
-        color: #285aa9;
+    .modal-header h3 {
+        margin: 0;
+        font-size: 18px;
         font-weight: 600;
     }
 
-    .form-group label .required {
-        color: #da6e64;
+    .modal-close {
+        background: none;
+        border: none;
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 24px;
+        cursor: pointer;
+        line-height: 1;
     }
 
-    .form-group input,
-    .form-group textarea {
-        flex: 1;
-        padding: 10px 12px;
-        border: 1px solid #cccccc;
-        border-radius: 4px;
+    .modal-body {
+        padding: 24px;
+        max-height: 480px;
+        overflow-y: auto;
+    }
+
+    .modal-input-field {
+        width: 100%;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        padding: 12px 14px;
         font-size: 14px;
-        font-family: 'Segoe UI', sans-serif;
-        resize: vertical;
+        outline: none;
+        transition: border-color 0.2s;
+        box-sizing: border-box;
     }
 
-    .form-group input:focus,
-    .form-group textarea:focus {
-        outline: none;
+    .modal-input-field:focus {
         border-color: #285aa9;
     }
 
-    .modal-footer {
-        display: flex;
-        justify-content: flex-end;
-        gap: 10px;
-        margin-top: 24px;
+    textarea.modal-input-field {
+        resize: vertical;
+        font-family: inherit;
+        line-height: 1.5;
     }
 
-    .btn-kembali,
-    .btn-simpan,
-    .btn-batal,
-    .btn-hapus-confirm {
+    .modal-footer {
+        padding: 16px 24px;
+        background: #f8fafc;
+        border-top: 1px solid #e2e8f0;
         display: flex;
+        justify-content: space-between;
         align-items: center;
-        gap: 8px;
+        width: 100%;
+    }
+
+    .btn-cancel {
+        background: #f1f5f9;
+        color: #475569;
+        border: 1px solid #cbd5e1;
+        padding: 10px 18px;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .btn-cancel:hover {
+        background: #cbd5e1;
+    }
+
+    .btn-modal-save {
+        background: #285aa9;
+        color: #ffffff;
         border: none;
         padding: 10px 18px;
-        border-radius: 4px;
+        border-radius: 6px;
         font-size: 14px;
+        font-weight: 500;
         cursor: pointer;
-        color: #ffffff;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s;
     }
 
-    .btn-kembali { background: #285aa9; }
-    .btn-simpan  { background: #69a86e; }
-
-    .btn-kembali:hover,
-    .btn-simpan:hover {
-        opacity: .9;
+    .btn-modal-save:hover {
+        background: #1e4687;
     }
 
     /* --- Modal Konfirmasi Hapus --- */
 
     .modal-box.modal-hapus {
+        background: #ffffff;
+        width: 100%;
         max-width: 420px;
-        border-top-color: #da6e64;
+        border-radius: 16px;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        border: 1px solid #e2e8f0;
+        border-top: 4px solid #da6e64;
         text-align: center;
+        padding: 30px 35px;
     }
 
     .modal-hapus .icon-warning {
@@ -455,6 +495,9 @@ require_once __DIR__ . '/../layouts/sidebar_dosen.php';
     }
 
     .modal-hapus .modal-title {
+        font-size: 20px;
+        font-weight: 600;
+        color: #222;
         margin-bottom: 10px;
     }
 
@@ -470,14 +513,30 @@ require_once __DIR__ . '/../layouts/sidebar_dosen.php';
 
     .modal-hapus .modal-footer {
         justify-content: center;
+        background: transparent;
+        border-top: none;
+        padding: 0;
+        gap: 10px;
     }
 
     .btn-batal {
         background: #9aa5b1;
+        color: #ffffff;
+        border: none;
+        padding: 10px 18px;
+        border-radius: 6px;
+        font-size: 14px;
+        cursor: pointer;
     }
 
     .btn-hapus-confirm {
         background: #da6e64;
+        color: #ffffff;
+        border: none;
+        padding: 10px 18px;
+        border-radius: 6px;
+        font-size: 14px;
+        cursor: pointer;
     }
 
     .btn-batal:hover,
@@ -509,8 +568,10 @@ require_once __DIR__ . '/../layouts/sidebar_dosen.php';
                     <th style="width:50px;">No</th>
                     <th>Topik</th>
                     <th>Deskripsi</th>
+                    <th>Kategori</th>
                     <th style="width:110px;">Tenggat</th>
                     <th style="width:80px;">Kuota</th>
+                    <th>Status</th>
                     <th class="col-aksi">Aksi</th>
                 </tr>
             </thead>
@@ -520,8 +581,18 @@ require_once __DIR__ . '/../layouts/sidebar_dosen.php';
                     <td class="col-no"><?= $i + 1 ?></td>
                     <td><?= htmlspecialchars($t['topik']) ?></td>
                     <td><?= htmlspecialchars($t['deskripsi']) ?></td>
+                    <td><?= htmlspecialchars($t['kategori']) ?></td>
                     <td><?= !empty($t['tenggat_tanggal']) ? htmlspecialchars($t['tenggat_tanggal']) : '-' ?></td>
                     <td class="col-kuota"><?= $t['kuota_terisi'] ?>/<?= $t['kuota_max'] ?></td>
+                    <td>
+                        <?php if ($t['status'] === 'menunggu'): ?>
+                            <span class="badge-status status-menunggu" style="font-size: 12px;">Menunggu</span>
+                        <?php elseif ($t['status'] === 'disetujui'): ?>
+                            <span class="badge-status status-disetujui" style="font-size: 12px;">Disetujui</span>
+                        <?php elseif ($t['status'] === 'ditolak'): ?>
+                            <span class="badge-status status-ditolak" style="font-size: 12px;">Ditolak</span>
+                        <?php endif; ?>
+                    </td>
                     <td class="col-aksi">
                         <div class="aksi-group">
                             <a href="/bimbingan-skripsi/app/views/dosen/seleksi_mahasiswa.php?id=<?= $t['id'] ?>" class="btn-seleksi-peminat" title="Seleksi Peminat">
@@ -531,7 +602,7 @@ require_once __DIR__ . '/../layouts/sidebar_dosen.php';
 
                             <?php if (empty($t['applicants'])): ?>
                             <button type="button" class="btn-edit" title="Edit"
-                                onclick="bukaModalEdit(<?= $t['id'] ?>, <?= htmlspecialchars(json_encode($t['topik'])) ?>, <?= htmlspecialchars(json_encode($t['deskripsi'])) ?>, <?= (int)$t['kuota_max'] ?>, '<?= $t['tenggat_tanggal'] ?>')">
+                                onclick="bukaModalEdit(<?= $t['id'] ?>, <?= htmlspecialchars(json_encode($t['topik'])) ?>, <?= htmlspecialchars(json_encode($t['kategori'])) ?>, <?= htmlspecialchars(json_encode($t['deskripsi'])) ?>, <?= (int)$t['kuota_max'] ?>, '<?= $t['tenggat_tanggal'] ?>')">
                                 <i class="fa-solid fa-pen"></i>
                             </button>
 
@@ -563,45 +634,50 @@ require_once __DIR__ . '/../layouts/sidebar_dosen.php';
 
     <!-- ============ MODAL TAMBAH / EDIT TOPIK PENELITIAN (1 modal, 2 mode) ============ -->
     <div class="modal-overlay" id="modalTambah">
-        <div class="modal-box">
-
-            <div class="modal-title" id="modalTitle">Tambah Topik Penelitian</div>
-
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 id="modalTitle">Tambah Topik Penelitian</h3>
+                <button type="button" class="modal-close" onclick="tutupModalTambah()">&times;</button>
+            </div>
+            
             <form id="formTambahTopik" method="POST" action="/bimbingan-skripsi/app/controllers/SimpanTopikController.php">
+                <div class="modal-body">
+                    <input type="hidden" name="id" id="inputId" value="">
 
-                <input type="hidden" name="id" id="inputId" value="">
+                    <div style="margin-bottom: 16px;">
+                        <label style="font-weight: 600; color: #285aa9; display: block; margin-bottom: 6px; font-size: 14px;">Topik <span style="color: #ef4444;">*</span></label>
+                        <input type="text" name="topik" id="inputTopik" class="modal-input-field" placeholder="Masukkan topik / judul penelitian" required>
+                    </div>
 
-                <div class="form-group">
-                    <label>Topik<span class="required">*</span></label>
-                    <input type="text" name="topik" id="inputTopik" required>
+                    <div style="margin-bottom: 16px;">
+                        <label style="font-weight: 600; color: #285aa9; display: block; margin-bottom: 6px; font-size: 14px;">Kategori <span style="color: #ef4444;">*</span></label>
+                        <input type="text" name="kategori" id="inputKategori" class="modal-input-field" placeholder="Contoh: Web, Mobile, IoT" required>
+                    </div>
+
+                    <div style="margin-bottom: 16px;">
+                        <label style="font-weight: 600; color: #285aa9; display: block; margin-bottom: 6px; font-size: 14px;">Deskripsi <span style="color: #ef4444;">*</span></label>
+                        <textarea name="deskripsi" id="inputDeskripsi" class="modal-input-field" rows="4" placeholder="Masukkan deskripsi topik penelitian" required></textarea>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div>
+                            <label style="font-weight: 600; color: #285aa9; display: block; margin-bottom: 6px; font-size: 14px;">Kuota <span style="color: #ef4444;">*</span></label>
+                            <input type="number" name="kuota" id="inputKuota" class="modal-input-field" min="1" required>
+                        </div>
+                        <div>
+                            <label style="font-weight: 600; color: #285aa9; display: block; margin-bottom: 6px; font-size: 14px;">Tenggat <span style="color: #ef4444;">*</span></label>
+                            <input type="date" name="tenggat_tanggal" id="inputTenggat" class="modal-input-field" required>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label>Deskripsi<span class="required">*</span></label>
-                    <textarea name="deskripsi" id="inputDeskripsi" rows="3" required></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label>Kuota<span class="required">*</span></label>
-                    <input type="number" name="kuota" id="inputKuota" min="1" required>
-                </div>
-
-                <div class="form-group">
-                    <label>Tenggat<span class="required">*</span></label>
-                    <input type="date" name="tenggat_tanggal" id="inputTenggat" required>
-                </div>
-
-                <div class="modal-footer">
-                    <button type="button" class="btn-kembali" onclick="tutupModalTambah()">
-                        <i class="fa-solid fa-chevron-left"></i> Kembali ke daftar
-                    </button>
-                    <button type="submit" class="btn-simpan">
+                <div class="modal-footer" style="box-sizing: border-box;">
+                    <button type="button" class="btn-cancel" onclick="tutupModalTambah()">Batal</button>
+                    <button type="submit" class="btn-modal-save">
                         <i class="fa-solid fa-floppy-disk"></i> Simpan
                     </button>
                 </div>
-
             </form>
-
         </div>
     </div>
 
@@ -652,7 +728,7 @@ require_once __DIR__ . '/../layouts/sidebar_dosen.php';
 
     function getFilteredRows() {
         const keyword = searchInput.value.trim().toLowerCase();
-        return allRows.filter(row => row.dataset.topik.includes(keyword));
+        return allRows.filter(row => row.innerText.toLowerCase().includes(keyword));
     }
 
     function renderTable() {
@@ -720,6 +796,7 @@ require_once __DIR__ . '/../layouts/sidebar_dosen.php';
     const modalTitle      = document.getElementById('modalTitle');
     const inputId         = document.getElementById('inputId');
     const inputTopik      = document.getElementById('inputTopik');
+    const inputKategori   = document.getElementById('inputKategori');
     const inputDeskripsi  = document.getElementById('inputDeskripsi');
     const inputKuota      = document.getElementById('inputKuota');
     const inputTenggat    = document.getElementById('inputTenggat');
@@ -734,15 +811,18 @@ require_once __DIR__ . '/../layouts/sidebar_dosen.php';
     }
 
     // Mode EDIT: form terisi data topik yang dipilih
-    function bukaModalEdit(id, topik, deskripsi, kuota, tenggat) {
+    function bukaModalEdit(id, topik, kategori, deskripsi, kuota, tenggat) {
         modalTitle.textContent = 'Edit Topik Penelitian';
         inputId.value = id;
         inputTopik.value = topik;
+        if (inputKategori) inputKategori.value = kategori || '';
         inputDeskripsi.value = deskripsi;
         inputKuota.value = kuota;
         if (inputTenggat) inputTenggat.value = tenggat || '';
         modalTambah.classList.add('show');
     }
+
+
 
     function tutupModalTambah() {
         modalTambah.classList.remove('show');

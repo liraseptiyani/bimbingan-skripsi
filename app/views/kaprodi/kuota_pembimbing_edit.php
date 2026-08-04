@@ -170,11 +170,7 @@ include '../layouts/topbar.php';
                 </select>
             </div>
 
-            <div class="form-group">
-                <label>Foto Profile</label>
-                <input type="file" name="foto_profile" accept="image/*">
-                <small style="color:#888;">File saat ini: <?= htmlspecialchars($dosen['profile_picture'] ?? 'images.jpg') ?></small>
-            </div>
+
 
             <div class="form-group">
                 <label>Kuota Bimbingan <span class="req">*</span></label>

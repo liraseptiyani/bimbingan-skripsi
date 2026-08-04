@@ -5,9 +5,9 @@ session_start();
 if (isset($_SESSION['user_id'])) {
     $role = $_SESSION['user_role'];
     $routes = [
-        'admin'     => 'app/views/admin/dashboard.php',
-        'dosen'     => 'app/views/dosen/dashboard.php',
-        'mahasiswa' => 'app/views/mahasiswa/dashboard.php',
+        'admin'     => 'app/Views/admin/dashboard.php',
+        'dosen'     => 'app/Views/dosen/dashboard.php',
+        'mahasiswa' => 'app/Views/mahasiswa/dashboard.php',
     ];
     header('Location: ' . ($routes[$role] ?? 'public/index.php'));
     exit;

@@ -305,6 +305,10 @@ require_once __DIR__ . '/../layouts/sidebar_kaprodi.php';
             <div class="info-value"><strong><?= htmlspecialchars($topik['topik']) ?></strong></div>
         </div>
         <div class="info-row">
+            <div class="info-label">Kategori</div>
+            <div class="info-value"><strong><?= htmlspecialchars($topik['kategori'] ?? '-') ?></strong></div>
+        </div>
+        <div class="info-row">
             <div class="info-label">Deskripsi</div>
             <div class="info-value"><?= nl2br(htmlspecialchars($topik['deskripsi'])) ?></div>
         </div>

@@ -1,21 +1,11 @@
 <?php
 date_default_timezone_set('Asia/Jakarta');
 
-$dbUrl = getenv('DATABASE_URL');
-if ($dbUrl) {
-    $dbparts = parse_url($dbUrl);
-    $host = $dbparts['host'] ?? '';
-    $port = $dbparts['port'] ?? '5432';
-    $user = $dbparts['user'] ?? '';
-    $password = $dbparts['pass'] ?? '';
-    $dbname = isset($dbparts['path']) ? ltrim($dbparts['path'], '/') : '';
-} else {
-    $host = getenv('PGHOST') ?: "ep-twilight-base-ao8gz75j-pooler.c-2.ap-southeast-1.aws.neon.tech";
-    $port = getenv('PGPORT') ?: "5432";
-    $dbname = getenv('PGDATABASE') ?: "neondb";
-    $user = getenv('PGUSER') ?: "neondb_owner";
-    $password = getenv('PGPASSWORD') ?: "npg_umw8ZUzN5Fef";
-}
+$host = "ep-twilight-base-ao8gz75j-pooler.c-2.ap-southeast-1.aws.neon.tech";
+$port = "5432";
+$dbname = "neondb";
+$user = "neondb_owner";
+$password = "npg_umw8ZUzN5Fef";
 
 try {
 
@@ -67,6 +57,8 @@ try {
             deskripsi TEXT NOT NULL,
             kuota_max INT DEFAULT 1,
             tenggat_tanggal VARCHAR(100) DEFAULT NULL,
+            kategori VARCHAR(100) DEFAULT NULL,
+            status VARCHAR(50) DEFAULT 'menunggu',
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )");
 
@@ -76,6 +68,25 @@ try {
         } catch (PDOException $e) {
             $pdo->exec("ALTER TABLE topik_penelitian ADD COLUMN tenggat_tanggal VARCHAR(100) DEFAULT NULL");
         }
+
+        // Self-healing migration to add kategori column if missing
+        try {
+            $pdo->query("SELECT kategori FROM topik_penelitian LIMIT 1");
+        } catch (PDOException $e) {
+            $pdo->exec("ALTER TABLE topik_penelitian ADD COLUMN kategori VARCHAR(100) DEFAULT NULL");
+        }
+
+        // Self-healing migration to add status column if missing
+        try {
+            $pdo->query("SELECT status FROM topik_penelitian LIMIT 1");
+        } catch (PDOException $e) {
+            $pdo->exec("ALTER TABLE topik_penelitian ADD COLUMN status VARCHAR(50) DEFAULT 'menunggu'");
+            // Legacy data backfill: set existing rows status to 'disetujui'
+            $pdo->exec("UPDATE topik_penelitian SET status = 'disetujui' WHERE status IS NULL");
+        }
+        
+        // Double-check backfill just in case status exists but is null
+        $pdo->exec("UPDATE topik_penelitian SET status = 'disetujui' WHERE status IS NULL");
 
         try {
             $checkConstraint = $pdo->query("

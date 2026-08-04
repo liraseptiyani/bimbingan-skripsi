@@ -41,6 +41,8 @@ try {
             'id'             => $t['id'],
             'topik'          => $t['topik'],
             'deskripsi'      => $t['deskripsi'],
+            'kategori'       => $t['kategori'] ?? '',
+            'status'         => $t['status'] ?? 'menunggu',
             'tenggat_tanggal' => $t['tenggat_tanggal'] ?: '',
             'dosen'          => $t['nama_dosen'],
             'kuota_terisi'   => (int)$terisi,
@@ -172,6 +174,63 @@ require_once __DIR__ . '/../layouts/sidebar_kaprodi.php';
         transform: translateY(-1px);
     }
 
+    .badge-status {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 12px;
+        display: inline-block;
+        text-align: center;
+    }
+    .status-menunggu {
+        background: #fef3c7;
+        color: #d97706;
+        border: 1px solid rgba(217, 119, 6, 0.15);
+    }
+    .status-disetujui {
+        background: #d1fae5;
+        color: #15803d;
+        border: 1px solid rgba(21, 128, 61, 0.15);
+    }
+    .status-ditolak {
+        background: #fee2e2;
+        color: #b91c1c;
+        border: 1px solid rgba(185, 28, 28, 0.15);
+    }
+
+    .aksi-group {
+        display: flex;
+        gap: 6px;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .aksi-group a,
+    .aksi-group button {
+        width: 32px;
+        height: 32px;
+        border: none;
+        border-radius: 4px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 14px;
+        text-decoration: none;
+        box-sizing: border-box;
+        transition: opacity 0.2s;
+    }
+
+    .aksi-group a:hover,
+    .aksi-group button:hover {
+        opacity: 0.9;
+    }
+
+    .btn-lihat   { background: #7db8db; color: #ffffff; }
+    .btn-approve { background: #10b981; color: #ffffff; }
+    .btn-reject  { background: #ef4444; color: #ffffff; }
+    .btn-cancel  { background: #f59e0b; color: #ffffff; }
+
     /* Pagination design matches Dosen page */
     .pagination-footer {
         display: flex;
@@ -269,26 +328,50 @@ require_once __DIR__ . '/../layouts/sidebar_kaprodi.php';
                     <th style="width: 250px;">Dosen Pengusul</th>
                     <th style="width: 220px;">Topik / Judul</th>
                     <th>Deskripsi</th>
+                    <th>Kategori</th>
                     <th style="width: 100px;">Tenggat</th>
                     <th style="width: 80px; text-align: center;">Kuota</th>
-                    <th style="width: 150px; text-align: center;">Aksi</th>
+                    <th>Status</th>
+                    <th style="width: 180px; text-align: center;">Aksi</th>
                 </tr>
             </thead>
             <tbody id="tableBody">
                 <?php foreach ($topik_penelitian as $i => $t): ?>
-                <tr data-dosen="<?= strtolower($t['dosen']) ?>" data-topik="<?= strtolower($t['topik']) ?>" data-deskripsi="<?= strtolower($t['deskripsi']) ?>">
+                <tr data-dosen="<?= strtolower($t['dosen']) ?>" data-topik="<?= strtolower($t['topik']) ?>" data-kategori="<?= strtolower($t['kategori']) ?>" data-deskripsi="<?= strtolower($t['deskripsi']) ?>">
                     <td style="text-align: center; white-space: nowrap;"><?= $i + 1 ?></td>
                     <td style="white-space: nowrap;"><?= htmlspecialchars($t['dosen']) ?></td>
                     <td><?= htmlspecialchars($t['topik']) ?></td>
                     <td><?= htmlspecialchars($t['deskripsi']) ?></td>
+                    <td><?= htmlspecialchars($t['kategori'] ?: '-') ?></td>
                     <td style="white-space: nowrap;"><?= !empty($t['tenggat_tanggal']) ? htmlspecialchars($t['tenggat_tanggal']) : '-' ?></td>
                     <td style="text-align: center; white-space: nowrap;"><?= $t['kuota_terisi'] ?>/<?= $t['kuota_max'] ?></td>
+                    <td>
+                        <?php if (($t['status'] ?? 'menunggu') === 'menunggu'): ?>
+                            <span class="badge-status status-menunggu">Menunggu</span>
+                        <?php elseif (($t['status'] ?? 'menunggu') === 'disetujui'): ?>
+                            <span class="badge-status status-disetujui">Disetujui</span>
+                        <?php elseif (($t['status'] ?? 'menunggu') === 'ditolak'): ?>
+                            <span class="badge-status status-ditolak">Ditolak</span>
+                        <?php endif; ?>
+                    </td>
                     <td style="white-space: nowrap;">
                         <div class="aksi-group">
-                            <a href="/bimbingan-skripsi/app/views/kaprodi/detail_topik.php?id=<?= $t['id'] ?>" class="btn-seleksi-peminat" title="Detail Peminat">
+                            <a href="/bimbingan-skripsi/app/views/kaprodi/detail_topik.php?id=<?= $t['id'] ?>" class="btn-lihat" title="Peminat (<?= $t['jumlah_peminat'] ?>)">
                                 <i class="fa-solid fa-eye"></i>
-                                Peminat (<?= $t['jumlah_peminat'] ?>)
                             </a>
+                            
+                            <?php if (($t['status'] ?? 'menunggu') === 'menunggu'): ?>
+                                <button type="button" class="btn-approve" onclick="verifikasiTopik(<?= $t['id'] ?>, 'disetujui')" title="Setujui Topik">
+                                    <i class="fa-solid fa-check"></i>
+                                </button>
+                                <button type="button" class="btn-reject" onclick="verifikasiTopik(<?= $t['id'] ?>, 'ditolak')" title="Tolak Topik">
+                                    <i class="fa-solid fa-xmark"></i>
+                                </button>
+                            <?php else: ?>
+                                <button type="button" class="btn-cancel" onclick="verifikasiTopik(<?= $t['id'] ?>, 'menunggu')" title="Batalkan Verifikasi">
+                                    <i class="fa-solid fa-rotate-left"></i>
+                                </button>
+                            <?php endif; ?>
                         </div>
                     </td>
                 </tr>
@@ -325,10 +408,11 @@ require_once __DIR__ . '/../layouts/sidebar_kaprodi.php';
     function getFilteredRows() {
         const keyword = searchInput.value.trim().toLowerCase();
         return allRows.filter(row => {
-            const dosen = row.dataset.dosen;
-            const topik = row.dataset.topik;
-            const deskripsi = row.dataset.deskripsi;
-            return dosen.includes(keyword) || topik.includes(keyword) || deskripsi.includes(keyword);
+            const dosen = row.dataset.dosen || '';
+            const topik = row.dataset.topik || '';
+            const kategori = row.dataset.kategori || '';
+            const deskripsi = row.dataset.deskripsi || '';
+            return dosen.includes(keyword) || topik.includes(keyword) || kategori.includes(keyword) || deskripsi.includes(keyword);
         });
     }
 
@@ -348,7 +432,7 @@ require_once __DIR__ . '/../layouts/sidebar_kaprodi.php';
         if (totalData === 0) {
             const emptyRow = document.createElement('tr');
             emptyRow.className = 'no-data-row';
-            emptyRow.innerHTML = `<td colspan="7" style="text-align:center;color:#94a3b8;padding:22px;">Tidak ada topik yang cocok.</td>`;
+            emptyRow.innerHTML = `<td colspan="9" style="text-align:center;color:#94a3b8;padding:22px;">Tidak ada topik yang cocok.</td>`;
             tableBody.appendChild(emptyRow);
         } else {
             const start = (currentPage - 1) * rowsPerPage;
@@ -390,6 +474,57 @@ require_once __DIR__ . '/../layouts/sidebar_kaprodi.php';
     rowsPerPageSel.addEventListener('change', () => { currentPage = 1; renderTable(); });
 
     renderTable();
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function verifikasiTopik(topikId, status) {
+        let actionWord = 'memproses';
+        if (status === 'disetujui') actionWord = 'menyetujui';
+        if (status === 'ditolak') actionWord = 'menolak';
+        if (status === 'menunggu') actionWord = 'membatalkan verifikasi';
+
+        Swal.fire({
+            title: 'Konfirmasi Verifikasi',
+            text: `Apakah Anda yakin ingin ${actionWord} topik penelitian ini?`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#285aa9',
+            cancelButtonColor: '#9aa5b1',
+            confirmButtonText: 'Ya, Proses',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch('/bimbingan-skripsi/app/controllers/KaprodiVerifikasiTopikController.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'id=' + topikId + '&status=' + status
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil!',
+                            text: 'Status verifikasi topik berhasil diperbarui.',
+                            timer: 1500,
+                            showConfirmButton: false
+                        }).then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal',
+                            text: data.message || 'Gagal memproses verifikasi.'
+                        });
+                    }
+                });
+            }
+        });
+    }
 </script>
 
 </body>
