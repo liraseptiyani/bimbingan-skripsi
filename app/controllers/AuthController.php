@@ -13,24 +13,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $password = trim($_POST['password'] ?? '');
 
     try {
-       // Login
+                // Login
         $sql = "
             SELECT *
             FROM users
             WHERE username = :username
-            AND password = :password
         ";
 
         $stmt = $pdo->prepare($sql);
 
         $stmt->execute([
             ':username' => $username,
-            ':password' => $password
         ]);
 
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if ($user) {
+        if ($user && password_verify($password, $user['password'])){
 
             // Remember me cookies (only username is saved for security)
             if (isset($_POST['remember'])) {
