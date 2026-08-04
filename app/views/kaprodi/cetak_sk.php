@@ -64,12 +64,12 @@ try {
     $dist = null;
 }
 
-// Synchronize values
-$nomor_sk = $dist['nomor_sk'] ?? $p['nomor_sk'] ?? 'No: -';
-$p1 = $dist['pembimbing1'] ?? $p['pembimbing1'] ?? '-';
-$p2 = $dist['pembimbing2'] ?? $p['pembimbing2'] ?? null;
-$pb1 = $dist['pembahas1'] ?? $p['pembahas1'] ?? '-';
-$pb2 = $dist['pembahas2'] ?? $p['pembahas2'] ?? null;
+// Synchronize values: prefer values from the specific pengajuan_judul record if available, fallback to active distribution
+$nomor_sk = !empty($p['nomor_sk']) ? $p['nomor_sk'] : ($dist['nomor_sk'] ?? 'No: -');
+$p1 = !empty($p['pembimbing1']) ? $p['pembimbing1'] : ($dist['pembimbing1'] ?? '-');
+$p2 = !empty($p['pembimbing2']) ? $p['pembimbing2'] : ($dist['pembimbing2'] ?? null);
+$pb1 = !empty($p['pembahas1']) ? $p['pembahas1'] : ($dist['pembahas1'] ?? '-');
+$pb2 = !empty($p['pembahas2']) ? $p['pembahas2'] : ($dist['pembahas2'] ?? null);
 
 $judul_disetujui = ($p['judul_disetujui'] === 'alternatif' && !empty($p['judul_alternatif'])) ? $p['judul_alternatif'] : $p['judul'];
 
@@ -240,6 +240,7 @@ $kaprodiNip = $kaprodiD['nip'] !== '-' ? $kaprodiD['nip'] : '19810414 200501 1 0
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 0px;
+            font-family: "Times New Roman", Times, serif;
         }
         .kop-logo {
             width: 85px;
@@ -324,10 +325,10 @@ $kaprodiNip = $kaprodiD['nip'] !== '-' ? $kaprodiD['nip'] : '19810414 200501 1 0
             color: #000000;
             white-space: nowrap; /* prevent labels from wrapping */
         }
-        .sop-separator {
+        .sop-table td.sop-separator {
             background-color: #dce6f1;
             font-weight: bold;
-            text-align: center;
+            text-align: center !important;
             padding: 6px 0px !important;
         }
         .sop-val {

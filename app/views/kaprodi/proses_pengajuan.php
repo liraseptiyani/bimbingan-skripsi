@@ -40,6 +40,23 @@ try {
         // ignore
     }
 
+    // Fetch the student's previous approved submission to show the exact approved title
+    $oldApprovedTitle = '-';
+    if (!empty($p['judul_lama'])) {
+        try {
+            $stmtPrev = $pdo->prepare("SELECT * FROM pengajuan_judul WHERE mahasiswa_npm = :npm AND status = 'disetujui' AND id < :id ORDER BY id DESC LIMIT 1");
+            $stmtPrev->execute([':npm' => $p['mahasiswa_npm'], ':id' => $p['id']]);
+            $prevApproved = $stmtPrev->fetch(PDO::FETCH_ASSOC);
+            if ($prevApproved) {
+                $oldApprovedTitle = ($prevApproved['judul_disetujui'] === 'alternatif' && !empty($prevApproved['judul_alternatif'])) ? $prevApproved['judul_alternatif'] : $prevApproved['judul'];
+            } else {
+                $oldApprovedTitle = $p['judul_lama'];
+            }
+        } catch (PDOException $ex) {
+            $oldApprovedTitle = $p['judul_lama'];
+        }
+    }
+
     // Setup selected values for dropdowns
     $selectedP1 = $dist['pembimbing1'] ?? $p['pembimbing1'] ?? '';
     $selectedP2 = $dist['pembimbing2'] ?? $p['pembimbing2'] ?? '';
@@ -476,22 +493,14 @@ function renderDocCard($filename, $label, $isDocx = false) {
                 <?php if (!empty($p['judul_lama'])): ?>
                     <div style="background: #fffbeb; border: 1px solid #f59e0b; border-radius: 8px; padding: 10px 14px; font-size: 13px; color: #b45309; margin-bottom: 10px; line-height: 1.4;">
                         <i class="fa-solid fa-circle-info"></i> <strong>Informasi Perbaikan Judul:</strong><br>
-                        Mahasiswa telah mengajukan perbaikan judul baru berdasarkan catatan revisi sebelumnya. Di bawah ini ditampilkan riwayat judul awal dan judul perbaikan saat ini.
+                        Mahasiswa telah mengajukan perbaikan judul baru berdasarkan catatan revisi sebelumnya. Di bawah ini ditampilkan riwayat judul yang disetujui sebelumnya dan judul perbaikan saat ini.
                     </div>
                     <div class="form-group" style="margin-bottom: 0;">
-                        <label style="font-size: 12px; color: #94a3b8; margin-bottom: 4px;">Judul Utama Awal (Lama)</label>
+                        <label style="font-size: 12px; color: #94a3b8; margin-bottom: 4px;">Judul Lama (Disetujui)</label>
                         <div style="background: #f1f5f9; border: 1px dashed #cbd5e1; border-radius: 6px; padding: 8px 12px; font-size: 13px; color: #64748b; line-height: 1.4; text-decoration: line-through;">
-                            <?= htmlspecialchars($p['judul_lama']) ?>
+                            <?= htmlspecialchars($oldApprovedTitle) ?>
                         </div>
                     </div>
-                    <?php if (!empty($p['judul_alternatif_lama'])): ?>
-                        <div class="form-group" style="margin-bottom: 0; margin-top: 4px;">
-                            <label style="font-size: 12px; color: #94a3b8; margin-bottom: 4px;">Judul Alternatif Awal (Lama)</label>
-                            <div style="background: #f1f5f9; border: 1px dashed #cbd5e1; border-radius: 6px; padding: 8px 12px; font-size: 13px; color: #64748b; line-height: 1.4; font-style: italic; text-decoration: line-through;">
-                                <?= htmlspecialchars($p['judul_alternatif_lama']) ?>
-                            </div>
-                        </div>
-                    <?php endif; ?>
                 <?php endif; ?>
 
                 <div class="form-group" style="margin-bottom: 0; margin-top: <?= !empty($p['judul_lama']) ? '12px' : '0' ?>;">

@@ -273,7 +273,10 @@ try {
         'judul_disetujui' => "VARCHAR(50) DEFAULT 'utama'",
         'tanggal_persetujuan' => "TIMESTAMP DEFAULT NULL",
         'judul_lama' => "TEXT DEFAULT NULL",
-        'judul_alternatif_lama' => "TEXT DEFAULT NULL"
+        'judul_alternatif_lama' => "TEXT DEFAULT NULL",
+        'nomor_sk' => 'VARCHAR(255) DEFAULT NULL',
+        'pembahas1' => 'VARCHAR(255) DEFAULT NULL',
+        'pembahas2' => 'VARCHAR(255) DEFAULT NULL'
     ];
 
     foreach ($columnsToAdd as $col => $type) {

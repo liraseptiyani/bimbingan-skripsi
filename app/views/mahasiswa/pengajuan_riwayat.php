@@ -416,15 +416,17 @@ require_once __DIR__ . '/../layouts/sidebar_mahasiswa.php';
 
     .decision-info .d-row {
         display: flex;
-        justify-content: space-between;
-        align-items: center;
+        justify-content: flex-start;
+        align-items: flex-start;
         gap: 12px;
     }
 
     .decision-info .d-row span:last-child {
         font-weight: 500;
         color: #1e293b;
-        text-align: right;
+        text-align: left;
+        flex: 1;
+        white-space: nowrap;
     }
 
     .decision-info .d-label {
@@ -433,6 +435,8 @@ require_once __DIR__ . '/../layouts/sidebar_mahasiswa.php';
         font-size: 11px;
         text-transform: uppercase;
         letter-spacing: 0.3px;
+        flex: 0 0 95px;
+        white-space: nowrap;
     }
 
     .btn-cancel {
@@ -603,19 +607,19 @@ require_once __DIR__ . '/../layouts/sidebar_mahasiswa.php';
                                         <div class="decision-info">
                                             <div class="d-row">
                                                 <span class="d-label">Pembimbing 1</span>
-                                                <span><?= htmlspecialchars($distData['pembimbing1'] ?? $p['pembimbing1'] ?? '-') ?></span>
+                                                <span><?= htmlspecialchars($p['pembimbing1'] ?? $distData['pembimbing1'] ?? '-') ?></span>
                                             </div>
                                             <div class="d-row">
                                                 <span class="d-label">Pembimbing 2</span>
-                                                <span><?= htmlspecialchars($distData['pembimbing2'] ?? ($p['pembimbing2'] ?: '-')) ?></span>
+                                                <span><?= htmlspecialchars($p['pembimbing2'] ?? $distData['pembimbing2'] ?? '-') ?></span>
                                             </div>
                                             <div class="d-row">
                                                 <span class="d-label">Pembahas</span>
-                                                <span><?= htmlspecialchars($distData['pembahas1'] ?? '-') ?></span>
+                                                <span><?= htmlspecialchars($p['pembahas1'] ?? $distData['pembahas1'] ?? '-') ?></span>
                                             </div>
                                             <div class="d-row" style="margin-top: 4px; border-top: 1px dashed #e2e8f0; padding-top: 6px;">
                                                 <span class="d-label">Nomor SK</span>
-                                                <span style="font-family: monospace; font-weight: 600; color: #166534; background: #f0fdf4; padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(22, 101, 52, 0.1);"><?= htmlspecialchars($distData['nomor_sk'] ?? '-') ?></span>
+                                                <span style="font-family: monospace; font-weight: 600; color: #166534; background: #f0fdf4; padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(22, 101, 52, 0.1);"><?= htmlspecialchars($p['nomor_sk'] ?? $distData['nomor_sk'] ?? '-') ?></span>
                                             </div>
                                         </div>
                                     <?php elseif ($p['status'] === 'ditolak'): ?>
@@ -678,12 +682,8 @@ require_once __DIR__ . '/../layouts/sidebar_mahasiswa.php';
                     <div class="review-value" id="view_npm_mhs">-</div>
                 </div>
                 <div class="review-row" id="row_judul_lama" style="display: none;">
-                    <div class="review-label">Judul Utama Awal</div>
+                    <div class="review-label">Judul Lama (Disetujui)</div>
                     <div class="review-value" id="view_judul_lama" style="text-decoration: line-through; color: #64748b;">-</div>
-                </div>
-                <div class="review-row" id="row_judul_alt_lama" style="display: none;">
-                    <div class="review-label">Judul Alternatif Awal</div>
-                    <div class="review-value" id="view_judul_alt_lama" style="text-decoration: line-through; color: #64748b;">-</div>
                 </div>
                 <div class="review-row">
                     <div class="review-label" id="label_judul_utama">Judul Utama</div>
@@ -843,7 +843,6 @@ require_once __DIR__ . '/../layouts/sidebar_mahasiswa.php';
         // Show Judul and highlight which one is approved
         const altRow = document.getElementById('row_judul_alt');
         const rowJudulLama = document.getElementById('row_judul_lama');
-        const rowJudulAltLama = document.getElementById('row_judul_alt_lama');
         const labelJudulUtama = document.getElementById('label_judul_utama');
         const labelJudulAlt = document.getElementById('label_judul_alt');
 
@@ -853,7 +852,6 @@ require_once __DIR__ . '/../layouts/sidebar_mahasiswa.php';
             document.getElementById('view_judul').textContent = displayTitle;
             altRow.style.display = 'none';
             rowJudulLama.style.display = 'none';
-            rowJudulAltLama.style.display = 'none';
         } else {
             labelJudulUtama.textContent = 'Judul Skripsi';
             document.getElementById('view_judul').textContent = p.judul;
@@ -867,15 +865,8 @@ require_once __DIR__ . '/../layouts/sidebar_mahasiswa.php';
             if (p.judul_lama) {
                 rowJudulLama.style.display = 'grid';
                 document.getElementById('view_judul_lama').textContent = p.judul_lama;
-                if (p.judul_alternatif_lama) {
-                    rowJudulAltLama.style.display = 'grid';
-                    document.getElementById('view_judul_alt_lama').textContent = p.judul_alternatif_lama;
-                } else {
-                    rowJudulAltLama.style.display = 'none';
-                }
             } else {
                 rowJudulLama.style.display = 'none';
-                rowJudulAltLama.style.display = 'none';
             }
         }
         
@@ -912,17 +903,10 @@ require_once __DIR__ . '/../layouts/sidebar_mahasiswa.php';
             document.getElementById('row_sk_akhir').style.display = 'grid';
             document.getElementById('row_alasan_akhir').style.display = 'none';
 
-            if (dist) {
-                document.getElementById('view_p1_akhir').textContent = dist.pembimbing1;
-                document.getElementById('view_p2_akhir').textContent = dist.pembimbing2 || '-';
-                document.getElementById('view_pb_akhir').textContent = dist.pembahas1;
-                document.getElementById('view_sk_akhir').textContent = dist.nomor_sk;
-            } else {
-                document.getElementById('view_p1_akhir').textContent = p.pembimbing1;
-                document.getElementById('view_p2_akhir').textContent = p.pembimbing2 || '-';
-                document.getElementById('view_pb_akhir').textContent = 'Belum diisi';
-                document.getElementById('view_sk_akhir').textContent = 'Belum diisi';
-            }
+            document.getElementById('view_p1_akhir').textContent = p.pembimbing1 || (dist ? dist.pembimbing1 : '-') || '-';
+            document.getElementById('view_p2_akhir').textContent = p.pembimbing2 || (dist ? dist.pembimbing2 : '-') || '-';
+            document.getElementById('view_pb_akhir').textContent = p.pembahas1 || (dist ? dist.pembahas1 : '-') || '-';
+            document.getElementById('view_sk_akhir').textContent = p.nomor_sk || (dist ? dist.nomor_sk : '-') || '-';
         } else {
             document.getElementById('row_p1_akhir').style.display = 'none';
             document.getElementById('row_p2_akhir').style.display = 'none';
@@ -963,8 +947,9 @@ require_once __DIR__ . '/../layouts/sidebar_mahasiswa.php';
     function bukaModalPerbaikan(p) {
         document.getElementById('perbaikan_id').value = p.id;
         
-        // Show old titles as read-only comparison
-        document.getElementById('perbaikan_judul_lama_val').textContent = p.judul;
+        // Show old titles as read-only comparison: use approved title only
+        const oldApprovedTitle = (p.judul_disetujui === 'alternatif' && p.judul_alternatif) ? p.judul_alternatif : p.judul;
+        document.getElementById('perbaikan_judul_lama_val').textContent = oldApprovedTitle;
         
         // Keep new inputs empty by default for student to enter their revised titles
         document.getElementById('perbaikan_judul').value = '';

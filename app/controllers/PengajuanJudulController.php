@@ -257,23 +257,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $judul_disetujui = ($judul_disetujui_pilihan === 'alternatif' && !empty($pengajuan['judul_alternatif'])) ? 'alternatif' : 'utama';
             $approved_title = ($judul_disetujui === 'alternatif') ? $pengajuan['judul_alternatif'] : $pengajuan['judul'];
 
-            // Update status and choices in pengajuan_judul
-            $stmtUpdate = $pdo->prepare("
-                UPDATE pengajuan_judul 
-                SET status = 'disetujui', 
-                    pembimbing1 = :p1, 
-                    pembimbing2 = :p2, 
-                    judul_disetujui = :judul_disetujui,
-                    tanggal_persetujuan = CURRENT_TIMESTAMP
-                WHERE id = :id
-            ");
-            $stmtUpdate->execute([
-                ':p1' => $p1,
-                ':p2' => $p2 ?: null,
-                ':judul_disetujui' => $judul_disetujui,
-                ':id' => $id
-            ]);
-
             // Check if already exists in distribusi_mahasiswa to reuse existing Nomor SK
             // First, make sure the table exists
             $pdo->exec("CREATE TABLE IF NOT EXISTS distribusi_mahasiswa (
@@ -327,6 +310,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ':pb1'  => !empty($pb1) ? $pb1 : '-',
                 ':pb2'  => !empty($pb2) ? $pb2 : null,
                 ':sk'   => $sk
+            ]);
+
+            // Update status, choices, and advisors inside pengajuan_judul
+            $stmtUpdate = $pdo->prepare("
+                UPDATE pengajuan_judul 
+                SET status = 'disetujui', 
+                    pembimbing1 = :p1, 
+                    pembimbing2 = :p2, 
+                    pembahas1 = :pb1,
+                    pembahas2 = :pb2,
+                    nomor_sk = :sk,
+                    judul_disetujui = :judul_disetujui,
+                    tanggal_persetujuan = CURRENT_TIMESTAMP
+                WHERE id = :id
+            ");
+            $stmtUpdate->execute([
+                ':p1' => $p1,
+                ':p2' => $p2 ?: null,
+                ':pb1' => !empty($pb1) ? $pb1 : '-',
+                ':pb2' => !empty($pb2) ? $pb2 : null,
+                ':sk' => $sk,
+                ':judul_disetujui' => $judul_disetujui,
+                ':id' => $id
             ]);
 
             echo json_encode(['success' => true]);
@@ -429,8 +435,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ':deskripsi' => $oldSub['deskripsi'],
                 ':judul_baru' => $judul_baru,
                 ':judul_alt_baru' => $judul_alt_baru ?: null,
-                ':judul_lama' => $oldSub['judul'],
-                ':judul_alternatif_lama' => $oldSub['judul_alternatif'],
+                ':judul_lama' => ($oldSub['judul_disetujui'] === 'alternatif' && !empty($oldSub['judul_alternatif'])) ? $oldSub['judul_alternatif'] : $oldSub['judul'],
+                ':judul_alternatif_lama' => null,
                 ':pembimbing1' => $oldSub['pembimbing1'],
                 ':pembimbing2' => $oldSub['pembimbing2'],
                 ':file_krs' => $oldSub['file_krs'],

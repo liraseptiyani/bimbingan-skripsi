@@ -160,20 +160,71 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     ':sk' => $nomor_sk
                 ]);
 
-                // Sync with pengajuan_judul: delete and recreate pre-approved entry
-                // NOTE: We only insert columns that exist in the database table definition of pengajuan_judul to prevent query errors.
-                $delPengajuan = $pdo->prepare("DELETE FROM pengajuan_judul WHERE mahasiswa_npm = :npm");
-                $delPengajuan->execute([':npm' => $npm]);
+                // Sync with pengajuan_judul: create pre-approved entry without deleting history
+                $stmtLast = $pdo->prepare("SELECT * FROM pengajuan_judul WHERE mahasiswa_npm = :npm ORDER BY id DESC LIMIT 1");
+                $stmtLast->execute([':npm' => $npm]);
+                $lastPengajuan = $stmtLast->fetch(PDO::FETCH_ASSOC);
 
-                $sqlP = "INSERT INTO pengajuan_judul (mahasiswa_npm, mahasiswa_nama, judul, deskripsi, status, judul_disetujui, pembimbing1, pembimbing2, tanggal_persetujuan)
-                         VALUES (:npm, :nama, :judul, '', 'disetujui', 'utama', :p1, :p2, CURRENT_TIMESTAMP)";
+                $deskripsi = $lastPengajuan ? $lastPengajuan['deskripsi'] : '';
+                $file_krs = $lastPengajuan ? $lastPengajuan['file_krs'] : null;
+                $file_transkrip = $lastPengajuan ? $lastPengajuan['file_transkrip'] : null;
+                $file_proposal = $lastPengajuan ? $lastPengajuan['file_proposal'] : null;
+                $file_ktm = $lastPengajuan ? $lastPengajuan['file_ktm'] : null;
+                $file_form_tema = $lastPengajuan ? $lastPengajuan['file_form_tema'] : null;
+                $file_bukti_ukt = $lastPengajuan ? $lastPengajuan['file_bukti_ukt'] : null;
+                $file_krs_terakhir = $lastPengajuan ? $lastPengajuan['file_krs_terakhir'] : null;
+                $file_form_verifikasi = $lastPengajuan ? $lastPengajuan['file_form_verifikasi'] : null;
+                $file_bukti_acc = $lastPengajuan ? $lastPengajuan['file_bukti_acc'] : null;
+                $file_form_penetapan = $lastPengajuan ? $lastPengajuan['file_form_penetapan'] : null;
+                $file_bab1 = $lastPengajuan ? $lastPengajuan['file_bab1'] : null;
+                $file_bab1_alt = $lastPengajuan ? $lastPengajuan['file_bab1_alt'] : null;
+                $judul_alternatif = $lastPengajuan ? $lastPengajuan['judul_alternatif'] : null;
+                $judul_lama = $lastPengajuan ? $lastPengajuan['judul'] : null;
+                $judul_alternatif_lama = $lastPengajuan ? $lastPengajuan['judul_alternatif'] : null;
+                $judul_disetujui = $lastPengajuan ? $lastPengajuan['judul_disetujui'] : 'utama';
+
+                $sqlP = "INSERT INTO pengajuan_judul (
+                            mahasiswa_npm, mahasiswa_nama, judul, deskripsi, status, judul_disetujui, 
+                            pembimbing1, pembimbing2, pembahas1, pembahas2, nomor_sk, tanggal_persetujuan,
+                            file_krs, file_transkrip, file_proposal, file_ktm, file_form_tema, 
+                            file_bukti_ukt, file_krs_terakhir, file_form_verifikasi, file_bukti_acc, 
+                            file_form_penetapan, file_bab1, file_bab1_alt, judul_alternatif, 
+                            judul_lama, judul_alternatif_lama
+                        ) VALUES (
+                            :npm, :nama, :judul, :deskripsi, 'disetujui', :judul_disetujui,
+                            :p1, :p2, :pb1, :pb2, :sk, CURRENT_TIMESTAMP,
+                            :file_krs, :file_transkrip, :file_proposal, :file_ktm, :file_form_tema, 
+                            :file_bukti_ukt, :file_krs_terakhir, :file_form_verifikasi, :file_bukti_acc, 
+                            :file_form_penetapan, :file_bab1, :file_bab1_alt, :judul_alternatif, 
+                            :judul_lama, :judul_alternatif_lama
+                        )";
                 $stmtP = $pdo->prepare($sqlP);
                 $stmtP->execute([
                     ':npm' => $npm,
                     ':nama' => $nama,
                     ':judul' => $judul_skripsi,
+                    ':deskripsi' => $deskripsi,
+                    ':judul_disetujui' => $judul_disetujui,
                     ':p1' => $pembimbing1,
-                    ':p2' => !empty($pembimbing2) ? $pembimbing2 : null
+                    ':p2' => !empty($pembimbing2) ? $pembimbing2 : null,
+                    ':pb1' => !empty($pembahas1) ? $pembahas1 : null,
+                    ':pb2' => !empty($pembahas2) ? $pembahas2 : null,
+                    ':sk' => $nomor_sk,
+                    ':file_krs' => $file_krs,
+                    ':file_transkrip' => $file_transkrip,
+                    ':file_proposal' => $file_proposal,
+                    ':file_ktm' => $file_ktm,
+                    ':file_form_tema' => $file_form_tema,
+                    ':file_bukti_ukt' => $file_bukti_ukt,
+                    ':file_krs_terakhir' => $file_krs_terakhir,
+                    ':file_form_verifikasi' => $file_form_verifikasi,
+                    ':file_bukti_acc' => $file_bukti_acc,
+                    ':file_form_penetapan' => $file_form_penetapan,
+                    ':file_bab1' => $file_bab1,
+                    ':file_bab1_alt' => $file_bab1_alt,
+                    ':judul_alternatif' => $judul_alternatif,
+                    ':judul_lama' => $judul_lama,
+                    ':judul_alternatif_lama' => $judul_alternatif_lama
                 ]);
 
                 $successCount++;
@@ -248,19 +299,77 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ':npm_lama' => $npm_lama
             ]);
 
-            // Sync with pengajuan_judul: delete and recreate pre-approved entry (using standard columns only)
-            $delOld = $pdo->prepare("DELETE FROM pengajuan_judul WHERE mahasiswa_npm = :npm_lama OR mahasiswa_npm = :npm");
-            $delOld->execute([':npm_lama' => $npm_lama, ':npm' => $npm]);
+            // If NPM changed, update the npm of old records in pengajuan_judul first
+            if ($npm !== $npm_lama) {
+                $updateNpm = $pdo->prepare("UPDATE pengajuan_judul SET mahasiswa_npm = :npm WHERE mahasiswa_npm = :npm_lama");
+                $updateNpm->execute([':npm' => $npm, ':npm_lama' => $npm_lama]);
+            }
 
-            $sqlP = "INSERT INTO pengajuan_judul (mahasiswa_npm, mahasiswa_nama, judul, deskripsi, status, judul_disetujui, pembimbing1, pembimbing2, tanggal_persetujuan)
-                     VALUES (:npm, :nama, :judul, '', 'disetujui', 'utama', :p1, :p2, CURRENT_TIMESTAMP)";
+            // Sync with pengajuan_judul: create pre-approved entry without deleting history
+            $stmtLast = $pdo->prepare("SELECT * FROM pengajuan_judul WHERE mahasiswa_npm = :npm ORDER BY id DESC LIMIT 1");
+            $stmtLast->execute([':npm' => $npm]);
+            $lastPengajuan = $stmtLast->fetch(PDO::FETCH_ASSOC);
+
+            $deskripsi = $lastPengajuan ? $lastPengajuan['deskripsi'] : '';
+            $file_krs = $lastPengajuan ? $lastPengajuan['file_krs'] : null;
+            $file_transkrip = $lastPengajuan ? $lastPengajuan['file_transkrip'] : null;
+            $file_proposal = $lastPengajuan ? $lastPengajuan['file_proposal'] : null;
+            $file_ktm = $lastPengajuan ? $lastPengajuan['file_ktm'] : null;
+            $file_form_tema = $lastPengajuan ? $lastPengajuan['file_form_tema'] : null;
+            $file_bukti_ukt = $lastPengajuan ? $lastPengajuan['file_bukti_ukt'] : null;
+            $file_krs_terakhir = $lastPengajuan ? $lastPengajuan['file_krs_terakhir'] : null;
+            $file_form_verifikasi = $lastPengajuan ? $lastPengajuan['file_form_verifikasi'] : null;
+            $file_bukti_acc = $lastPengajuan ? $lastPengajuan['file_bukti_acc'] : null;
+            $file_form_penetapan = $lastPengajuan ? $lastPengajuan['file_form_penetapan'] : null;
+            $file_bab1 = $lastPengajuan ? $lastPengajuan['file_bab1'] : null;
+            $file_bab1_alt = $lastPengajuan ? $lastPengajuan['file_bab1_alt'] : null;
+            $judul_alternatif = $lastPengajuan ? $lastPengajuan['judul_alternatif'] : null;
+            $judul_lama = $lastPengajuan ? $lastPengajuan['judul'] : null;
+            $judul_alternatif_lama = $lastPengajuan ? $lastPengajuan['judul_alternatif'] : null;
+            $judul_disetujui = $lastPengajuan ? $lastPengajuan['judul_disetujui'] : 'utama';
+
+            $sqlP = "INSERT INTO pengajuan_judul (
+                        mahasiswa_npm, mahasiswa_nama, judul, deskripsi, status, judul_disetujui, 
+                        pembimbing1, pembimbing2, pembahas1, pembahas2, nomor_sk, tanggal_persetujuan,
+                        file_krs, file_transkrip, file_proposal, file_ktm, file_form_tema, 
+                        file_bukti_ukt, file_krs_terakhir, file_form_verifikasi, file_bukti_acc, 
+                        file_form_penetapan, file_bab1, file_bab1_alt, judul_alternatif, 
+                        judul_lama, judul_alternatif_lama
+                    ) VALUES (
+                        :npm, :nama, :judul, :deskripsi, 'disetujui', :judul_disetujui,
+                        :p1, :p2, :pb1, :pb2, :sk, CURRENT_TIMESTAMP,
+                        :file_krs, :file_transkrip, :file_proposal, :file_ktm, :file_form_tema, 
+                        :file_bukti_ukt, :file_krs_terakhir, :file_form_verifikasi, :file_bukti_acc, 
+                        :file_form_penetapan, :file_bab1, :file_bab1_alt, :judul_alternatif, 
+                        :judul_lama, :judul_alternatif_lama
+                    )";
             $stmtP = $pdo->prepare($sqlP);
             $stmtP->execute([
                 ':npm' => $npm,
                 ':nama' => $nama,
                 ':judul' => $judul_skripsi,
+                ':deskripsi' => $deskripsi,
+                ':judul_disetujui' => $judul_disetujui,
                 ':p1' => $pembimbing1,
-                ':p2' => !empty($pembimbing2) ? $pembimbing2 : null
+                ':p2' => !empty($pembimbing2) ? $pembimbing2 : null,
+                ':pb1' => !empty($pembahas1) ? $pembahas1 : null,
+                ':pb2' => !empty($pembahas2) ? $pembahas2 : null,
+                ':sk' => $nomor_sk,
+                ':file_krs' => $file_krs,
+                ':file_transkrip' => $file_transkrip,
+                ':file_proposal' => $file_proposal,
+                ':file_ktm' => $file_ktm,
+                ':file_form_tema' => $file_form_tema,
+                ':file_bukti_ukt' => $file_bukti_ukt,
+                ':file_krs_terakhir' => $file_krs_terakhir,
+                ':file_form_verifikasi' => $file_form_verifikasi,
+                ':file_bukti_acc' => $file_bukti_acc,
+                ':file_form_penetapan' => $file_form_penetapan,
+                ':file_bab1' => $file_bab1,
+                ':file_bab1_alt' => $file_bab1_alt,
+                ':judul_alternatif' => $judul_alternatif,
+                ':judul_lama' => $judul_lama,
+                ':judul_alternatif_lama' => $judul_alternatif_lama
             ]);
 
             $_SESSION['swal_success'] = 'Data distribusi mahasiswa berhasil diubah!';
