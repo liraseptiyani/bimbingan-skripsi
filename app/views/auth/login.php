@@ -1,6 +1,8 @@
 <?php
 session_start();
 
+require_once dirname(__DIR__, 3) . '/config/config.php';
+
 // Redirect jika sudah login
 if (isset($_SESSION['user_id'])) {
     $role = $_SESSION['user_role'];
@@ -25,6 +27,7 @@ $remembered_checked  = isset($_COOKIE['remember_checked']) ? 'checked' : '';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login — Sistem Bimbingan Skripsi Universitas Lampung</title>
+    <link rel="icon" type="image/png" href="<?= BASE_URL ?>/public/img/Logo_UnivLampung.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@300;400;600;700&display=swap" rel="stylesheet">
