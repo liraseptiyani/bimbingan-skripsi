@@ -7,7 +7,17 @@ header('Content-Type: application/json');
 
 require_once dirname(__DIR__, 2) . '/config/koneksi.php';
 
+// Log the incoming request
+$logData = "PENGAJUAN JUDUL REQUEST: method=" . $_SERVER['REQUEST_METHOD'] . 
+           " | action=" . ($_POST['action'] ?? 'none') . 
+           " | session_user=" . ($_SESSION['username'] ?? 'null') . 
+           " | session_role=" . ($_SESSION['role'] ?? 'null') . 
+           " | post=" . json_encode($_POST) . 
+           " | files=" . json_encode(array_map(function($f) { return ['name' => $f['name'], 'error' => $f['error'], 'size' => $f['size']]; }, $_FILES)) . "\n";
+file_put_contents(dirname(__DIR__, 2) . '/db_log.txt', $logData, FILE_APPEND);
+
 if (!isset($_SESSION['username'])) {
+    file_put_contents(dirname(__DIR__, 2) . '/db_log.txt', "PENGAJUAN JUDUL ERROR: Akses ditolak (username session not set)\n", FILE_APPEND);
     echo json_encode(['success' => false, 'message' => 'Akses ditolak! Silakan login kembali.']);
     exit;
 }
@@ -47,6 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Upload helper
             $uploadHelper = function($fileKey, $npm, $prefix, $allowedExts = ['pdf']) {
                 if (!isset($_FILES[$fileKey])) {
+                    file_put_contents(dirname(__DIR__, 2) . '/db_log.txt', "PENGAJUAN JUDUL UPLOAD ERROR: Berkas $fileKey tidak di-set!\n", FILE_APPEND);
                     return ['success' => false, 'message' => 'Berkas ' . $fileKey . ' wajib diunggah!'];
                 }
 
@@ -58,10 +69,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     // Validate upload errors and extensions first
                     for ($i = 0; $i < $filesCount; $i++) {
                         if ($_FILES[$fileKey]['error'][$i] !== UPLOAD_ERR_OK) {
+                            file_put_contents(dirname(__DIR__, 2) . '/db_log.txt', "PENGAJUAN JUDUL UPLOAD ERROR: $fileKey index $i error code=" . $_FILES[$fileKey]['error'][$i] . "\n", FILE_APPEND);
                             return ['success' => false, 'message' => 'Gagal mengunggah beberapa berkas untuk ' . $fileKey];
                         }
                         $ext = strtolower(pathinfo($_FILES[$fileKey]['name'][$i], PATHINFO_EXTENSION));
                         if (!in_array($ext, $allowedExts)) {
+                            file_put_contents(dirname(__DIR__, 2) . '/db_log.txt', "PENGAJUAN JUDUL UPLOAD ERROR: $fileKey index $i invalid ext=$ext\n", FILE_APPEND);
                             return ['success' => false, 'message' => 'Format berkas untuk ' . $fileKey . ' tidak valid (harus ' . implode('/', $allowedExts) . ')!'];
                         }
                     }
@@ -77,6 +90,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         if (move_uploaded_file($_FILES[$fileKey]['tmp_name'][$i], $uploadDir . $filename)) {
                             $filenames[] = $filename;
                         } else {
+                            file_put_contents(dirname(__DIR__, 2) . '/db_log.txt', "PENGAJUAN JUDUL UPLOAD ERROR: move_uploaded_file failed for $fileKey index $i\n", FILE_APPEND);
                             return ['success' => false, 'message' => 'Gagal mengunggah berkas ke-' . ($i + 1) . ' untuk ' . $fileKey];
                         }
                     }
@@ -85,10 +99,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 } else {
                     // Single file upload
                     if ($_FILES[$fileKey]['error'] !== UPLOAD_ERR_OK) {
+                        file_put_contents(dirname(__DIR__, 2) . '/db_log.txt', "PENGAJUAN JUDUL UPLOAD ERROR: $fileKey single error code=" . $_FILES[$fileKey]['error'] . "\n", FILE_APPEND);
                         return ['success' => false, 'message' => 'Berkas ' . $fileKey . ' wajib diunggah!'];
                     }
                     $ext = strtolower(pathinfo($_FILES[$fileKey]['name'], PATHINFO_EXTENSION));
                     if (!in_array($ext, $allowedExts)) {
+                        file_put_contents(dirname(__DIR__, 2) . '/db_log.txt', "PENGAJUAN JUDUL UPLOAD ERROR: $fileKey single invalid ext=$ext\n", FILE_APPEND);
                         return ['success' => false, 'message' => 'Format berkas untuk ' . $fileKey . ' tidak valid (harus ' . implode('/', $allowedExts) . ')!'];
                     }
                     $uploadDir = dirname(__DIR__, 2) . '/public/uploads/persyaratan/';
@@ -99,6 +115,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     if (move_uploaded_file($_FILES[$fileKey]['tmp_name'], $uploadDir . $filename)) {
                         return ['success' => true, 'filename' => $filename];
                     }
+                    file_put_contents(dirname(__DIR__, 2) . '/db_log.txt', "PENGAJUAN JUDUL UPLOAD ERROR: move_uploaded_file failed for $fileKey\n", FILE_APPEND);
                     return ['success' => false, 'message' => 'Gagal mengunggah berkas ' . $fileKey];
                 }
             };
@@ -192,9 +209,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ':f_bab1_alt' => $file_bab1_alt
             ]);
 
+            file_put_contents(dirname(__DIR__, 2) . '/db_log.txt', "PENGAJUAN JUDUL SUCCESS\n", FILE_APPEND);
             echo json_encode(['success' => true]);
             exit;
         } catch (PDOException $e) {
+            file_put_contents(dirname(__DIR__, 2) . '/db_log.txt', "PENGAJUAN JUDUL DATABASE ERROR: " . $e->getMessage() . "\n", FILE_APPEND);
             echo json_encode(['success' => false, 'message' => 'Gagal menyimpan pengajuan: ' . $e->getMessage()]);
             exit;
         }
