@@ -430,6 +430,11 @@ table tbody tr:nth-child(even){
     opacity:.9;
 }
 
+/* Pastikan SweetAlert2 tampil di paling depan (di atas modal overlay) */
+.swal2-container {
+    z-index: 100000000 !important;
+}
+
 </style>
 <script>
 document.addEventListener("DOMContentLoaded", function() {

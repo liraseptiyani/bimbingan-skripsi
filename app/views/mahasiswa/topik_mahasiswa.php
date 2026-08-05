@@ -387,6 +387,11 @@ table thead th {
         z-index: 100000;
     }
 
+    /* Pastikan SweetAlert2 tampil di depan modal-overlay */
+    .swal2-container {
+        z-index: 100000000 !important;
+    }
+
     .modal-container {
         background: #ffffff;
         border-radius: 16px;

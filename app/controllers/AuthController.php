@@ -13,7 +13,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $password = trim($_POST['password'] ?? '');
 
     try {
-                // Login
+
+        // Login
         $sql = "
             SELECT *
             FROM users
@@ -23,14 +24,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $stmt = $pdo->prepare($sql);
 
         $stmt->execute([
-            ':username' => $username,
+            ':username' => $username
         ]);
 
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if ($user && password_verify($password, $user['password'])){
+        if ($user && password_verify($password, $user['password'])) {
 
-            // Remember me cookies (only username is saved for security)
+            // Remember me cookies
             if (isset($_POST['remember'])) {
                 setcookie('remember_username', $username, time() + 3600 * 24 * 30, "/");
                 setcookie('remember_checked', '1', time() + 3600 * 24 * 30, "/");
@@ -42,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             // =====================
             // Session dasar
             // =====================
-            // role     = jenis akun (mahasiswa / dosen) -> nentuin tabel data
+            // role     = jenis akun (mahasiswa /dosen) -> nentuin tabel data
             // otoritas = tampilan aktif saat ini (mahasiswa / dosen / kaprodi) -> nentuin dashboard
 
             $_SESSION['username'] = $user['username'];
@@ -96,15 +97,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             switch ($user['otoritas']) {
 
                 case 'mahasiswa':
-                    header("Location: /app/views/mahasiswa/dashboard.php");
+                    header("Location: " . BASE_URL . "/app/views/mahasiswa/dashboard.php");
                     exit;       
 
                 case 'dosen':
-                    header("Location: /app/views/dosen/dashboard.php");
+                    header("Location: " . BASE_URL . "/app/views/dosen/dashboard.php");
                     exit;
 
                 case 'kaprodi':
-                    header("Location: /app/views/kaprodi/dashboard.php");
+                    header("Location: " . BASE_URL . "/app/views/kaprodi/dashboard.php");
                     exit;
             }
 
@@ -112,7 +113,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         $_SESSION['error'] = "Username atau Password salah.";
 
-        header("Location: /");
+        header("Location: " . BASE_URL . "/");
 
         exit;
 

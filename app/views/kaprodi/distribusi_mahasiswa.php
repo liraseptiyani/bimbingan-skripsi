@@ -2,8 +2,9 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+require_once dirname(__DIR__, 3) . '/config/config.php';
 if (!isset($_SESSION['username']) || ($_SESSION['role'] ?? '') !== 'dosen' || ($_SESSION['otoritas'] ?? '') !== 'kaprodi') {
-    header("Location: /");
+    header("Location: " . BASE_URL . "/");
     exit;
 }
 $title = 'Distribusi Mahasiswa';
@@ -359,6 +360,11 @@ include '../layouts/topbar.php';
         align-items: center;
         justify-content: center;
         z-index: 100000;
+    }
+
+    /* Pastikan SweetAlert2 tampil di depan modal-overlay */
+    .swal2-container {
+        z-index: 100000000 !important;
     }
 
     .modal-container {

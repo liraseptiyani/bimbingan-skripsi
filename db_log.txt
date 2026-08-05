@@ -308,3 +308,19 @@ Session: Array
 )
 
 VERIFIKASI Query successful for status 'disetujui' on ID 5.
+VERIFIKASI POST received: Array
+(
+    [action] => verifikasi
+    [id] => 9
+    [status] => menunggu
+)
+Session: Array
+(
+    [username] => 198104142005011001
+    [role] => dosen
+    [otoritas] => dosen
+    [nama] => Tristiyanto, S.Kom., M.I.S., Ph.D
+    [flash_success] => Otoritas berhasil diubah menjadi Kepala Program Studi.
+)
+
+VERIFIKASI Query successful for status 'menunggu' on ID 9.
