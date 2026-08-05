@@ -5,12 +5,12 @@ session_start();
 // PROTEKSI HALAMAN: hanya dosen yang boleh mengakses
 // ==========================================================
 if (!isset($_SESSION['username']) || ($_SESSION['role'] ?? '') !== 'dosen') {
-    header("Location: /bimbingan-skripsi/");
+    header("Location: " . BASE_URL . "/");
     exit;
 }
 
 if (($_SESSION['otoritas'] ?? '') === 'kaprodi') {
-    header("Location: /bimbingan-skripsi/app/views/kaprodi/dashboard.php");
+    header("Location: " . BASE_URL . "/app/views/kaprodi/dashboard.php");
     exit;
 }
 
@@ -595,7 +595,7 @@ require_once __DIR__ . '/../layouts/sidebar_dosen.php';
                     </td>
                     <td class="col-aksi">
                         <div class="aksi-group">
-                            <a href="/bimbingan-skripsi/app/views/dosen/seleksi_mahasiswa.php?id=<?= $t['id'] ?>" class="btn-seleksi-peminat" title="Seleksi Peminat">
+                            <a href="<?= BASE_URL ?>/app/views/dosen/seleksi_mahasiswa.php?id=<?= $t['id'] ?>" class="btn-seleksi-peminat" title="Seleksi Peminat">
                                 <i class="fa-solid fa-user-check"></i>
                                 Seleksi (<?= count($t['applicants']) ?>)
                             </a>
@@ -640,7 +640,7 @@ require_once __DIR__ . '/../layouts/sidebar_dosen.php';
                 <button type="button" class="modal-close" onclick="tutupModalTambah()">&times;</button>
             </div>
             
-            <form id="formTambahTopik" method="POST" action="/bimbingan-skripsi/app/controllers/SimpanTopikController.php">
+            <form id="formTambahTopik" method="POST" action="<?= BASE_URL ?>/app/controllers/SimpanTopikController.php">
                 <div class="modal-body">
                     <input type="hidden" name="id" id="inputId" value="">
 
@@ -690,7 +690,7 @@ require_once __DIR__ . '/../layouts/sidebar_dosen.php';
             <div class="modal-title">Hapus Topik Penelitian?</div>
             <p>Apakah Anda yakin ingin menghapus topik <strong id="namaTopikHapus"></strong>? Tindakan ini tidak dapat dibatalkan.</p>
 
-            <form id="formHapusTopik" method="POST" action="/bimbingan-skripsi/app/controllers/HapusTopikController.php">
+            <form id="formHapusTopik" method="POST" action="<?= BASE_URL ?>/app/controllers/HapusTopikController.php">
                 <input type="hidden" name="id" id="inputIdHapus" value="">
 
                 <div class="modal-footer">

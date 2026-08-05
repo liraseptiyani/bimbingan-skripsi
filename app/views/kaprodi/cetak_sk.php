@@ -7,7 +7,7 @@ if (session_status() === PHP_SESSION_NONE) {
 // PROTEKSI HALAMAN: hanya user terautentikasi (mhs/dosen)
 // ==========================================================
 if (!isset($_SESSION['username'])) {
-    header("Location: /bimbingan-skripsi/");
+    header("Location: " . BASE_URL . "/");
     exit;
 }
 
@@ -431,7 +431,7 @@ $kaprodiNip = $kaprodiD['nip'] !== '-' ? $kaprodiD['nip'] : '19810414 200501 1 0
             <table class="kop-table">
                 <tr>
                     <td class="kop-logo">
-                        <img src="/bimbingan-skripsi/public/img/Logo_UnivLampung.png" alt="Logo Unila">
+                        <img src="<?= BASE_URL ?>/public/img/Logo_UnivLampung.png" alt="Logo Unila">
                     </td>
                     <td class="kop-text">
                         <div class="dept">KEMENTERIAN PENDIDIKAN TINGGI, SAINS, DAN TEKNOLOGI</div>
@@ -595,7 +595,7 @@ $kaprodiNip = $kaprodiD['nip'] !== '-' ? $kaprodiD['nip'] : '19810414 200501 1 0
                         <div class="sig-space" style="height: 75px; position: relative;">
                             <?php if (file_exists($destPath)): ?>
                                 <div class="sig-image-wrap" style="position: absolute; top: -12px; left: 0px; z-index: 10;">
-                                    <img src="/bimbingan-skripsi/public/img/ttd_tristiyanto.png" alt="Tanda Tangan Tristiyanto">
+                                    <img src="<?= BASE_URL ?>/public/img/ttd_tristiyanto.png" alt="Tanda Tangan Tristiyanto">
                                 </div>
                             <?php endif; ?>
                         </div>

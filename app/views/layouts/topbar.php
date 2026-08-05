@@ -11,13 +11,13 @@ $otoritasAktif = $_SESSION['otoritas'] ?? $role;
 
 switch ($role) {
     case 'mahasiswa':
-        $profil_link = '/bimbingan-skripsi/app/views/mahasiswa/profil.php';
+        $profil_link = BASE_URL . '/app/views/mahasiswa/profil.php';
         break;
 
     case 'dosen':
     case 'kaprodi':
         // dosen dan kaprodi memakai halaman profil yang sama (folder dosen)
-        $profil_link = '/bimbingan-skripsi/app/views/dosen/profil.php';
+        $profil_link = BASE_URL . '/app/views/dosen/profil.php';
         break;
 
     default:
@@ -63,7 +63,7 @@ if ($otoritasAktif === 'mahasiswa') {
                     Profil
                 </a>
 
-                <a href="/bimbingan-skripsi/app/controllers/LogoutController.php">
+                <a href="<?= BASE_URL ?>/app/controllers/LogoutController.php">
                     <i class="fa-solid fa-right-from-bracket"></i>
                     Logout
                 </a>

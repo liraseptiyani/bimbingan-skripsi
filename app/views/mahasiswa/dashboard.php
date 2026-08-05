@@ -2,16 +2,16 @@
 session_start();
 
 if (!isset($_SESSION['username'])) {
-    header('Location: /bimbingan-skripsi/');
+    header('Location: ' . BASE_URL . '/');
     exit;
 }
 
 if (($_SESSION['role'] ?? '') === 'dosen') {
     if (($_SESSION['otoritas'] ?? '') === 'dosen') {
-        header("Location: /bimbingan-skripsi/app/views/dosen/dashboard.php");
+        header("Location: " . BASE_URL . "/app/views/dosen/dashboard.php");
         exit;
     } elseif (($_SESSION['otoritas'] ?? '') === 'kaprodi') {
-        header("Location: /bimbingan-skripsi/app/views/kaprodi/dashboard.php");
+        header("Location: " . BASE_URL . "/app/views/kaprodi/dashboard.php");
         exit;
     }
 }

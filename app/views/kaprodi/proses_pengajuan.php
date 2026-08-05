@@ -2,12 +2,12 @@
 session_start();
 
 if (!isset($_SESSION['username']) || ($_SESSION['role'] ?? '') !== 'dosen') {
-    header("Location: /bimbingan-skripsi/");
+    header("Location: " . BASE_URL . "/");
     exit;
 }
 
 if (($_SESSION['otoritas'] ?? '') !== 'kaprodi') {
-    header("Location: /bimbingan-skripsi/app/views/dosen/dashboard.php");
+    header("Location: " . BASE_URL . "/app/views/dosen/dashboard.php");
     exit;
 }
 
@@ -15,7 +15,7 @@ require_once dirname(__DIR__, 3) . '/config/koneksi.php';
 
 $id = (int)($_GET['id'] ?? 0);
 if ($id <= 0) {
-    header("Location: /bimbingan-skripsi/app/views/kaprodi/pengajuan_judul.php");
+    header("Location: " . BASE_URL . "/app/views/kaprodi/pengajuan_judul.php");
     exit;
 }
 
@@ -26,7 +26,7 @@ try {
     $p = $stmt->fetch(PDO::FETCH_ASSOC);
     
     if (!$p || $p['status'] !== 'menunggu') {
-        header("Location: /bimbingan-skripsi/app/views/kaprodi/pengajuan_judul.php");
+        header("Location: " . BASE_URL . "/app/views/kaprodi/pengajuan_judul.php");
         exit;
     }
 
@@ -64,7 +64,7 @@ try {
     $selectedPb2 = $dist['pembahas2'] ?? '';
 
 } catch (PDOException $e) {
-    header("Location: /bimbingan-skripsi/app/views/kaprodi/pengajuan_judul.php");
+    header("Location: " . BASE_URL . "/app/views/kaprodi/pengajuan_judul.php");
     exit;
 }
 
@@ -107,7 +107,7 @@ function renderDocCard($filename, $label, $isDocx = false) {
     $output = '';
     foreach ($files as $index => $file) {
         $fileClean = trim($file);
-        $path = "/bimbingan-skripsi/public/uploads/persyaratan/" . $fileClean;
+        $path = BASE_URL . "/public/uploads/persyaratan/" . $fileClean;
         $fileExt = strtolower(pathinfo($fileClean, PATHINFO_EXTENSION));
         $fileIsDocx = in_array($fileExt, ['docx', 'doc']);
         $iconClass = $fileIsDocx ? 'word' : 'pdf';
@@ -779,7 +779,7 @@ function renderDocCard($filename, $label, $isDocx = false) {
                 btnSubmitForm.disabled = true;
                 btnSubmitForm.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
 
-                fetch('/bimbingan-skripsi/app/controllers/PengajuanJudulController.php', {
+                fetch('<?= BASE_URL ?>/app/controllers/PengajuanJudulController.php', {
                     method: 'POST',
                     body: formData
                 })

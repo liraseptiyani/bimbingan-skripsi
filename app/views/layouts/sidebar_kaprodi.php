@@ -95,31 +95,31 @@ $pengajuanJudulActive = in_array($current, [
 <div class="sidebar">
 
     <div class="logo">
-        <img src="/bimbingan-skripsi/public/img/Logo_UnivLampung.png" alt="Logo">
+        <img src="<?= BASE_URL ?>/public/img/Logo_UnivLampung.png" alt="Logo">
         <h3>UNIVERSITAS LAMPUNG</h3>
     </div>
 
     <div class="menu">
 
-        <a href="/bimbingan-skripsi/app/views/kaprodi/dashboard.php"
+        <a href="<?= BASE_URL ?>/app/views/kaprodi/dashboard.php"
            class="<?= $current == 'dashboard.php' ? 'active' : '' ?>">
             <i class="fas fa-home"></i>
             Dashboard
         </a>
 
-        <a href="/bimbingan-skripsi/app/views/kaprodi/monitoring_progres.php"
+        <a href="<?= BASE_URL ?>/app/views/kaprodi/monitoring_progres.php"
            class="<?= $current == 'monitoring_progres.php' ? 'active' : '' ?>">
             <i class="fas fa-chart-line"></i>
             Monitoring Progres
         </a>
 
-        <a href="/bimbingan-skripsi/app/views/kaprodi/kuota_pembimbing.php"
+        <a href="<?= BASE_URL ?>/app/views/kaprodi/kuota_pembimbing.php"
            class="<?= $current == 'kuota_pembimbing.php' ? 'active' : '' ?>">
             <i class="fas fa-list-check"></i>
             Kuota Pembimbing
         </a>
 
-        <a href="/bimbingan-skripsi/app/views/kaprodi/topik_penelitian.php"
+        <a href="<?= BASE_URL ?>/app/views/kaprodi/topik_penelitian.php"
            class="<?= $current == 'topik_penelitian.php' ? 'active' : '' ?>">
             <i class="fas fa-book-bookmark"></i>
             Topik Penelitian
@@ -135,19 +135,19 @@ $pengajuanJudulActive = in_array($current, [
 
         <!-- SUBMENU PENGAJUAN JUDUL -->
         <div id="submenuJudul" class="submenu <?= $pengajuanJudulActive ? 'show' : '' ?>">
-            <a href="/bimbingan-skripsi/app/views/kaprodi/pengajuan_judul.php"
+            <a href="<?= BASE_URL ?>/app/views/kaprodi/pengajuan_judul.php"
                class="<?= in_array($current, ['pengajuan_judul.php', 'proses_pengajuan.php']) ? 'active' : '' ?>">
                 <i class="fa-solid fa-angle-right"></i>
                 Persetujuan Judul
             </a>
-            <a href="/bimbingan-skripsi/app/views/kaprodi/pengajuan_riwayat.php"
+            <a href="<?= BASE_URL ?>/app/views/kaprodi/pengajuan_riwayat.php"
                class="<?= in_array($current, ['pengajuan_riwayat.php', 'riwayat_detail.php']) ? 'active' : '' ?>">
                 <i class="fa-solid fa-angle-right"></i>
                 Riwayat SK Judul
             </a>
         </div>
 
-        <a href="/bimbingan-skripsi/app/views/kaprodi/distribusi_mahasiswa.php"
+        <a href="<?= BASE_URL ?>/app/views/kaprodi/distribusi_mahasiswa.php"
            class="<?= $current == 'distribusi_mahasiswa.php' ? 'active' : '' ?>">
             <i class="fas fa-user-graduate"></i>
             Distribusi Mahasiswa

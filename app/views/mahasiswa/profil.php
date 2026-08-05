@@ -5,7 +5,7 @@ session_start();
 // PROTEKSI HALAMAN: hanya akun ber-role mahasiswa yang boleh akses
 // ==========================================================
 if (!isset($_SESSION['username']) || ($_SESSION['role'] ?? '') !== 'mahasiswa') {
-    header("Location: /bimbingan-skripsi/");
+    header("Location: " . BASE_URL . "/");
     exit;
 }
 
@@ -38,7 +38,7 @@ try {
     if (!empty($mhsDb['profile_picture'])) {
         $fullPath = dirname(__DIR__, 3) . '/public/uploads/profile/' . $mhsDb['profile_picture'];
         if (file_exists($fullPath) && is_file($fullPath)) {
-            $fotoPath = '/bimbingan-skripsi/public/uploads/profile/' . $mhsDb['profile_picture'];
+            $fotoPath = BASE_URL . '/public/uploads/profile/' . $mhsDb['profile_picture'];
         }
     }
 } catch (PDOException $e) {}
@@ -263,7 +263,7 @@ require_once __DIR__ . '/../layouts/sidebar_mahasiswa.php';
         <!-- ============ KOLOM KIRI: Informasi Profil Lengkap ============ -->
         <div class="card table-card">
             <div class="avatar-wrap">
-                <form action="/bimbingan-skripsi/app/controllers/MahasiswaController.php" method="POST" enctype="multipart/form-data">
+                <form action="<?= BASE_URL ?>/app/controllers/MahasiswaController.php" method="POST" enctype="multipart/form-data">
                     <input type="hidden" name="action" value="ubah_foto">
                     <label class="avatar-label">
                         <?php if (!empty($fotoPath)): ?>
@@ -375,7 +375,7 @@ require_once __DIR__ . '/../layouts/sidebar_mahasiswa.php';
                 btnSubmit.disabled = true;
                 btnSubmit.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses...';
 
-                fetch('/bimbingan-skripsi/app/controllers/UbahPasswordController.php', {
+                fetch('<?= BASE_URL ?>/app/controllers/UbahPasswordController.php', {
                     method: 'POST',
                     body: formData
                 })

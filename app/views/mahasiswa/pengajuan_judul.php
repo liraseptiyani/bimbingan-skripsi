@@ -2,16 +2,16 @@
 session_start();
 
 if (!isset($_SESSION['username'])) {
-    header('Location: /bimbingan-skripsi/');
+    header('Location: ' . BASE_URL . '/');
     exit;
 }
 
 if (($_SESSION['role'] ?? '') === 'dosen') {
     if (($_SESSION['otoritas'] ?? '') === 'dosen') {
-        header("Location: /bimbingan-skripsi/app/views/dosen/dashboard.php");
+        header("Location: " . BASE_URL . "/app/views/dosen/dashboard.php");
         exit;
     } elseif (($_SESSION['otoritas'] ?? '') === 'kaprodi') {
-        header("Location: /bimbingan-skripsi/app/views/kaprodi/dashboard.php");
+        header("Location: " . BASE_URL . "/app/views/kaprodi/dashboard.php");
         exit;
     }
 }
@@ -382,7 +382,7 @@ require_once __DIR__ . '/../layouts/sidebar_mahasiswa.php';
                     btnSubmit.disabled = true;
                     btnSubmit.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mengirim...';
 
-                    fetch('/bimbingan-skripsi/app/controllers/PengajuanJudulController.php', {
+                    fetch('<?= BASE_URL ?>/app/controllers/PengajuanJudulController.php', {
                         method: 'POST',
                         body: formData
                     })

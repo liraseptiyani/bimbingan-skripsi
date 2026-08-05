@@ -2,16 +2,16 @@
 session_start();
 
 if (!isset($_SESSION['username'])) {
-    header('Location: /bimbingan-skripsi/');
+    header('Location: ' . BASE_URL . '/');
     exit;
 }
 
 if (($_SESSION['role'] ?? '') === 'dosen') {
     if (($_SESSION['otoritas'] ?? '') === 'dosen') {
-        header("Location: /bimbingan-skripsi/app/views/dosen/dashboard.php");
+        header("Location: " . BASE_URL . "/app/views/dosen/dashboard.php");
         exit;
     } elseif (($_SESSION['otoritas'] ?? '') === 'kaprodi') {
-        header("Location: /bimbingan-skripsi/app/views/kaprodi/dashboard.php");
+        header("Location: " . BASE_URL . "/app/views/kaprodi/dashboard.php");
         exit;
     }
 }
@@ -39,7 +39,7 @@ $distribusi = $stmtDist->fetch(PDO::FETCH_ASSOC);
 
 if (!$distribusi || empty($distribusi['pembimbing1'])) {
     $_SESSION['swal_error'] = 'Fitur bimbingan belum aktif. Silakan tunggu plotting Pembimbing dan Judul Skripsi oleh Kaprodi.';
-    header("Location: /bimbingan-skripsi/app/views/mahasiswa/dashboard.php");
+    header("Location: " . BASE_URL . "/app/views/mahasiswa/dashboard.php");
     exit;
 }
 
@@ -566,7 +566,7 @@ table thead th {
                         <td><?= htmlspecialchars($row['npm']) ?></td>
                         <td><?= htmlspecialchars($row['nama']) ?></td>
                         <td>
-                            <a href="/bimbingan-skripsi/public/uploads/draft/<?= htmlspecialchars($row['file_draft']) ?>" class="draft-link" target="_blank" title="<?= htmlspecialchars($row['file_draft']) ?>">
+                            <a href="<?= BASE_URL ?>/public/uploads/draft/<?= htmlspecialchars($row['file_draft']) ?>" class="draft-link" target="_blank" title="<?= htmlspecialchars($row['file_draft']) ?>">
                                 <i class="fa-solid fa-file-pdf"></i>
                                 <span><?= htmlspecialchars($row['file_draft']) ?></span>
                             </a>
@@ -596,7 +596,7 @@ table thead th {
                             </div>
                         </td>
                         <td>
-                            <a href="/bimbingan-skripsi/app/views/mahasiswa/detail_bimbingan.php?id=<?= $row['id'] ?>" class="btn-aksi btn-lihat" title="Lihat Detail">
+                            <a href="<?= BASE_URL ?>/app/views/mahasiswa/detail_bimbingan.php?id=<?= $row['id'] ?>" class="btn-aksi btn-lihat" title="Lihat Detail">
                                 <i class="fa-solid fa-eye"></i>
                             </a>
                             <?php if (($distribusi['status_bimbingan'] ?? 'aktif') !== 'selesai' && ($row['status_pembimbing1'] ?? '') !== 'sudah_dibalas' && ($row['status_pembimbing2'] ?? '') !== 'sudah_dibalas'): ?>
@@ -604,7 +604,7 @@ table thead th {
                                         onclick="bukaModalEdit(<?= $row['id'] ?>, <?= htmlspecialchars(json_encode($row['file_draft']), ENT_QUOTES, 'UTF-8') ?>, <?= htmlspecialchars(json_encode($initialPesan), ENT_QUOTES, 'UTF-8') ?>)">
                                     <i class="fa-solid fa-pen-to-square"></i>
                                 </button>
-                                <a href="/bimbingan-skripsi/app/controllers/HapusBimbinganController.php?id=<?= $row['id'] ?>" 
+                                <a href="<?= BASE_URL ?>/app/controllers/HapusBimbinganController.php?id=<?= $row['id'] ?>" 
                                    class="btn-aksi btn-hapus" title="Hapus" 
                                    onclick="return confirm('Apakah Anda yakin ingin menghapus bimbingan ini?')">
                                     <i class="fa-solid fa-trash"></i>
@@ -643,7 +643,7 @@ table thead th {
             <h3><i class="fa-solid fa-cloud-arrow-up"></i> Upload Draft Bimbingan</h3>
             <button type="button" class="btn-close" id="btnCloseModal">&times;</button>
         </div>
-        <form action="/bimbingan-skripsi/app/controllers/TambahBimbinganController.php" method="POST" enctype="multipart/form-data">
+        <form action="<?= BASE_URL ?>/app/controllers/TambahBimbinganController.php" method="POST" enctype="multipart/form-data">
             <div class="modal-body">
                 <div class="form-group">
                     <label for="draft">File Draft (PDF)</label>
@@ -669,7 +669,7 @@ table thead th {
             <h3><i class="fa-solid fa-pen-to-square"></i> Edit Draft Bimbingan</h3>
             <button type="button" class="btn-close" id="btnCloseEditModal">&times;</button>
         </div>
-        <form action="/bimbingan-skripsi/app/controllers/EditBimbinganController.php" method="POST" enctype="multipart/form-data">
+        <form action="<?= BASE_URL ?>/app/controllers/EditBimbinganController.php" method="POST" enctype="multipart/form-data">
             <input type="hidden" name="id" id="editBimbinganId">
             <div class="modal-body">
                 <div class="form-group">

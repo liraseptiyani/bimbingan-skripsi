@@ -151,7 +151,7 @@ if (isset($_SESSION['username']) && ($_SESSION['role'] ?? '') === 'mahasiswa') {
 
     <!-- LOGO -->
     <div class="logo">
-        <img src="/bimbingan-skripsi/public/img/Logo_UnivLampung.png">
+        <img src="<?= BASE_URL ?>/public/img/Logo_UnivLampung.png">
         <h3>UNIVERSITAS LAMPUNG</h3>
     </div>
 
@@ -159,7 +159,7 @@ if (isset($_SESSION['username']) && ($_SESSION['role'] ?? '') === 'mahasiswa') {
 
         <!-- DASHBOARD -->
 
-        <a href="/bimbingan-skripsi/app/views/mahasiswa/dashboard.php"
+        <a href="<?= BASE_URL ?>/app/views/mahasiswa/dashboard.php"
            class="<?= $current=='dashboard.php' ? 'active' : '' ?>">
 
             <i class="fa-solid fa-house"></i>
@@ -190,14 +190,14 @@ if (isset($_SESSION['username']) && ($_SESSION['role'] ?? '') === 'mahasiswa') {
             id="submenu"
             class="submenu <?= $topikDosenActive ? 'show' : '' ?>">
 
-           <a href="/bimbingan-skripsi/app/views/mahasiswa/topik_mahasiswa.php"
+           <a href="<?= BASE_URL ?>/app/views/mahasiswa/topik_mahasiswa.php"
             class="<?= $current=='topik_mahasiswa.php' ? 'active' : '' ?>">
                 <i class="fa-solid fa-angle-right"></i>
              Daftar Topik Penelitian
 
             </a>
 
-            <a href="/bimbingan-skripsi/app/views/mahasiswa/kuota_dosen.php"
+            <a href="<?= BASE_URL ?>/app/views/mahasiswa/kuota_dosen.php"
             class="<?= ($current=='kuota_dosen.php' || $current=='detail_dosen.php') ? 'active' : '' ?>">
                 <i class="fa-solid fa-angle-right"></i>
                 Daftar Dosen
@@ -223,13 +223,13 @@ if (isset($_SESSION['username']) && ($_SESSION['role'] ?? '') === 'mahasiswa') {
             id="submenuJudul"
             class="submenu <?= $pengajuanJudulActive ? 'show' : '' ?>">
 
-            <a href="/bimbingan-skripsi/app/views/mahasiswa/pengajuan_judul.php"
+            <a href="<?= BASE_URL ?>/app/views/mahasiswa/pengajuan_judul.php"
                class="<?= $current=='pengajuan_judul.php' ? 'active' : '' ?>">
                 <i class="fa-solid fa-angle-right"></i>
                 Alur & Formulir
             </a>
 
-            <a href="/bimbingan-skripsi/app/views/mahasiswa/pengajuan_riwayat.php"
+            <a href="<?= BASE_URL ?>/app/views/mahasiswa/pengajuan_riwayat.php"
                class="<?= $current=='pengajuan_riwayat.php' ? 'active' : '' ?>">
                 <i class="fa-solid fa-angle-right"></i>
                 Riwayat Pengajuan
@@ -240,7 +240,7 @@ if (isset($_SESSION['username']) && ($_SESSION['role'] ?? '') === 'mahasiswa') {
         <!-- BIMBINGAN -->
 
         <?php if ($sidebar_is_distributed): ?>
-            <a href="/bimbingan-skripsi/app/views/mahasiswa/bimbingan.php"
+            <a href="<?= BASE_URL ?>/app/views/mahasiswa/bimbingan.php"
             class="<?= $current=='bimbingan.php' ? 'active' : '' ?>">
                 <i class="fa-solid fa-graduation-cap"></i>
                 Bimbingan

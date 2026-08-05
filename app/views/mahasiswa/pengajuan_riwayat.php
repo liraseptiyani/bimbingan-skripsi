@@ -2,16 +2,16 @@
 session_start();
 
 if (!isset($_SESSION['username'])) {
-    header('Location: /bimbingan-skripsi/');
+    header('Location: ' . BASE_URL . '/');
     exit;
 }
 
 if (($_SESSION['role'] ?? '') === 'dosen') {
     if (($_SESSION['otoritas'] ?? '') === 'dosen') {
-        header("Location: /bimbingan-skripsi/app/views/dosen/dashboard.php");
+        header("Location: " . BASE_URL . "/app/views/dosen/dashboard.php");
         exit;
     } elseif (($_SESSION['otoritas'] ?? '') === 'kaprodi') {
-        header("Location: /bimbingan-skripsi/app/views/kaprodi/dashboard.php");
+        header("Location: " . BASE_URL . "/app/views/kaprodi/dashboard.php");
         exit;
     }
 }
@@ -818,7 +818,7 @@ require_once __DIR__ . '/../layouts/sidebar_mahasiswa.php';
         if (files.length > 1) {
             let links = [];
             files.forEach((file, index) => {
-                const path = `/bimbingan-skripsi/public/uploads/persyaratan/${file.trim()}`;
+                const path = `<?= BASE_URL ?>/public/uploads/persyaratan/${file.trim()}`;
                 const fileExt = file.trim().split('.').pop().toLowerCase();
                 const fileIsDocx = ['docx', 'doc'].includes(fileExt);
                 const icon = fileIsDocx ? 'fa-file-word' : 'fa-file-pdf';
@@ -831,7 +831,7 @@ require_once __DIR__ . '/../layouts/sidebar_mahasiswa.php';
             const fileIsDocx = ['docx', 'doc'].includes(fileExt);
             const icon = fileIsDocx ? 'fa-file-word' : 'fa-file-pdf';
             const color = fileIsDocx ? '#2563eb' : '#dc2626';
-            const path = `/bimbingan-skripsi/public/uploads/persyaratan/${filename}`;
+            const path = `<?= BASE_URL ?>/public/uploads/persyaratan/${filename}`;
             return `<a href="${path}" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; color: ${color}; font-weight: 600; text-decoration: none;"><i class="fa-solid ${icon}"></i> ${label}</a>`;
         }
     }

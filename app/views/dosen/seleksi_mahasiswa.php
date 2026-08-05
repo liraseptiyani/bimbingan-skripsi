@@ -3,12 +3,12 @@ session_start();
 
 // Protection: Dosen only
 if (!isset($_SESSION['username']) || ($_SESSION['role'] ?? '') !== 'dosen') {
-    header("Location: /bimbingan-skripsi/");
+    header("Location: " . BASE_URL . "/");
     exit;
 }
 
 if (($_SESSION['otoritas'] ?? '') === 'kaprodi') {
-    header("Location: /bimbingan-skripsi/app/views/kaprodi/dashboard.php");
+    header("Location: " . BASE_URL . "/app/views/kaprodi/dashboard.php");
     exit;
 }
 
@@ -18,7 +18,7 @@ require_once dirname(__DIR__, 3) . '/config/koneksi.php';
 
 $topik_id = (int)($_GET['id'] ?? 0);
 if ($topik_id <= 0) {
-    header("Location: /bimbingan-skripsi/app/views/dosen/topik_penelitian.php");
+    header("Location: " . BASE_URL . "/app/views/dosen/topik_penelitian.php");
     exit;
 }
 
@@ -41,7 +41,7 @@ try {
     
     if (!$topik) {
         $_SESSION['swal_error'] = 'Topik penelitian tidak ditemukan atau bukan milik Anda!';
-        header("Location: /bimbingan-skripsi/app/views/dosen/topik_penelitian.php");
+        header("Location: " . BASE_URL . "/app/views/dosen/topik_penelitian.php");
         exit;
     }
 
@@ -63,7 +63,7 @@ try {
 
 } catch (PDOException $e) {
     $_SESSION['swal_error'] = 'Database error: ' . $e->getMessage();
-    header("Location: /bimbingan-skripsi/app/views/dosen/topik_penelitian.php");
+    header("Location: " . BASE_URL . "/app/views/dosen/topik_penelitian.php");
     exit;
 }
 
@@ -364,7 +364,7 @@ require_once __DIR__ . '/../layouts/sidebar_dosen.php';
 <div class="content">
 
     <!-- BREADCRUMB -->
-    <a href="/bimbingan-skripsi/app/views/dosen/topik_penelitian.php" class="page-title-back">
+    <a href="<?= BASE_URL ?>/app/views/dosen/topik_penelitian.php" class="page-title-back">
         <i class="fa-solid fa-chevron-left"></i> Seleksi Mahasiswa Peminat
     </a>
 
@@ -501,7 +501,7 @@ require_once __DIR__ . '/../layouts/sidebar_dosen.php';
             cancelButtonText: 'Batal'
         }).then((result) => {
             if (result.isConfirmed) {
-                fetch('/bimbingan-skripsi/app/controllers/VerifikasiTopikController.php', {
+                fetch('<?= BASE_URL ?>/app/controllers/VerifikasiTopikController.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',

@@ -2,16 +2,16 @@
 session_start();
 
 if (!isset($_SESSION['username'])) {
-    header('Location: /bimbingan-skripsi/');
+    header('Location: ' . BASE_URL . '/');
     exit;
 }
 
 if (($_SESSION['role'] ?? '') === 'dosen') {
     if (($_SESSION['otoritas'] ?? '') === 'dosen') {
-        header("Location: /bimbingan-skripsi/app/views/dosen/dashboard.php");
+        header("Location: " . BASE_URL . "/app/views/dosen/dashboard.php");
         exit;
     } elseif (($_SESSION['otoritas'] ?? '') === 'kaprodi') {
-        header("Location: /bimbingan-skripsi/app/views/kaprodi/dashboard.php");
+        header("Location: " . BASE_URL . "/app/views/kaprodi/dashboard.php");
         exit;
     }
 }
@@ -46,7 +46,7 @@ try {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['topik_id'])) {
     if ($hasApprovedTopic) {
         $_SESSION['swal_error'] = 'Anda tidak dapat mengajukan topik lain karena Anda sudah disetujui untuk salah satu topik penelitian!';
-        header('Location: /bimbingan-skripsi/app/views/mahasiswa/topik_mahasiswa.php');
+        header('Location: ' . BASE_URL . '/app/views/mahasiswa/topik_mahasiswa.php');
         exit;
     }
 
@@ -55,7 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['topik_id'])) {
 
     if (empty($alasan)) {
         $_SESSION['swal_error'] = 'Harap isi alasan ketertarikan Anda!';
-        header('Location: /bimbingan-skripsi/app/views/mahasiswa/topik_mahasiswa.php');
+        header('Location: ' . BASE_URL . '/app/views/mahasiswa/topik_mahasiswa.php');
         exit;
     }
 
@@ -88,7 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['topik_id'])) {
         $_SESSION['swal_error'] = 'Gagal menyimpan permohonan: ' . $e->getMessage();
     }
 
-    header('Location: /bimbingan-skripsi/app/views/mahasiswa/topik_mahasiswa.php');
+    header('Location: ' . BASE_URL . '/app/views/mahasiswa/topik_mahasiswa.php');
     exit;
 }
 

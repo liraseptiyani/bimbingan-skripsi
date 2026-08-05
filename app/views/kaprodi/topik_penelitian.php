@@ -3,12 +3,12 @@ session_start();
 
 // Protection: Kaprodi only
 if (!isset($_SESSION['username']) || ($_SESSION['role'] ?? '') !== 'dosen') {
-    header("Location: /bimbingan-skripsi/");
+    header("Location: " . BASE_URL . "/");
     exit;
 }
 
 if (($_SESSION['otoritas'] ?? '') !== 'kaprodi') {
-    header("Location: /bimbingan-skripsi/app/views/dosen/dashboard.php");
+    header("Location: " . BASE_URL . "/app/views/dosen/dashboard.php");
     exit;
 }
 
@@ -356,7 +356,7 @@ require_once __DIR__ . '/../layouts/sidebar_kaprodi.php';
                     </td>
                     <td style="white-space: nowrap;">
                         <div class="aksi-group">
-                            <a href="/bimbingan-skripsi/app/views/kaprodi/detail_topik.php?id=<?= $t['id'] ?>" class="btn-lihat" title="Peminat (<?= $t['jumlah_peminat'] ?>)">
+                            <a href="<?= BASE_URL ?>/app/views/kaprodi/detail_topik.php?id=<?= $t['id'] ?>" class="btn-lihat" title="Peminat (<?= $t['jumlah_peminat'] ?>)">
                                 <i class="fa-solid fa-eye"></i>
                             </a>
                             
@@ -495,7 +495,7 @@ require_once __DIR__ . '/../layouts/sidebar_kaprodi.php';
             cancelButtonText: 'Batal'
         }).then((result) => {
             if (result.isConfirmed) {
-                fetch('/bimbingan-skripsi/app/controllers/KaprodiVerifikasiTopikController.php', {
+                fetch('<?= BASE_URL ?>/app/controllers/KaprodiVerifikasiTopikController.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',

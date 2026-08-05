@@ -10,16 +10,16 @@ function getOnlyTime($tanggal_string) {
 }
 
 if (!isset($_SESSION['username'])) {
-    header("Location: /bimbingan-skripsi/");
+    header("Location: " . BASE_URL . "/");
     exit;
 }
 
 if (($_SESSION['role'] ?? '') === 'dosen') {
     if (($_SESSION['otoritas'] ?? '') === 'dosen') {
-        header("Location: /bimbingan-skripsi/app/views/dosen/dashboard.php");
+        header("Location: " . BASE_URL . "/app/views/dosen/dashboard.php");
         exit;
     } elseif (($_SESSION['otoritas'] ?? '') === 'kaprodi') {
-        header("Location: /bimbingan-skripsi/app/views/kaprodi/dashboard.php");
+        header("Location: " . BASE_URL . "/app/views/kaprodi/dashboard.php");
         exit;
     }
 }
@@ -48,7 +48,7 @@ $distribusi = $stmtDist->fetch(PDO::FETCH_ASSOC);
 
 if (!$distribusi || empty($distribusi['pembimbing1'])) {
     $_SESSION['swal_error'] = 'Fitur bimbingan belum aktif. Silakan tunggu plotting Pembimbing dan Judul Skripsi oleh Kaprodi.';
-    header("Location: /bimbingan-skripsi/app/views/mahasiswa/dashboard.php");
+    header("Location: " . BASE_URL . "/app/views/mahasiswa/dashboard.php");
     exit;
 }
 
@@ -446,7 +446,7 @@ require_once __DIR__ . '/../layouts/sidebar_mahasiswa.php';
 
 <div class="content">
 
-    <a href="/bimbingan-skripsi/app/views/mahasiswa/bimbingan.php" class="back-link">
+    <a href="<?= BASE_URL ?>/app/views/mahasiswa/bimbingan.php" class="back-link">
         <i class="fa-solid fa-chevron-left"></i> Forum Bimbingan
     </a>
 
@@ -526,7 +526,7 @@ require_once __DIR__ . '/../layouts/sidebar_mahasiswa.php';
                 ?></div>
                 
                 <?php if (!empty($pesan['file'])): ?>
-                    <a href="/bimbingan-skripsi/public/uploads/draft/<?= htmlspecialchars($pesan['file']) ?>" class="chat-file-attachment" target="_blank">
+                    <a href="<?= BASE_URL ?>/public/uploads/draft/<?= htmlspecialchars($pesan['file']) ?>" class="chat-file-attachment" target="_blank">
                         <i class="fa-regular fa-file-pdf chat-file-icon"></i>
                         <div class="chat-file-info">
                             <span class="chat-file-name"><?= htmlspecialchars($pesan['file']) ?></span>
@@ -554,7 +554,7 @@ require_once __DIR__ . '/../layouts/sidebar_mahasiswa.php';
     <!-- ============ KOTAK BALAS PESAN ============ -->
     <?php if (($distribusi['status_bimbingan'] ?? 'aktif') !== 'selesai'): ?>
         <div class="reply-box">
-            <form id="formBalasForum" method="POST" action="/bimbingan-skripsi/app/controllers/BalasForumController.php" enctype="multipart/form-data">
+            <form id="formBalasForum" method="POST" action="<?= BASE_URL ?>/app/controllers/BalasForumController.php" enctype="multipart/form-data">
                 <input type="hidden" name="bimbingan_id" value="<?= $id ?>">
 
                 <!-- Quote Preview Container -->

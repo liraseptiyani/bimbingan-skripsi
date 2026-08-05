@@ -9,7 +9,7 @@ if (
     || ($_SESSION['role'] ?? '') !== 'dosen'
     || ($_SESSION['otoritas'] ?? '') !== 'kaprodi'
 ) {
-    header("Location: /bimbingan-skripsi/");
+    header("Location: " . BASE_URL . "/");
     exit;
 }
 
@@ -291,7 +291,7 @@ require_once __DIR__ . '/../layouts/sidebar_kaprodi.php';
 
 <div class="content">
 
-    <a href="/bimbingan-skripsi/app/views/kaprodi/monitoring_progres.php" class="page-title-back">
+    <a href="<?= BASE_URL ?>/app/views/kaprodi/monitoring_progres.php" class="page-title-back">
         <i class="fa-solid fa-chevron-left"></i>
         Riwayat Bimbingan: <?= htmlspecialchars($nama) ?>
     </a>
@@ -323,7 +323,7 @@ require_once __DIR__ . '/../layouts/sidebar_kaprodi.php';
                     <td style="white-space: nowrap;"><?= htmlspecialchars($r['npm']) ?></td>
                     <td><?= htmlspecialchars($r['nama']) ?></td>
                     <td class="col-draft">
-                        <a href="/bimbingan-skripsi/public/uploads/draft/<?= htmlspecialchars($r['draft']) ?>" class="draft-link" target="_blank" title="<?= htmlspecialchars($r['draft']) ?>">
+                        <a href="<?= BASE_URL ?>/public/uploads/draft/<?= htmlspecialchars($r['draft']) ?>" class="draft-link" target="_blank" title="<?= htmlspecialchars($r['draft']) ?>">
                             <i class="fa-solid fa-file-pdf"></i>
                             <span><?= htmlspecialchars($r['draft']) ?></span>
                         </a>
@@ -355,7 +355,7 @@ require_once __DIR__ . '/../layouts/sidebar_kaprodi.php';
                     <td>
                         <div class="aksi-group" style="justify-content: center;">
                             <a class="btn-lihat"
-                               href="/bimbingan-skripsi/app/views/kaprodi/riwayat_detail.php?npm=<?= urlencode($r['npm']) ?>&nama=<?= urlencode($r['nama']) ?>&id=<?= $r['id'] ?>"
+                               href="<?= BASE_URL ?>/app/views/kaprodi/riwayat_detail.php?npm=<?= urlencode($r['npm']) ?>&nama=<?= urlencode($r['nama']) ?>&id=<?= $r['id'] ?>"
                                title="Lihat Detail">
                                 <i class="fa-solid fa-eye"></i>
                             </a>

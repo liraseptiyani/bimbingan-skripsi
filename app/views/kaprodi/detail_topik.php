@@ -3,12 +3,12 @@ session_start();
 
 // Protection: Kaprodi only
 if (!isset($_SESSION['username']) || ($_SESSION['role'] ?? '') !== 'dosen') {
-    header("Location: /bimbingan-skripsi/");
+    header("Location: " . BASE_URL . "/");
     exit;
 }
 
 if (($_SESSION['otoritas'] ?? '') !== 'kaprodi') {
-    header("Location: /bimbingan-skripsi/app/views/dosen/dashboard.php");
+    header("Location: " . BASE_URL . "/app/views/dosen/dashboard.php");
     exit;
 }
 
@@ -18,7 +18,7 @@ require_once dirname(__DIR__, 3) . '/config/koneksi.php';
 
 $topik_id = (int)($_GET['id'] ?? 0);
 if ($topik_id <= 0) {
-    header("Location: /bimbingan-skripsi/app/views/kaprodi/topik_penelitian.php");
+    header("Location: " . BASE_URL . "/app/views/kaprodi/topik_penelitian.php");
     exit;
 }
 
@@ -36,7 +36,7 @@ try {
     
     if (!$topik) {
         $_SESSION['swal_error'] = 'Topik penelitian tidak ditemukan!';
-        header("Location: /bimbingan-skripsi/app/views/kaprodi/topik_penelitian.php");
+        header("Location: " . BASE_URL . "/app/views/kaprodi/topik_penelitian.php");
         exit;
     }
 
@@ -58,7 +58,7 @@ try {
 
 } catch (PDOException $e) {
     $_SESSION['swal_error'] = 'Database error: ' . $e->getMessage();
-    header("Location: /bimbingan-skripsi/app/views/kaprodi/topik_penelitian.php");
+    header("Location: " . BASE_URL . "/app/views/kaprodi/topik_penelitian.php");
     exit;
 }
 
@@ -290,7 +290,7 @@ require_once __DIR__ . '/../layouts/sidebar_kaprodi.php';
 <div class="content">
 
     <!-- BREADCRUMB -->
-    <a href="/bimbingan-skripsi/app/views/kaprodi/topik_penelitian.php" class="page-title-back">
+    <a href="<?= BASE_URL ?>/app/views/kaprodi/topik_penelitian.php" class="page-title-back">
         <i class="fa-solid fa-chevron-left"></i> Detail Peminat Topik
     </a>
 

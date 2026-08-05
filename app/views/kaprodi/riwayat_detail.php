@@ -17,7 +17,7 @@ if (
     || ($_SESSION['role'] ?? '') !== 'dosen'
     || ($_SESSION['otoritas'] ?? '') !== 'kaprodi'
 ) {
-    header("Location: /bimbingan-skripsi/");
+    header("Location: " . BASE_URL . "/");
     exit;
 }
 
@@ -372,7 +372,7 @@ require_once __DIR__ . '/../layouts/sidebar_kaprodi.php';
 
 <div class="content">
 
-    <a href="/bimbingan-skripsi/app/views/kaprodi/detail_progres.php?npm=<?= urlencode($npm) ?>&nama=<?= urlencode($nama) ?>" class="page-title-back">
+    <a href="<?= BASE_URL ?>/app/views/kaprodi/detail_progres.php?npm=<?= urlencode($npm) ?>&nama=<?= urlencode($nama) ?>" class="page-title-back">
         <i class="fa-solid fa-chevron-left"></i>
         Forum Bimbingan: <?= htmlspecialchars($info_skripsi['nama']) ?>
     </a>
@@ -455,7 +455,7 @@ require_once __DIR__ . '/../layouts/sidebar_kaprodi.php';
                     ?></div>
                     
                     <?php if (!empty($pesan['file'])): ?>
-                        <a href="/bimbingan-skripsi/public/uploads/draft/<?= htmlspecialchars($pesan['file']) ?>" class="chat-file-attachment" target="_blank">
+                        <a href="<?= BASE_URL ?>/public/uploads/draft/<?= htmlspecialchars($pesan['file']) ?>" class="chat-file-attachment" target="_blank">
                             <i class="fa-regular fa-file-pdf chat-file-icon"></i>
                             <div class="chat-file-info">
                                 <span class="chat-file-name"><?= htmlspecialchars($pesan['file']) ?></span>

@@ -5,12 +5,12 @@ session_start();
 // PROTEKSI HALAMAN: hanya kaprodi yang boleh mengakses
 // ==========================================================
 if (!isset($_SESSION['username']) || ($_SESSION['role'] ?? '') !== 'dosen') {
-    header("Location: /bimbingan-skripsi/");
+    header("Location: " . BASE_URL . "/");
     exit;
 }
 
 if (($_SESSION['otoritas'] ?? '') === 'dosen') {
-    header("Location: /bimbingan-skripsi/app/views/dosen/dashboard.php");
+    header("Location: " . BASE_URL . "/app/views/dosen/dashboard.php");
     exit;
 }
 

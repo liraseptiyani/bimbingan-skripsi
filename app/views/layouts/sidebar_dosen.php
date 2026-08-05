@@ -129,7 +129,7 @@ $bimbinganActive = in_array($current, [
 
     <!-- LOGO -->
     <div class="logo">
-        <img src="/bimbingan-skripsi/public/img/Logo_UnivLampung.png">
+        <img src="<?= BASE_URL ?>/public/img/Logo_UnivLampung.png">
         <h3>UNIVERSITAS LAMPUNG</h3>
     </div>
 
@@ -137,7 +137,7 @@ $bimbinganActive = in_array($current, [
 
         <!-- DASHBOARD -->
 
-        <a href="/bimbingan-skripsi/app/views/dosen/dashboard.php"
+        <a href="<?= BASE_URL ?>/app/views/dosen/dashboard.php"
            class="<?= $current=='dashboard.php' ? 'active' : '' ?>">
 
             <i class="fa-solid fa-house"></i>
@@ -147,7 +147,7 @@ $bimbinganActive = in_array($current, [
 
         <!-- TOPIK PENELITIAN -->
 
-        <a href="/bimbingan-skripsi/app/views/dosen/topik_penelitian.php"
+        <a href="<?= BASE_URL ?>/app/views/dosen/topik_penelitian.php"
            class="<?= $topikActive ? 'active' : '' ?>">
 
             <i class="fa-solid fa-book"></i>
@@ -157,7 +157,7 @@ $bimbinganActive = in_array($current, [
 
         <!-- BIMBINGAN -->
 
-        <a href="/bimbingan-skripsi/app/views/dosen/bimbingan.php"
+        <a href="<?= BASE_URL ?>/app/views/dosen/bimbingan.php"
            class="<?= $bimbinganActive ? 'active' : '' ?>">
 
             <i class="fa-solid fa-graduation-cap"></i>
