@@ -1,0 +1,58 @@
+RewriteEngine On
+
+# =====================================================================
+# 1. AUTO REDIRECT FROM RAW PHP PATHS TO CLEAN URLS (GET requests only)
+# =====================================================================
+# This forces the browser address bar to show clean URLs, even if the application
+# redirects to raw PHP paths internally.
+
+# Special case: riwayat_pengajuan
+RewriteCond %{REQUEST_METHOD} GET
+RewriteCond %{THE_REQUEST} /app/views/mahasiswa/pengajuan_riwayat\.php [NC]
+RewriteCond %{REQUEST_URI} ^(.*)/app/views/mahasiswa/pengajuan_riwayat\.php$ [NC]
+RewriteRule ^ %1/riwayat_pengajuan [R=302,L]
+
+# General Role-based Redirects
+RewriteCond %{REQUEST_METHOD} GET
+RewriteCond %{THE_REQUEST} /app/views/mahasiswa/([a-zA-Z0-9_-]+)\.php [NC]
+RewriteCond %{REQUEST_URI} ^(.*)/app/views/mahasiswa/([a-zA-Z0-9_-]+)\.php$ [NC]
+RewriteRule ^ %1/mahasiswa/%2 [R=302,L]
+
+RewriteCond %{REQUEST_METHOD} GET
+RewriteCond %{THE_REQUEST} /app/views/dosen/([a-zA-Z0-9_-]+)\.php [NC]
+RewriteCond %{REQUEST_URI} ^(.*)/app/views/dosen/([a-zA-Z0-9_-]+)\.php$ [NC]
+RewriteRule ^ %1/dosen/%2 [R=302,L]
+
+RewriteCond %{REQUEST_METHOD} GET
+RewriteCond %{THE_REQUEST} /app/views/kaprodi/([a-zA-Z0-9_-]+)\.php [NC]
+RewriteCond %{REQUEST_URI} ^(.*)/app/views/kaprodi/([a-zA-Z0-9_-]+)\.php$ [NC]
+RewriteRule ^ %1/kaprodi/%2 [R=302,L]
+
+RewriteCond %{REQUEST_METHOD} GET
+RewriteCond %{THE_REQUEST} /app/views/auth/login\.php [NC]
+RewriteCond %{REQUEST_URI} ^(.*)/app/views/auth/login\.php$ [NC]
+RewriteRule ^ %1/login [R=302,L]
+
+
+# =====================================================================
+# 2. INTERNAL REWRITES (Translate clean URLs to actual PHP files)
+# =====================================================================
+
+# Special alias requested by the user
+RewriteRule ^riwayat_pengajuan$ app/views/mahasiswa/pengajuan_riwayat.php [L,QSA]
+
+# General Mahasiswa Clean URLs
+RewriteRule ^mahasiswa/([a-zA-Z0-9_-]+)$ app/views/mahasiswa/$1.php [L,QSA]
+
+# General Dosen Clean URLs
+RewriteRule ^dosen/([a-zA-Z0-9_-]+)$ app/views/dosen/$1.php [L,QSA]
+
+# General Kaprodi Clean URLs (including sub-paths)
+RewriteRule ^kaprodi/kuota/tambah$ app/views/kaprodi/kuota_pembimbing_add.php [L,QSA]
+RewriteRule ^kaprodi/kuota/edit$ app/views/kaprodi/kuota_pembimbing_edit.php [L,QSA]
+RewriteRule ^kaprodi/distribusi/tambah$ app/views/kaprodi/distribusi_mahasiswa_add.php [L,QSA]
+RewriteRule ^kaprodi/distribusi/edit$ app/views/kaprodi/distribusi_mahasiswa_edit.php [L,QSA]
+RewriteRule ^kaprodi/([a-zA-Z0-9_-]+)$ app/views/kaprodi/$1.php [L,QSA]
+
+# Auth Clean URL
+RewriteRule ^login$ app/views/auth/login.php [L,QSA]

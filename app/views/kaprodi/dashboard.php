@@ -26,10 +26,8 @@ try {
     
     foreach ($dbMhsList as $item) {
         // Parse angkatan from NPM
-        $angkatan = (int)substr($item['npm'], 0, 4);
-        if ($angkatan < 2000 || $angkatan > 2100) {
-            $angkatan = 2022; // default
-        }
+        $prefix = substr(trim($item['npm']), 0, 2);
+        $angkatan = is_numeric($prefix) ? (int)('20' . $prefix) : 2022;
         $semester_by_angkatan = [2020 => 12, 2021 => 10, 2022 => 8, 2023 => 6];
         $sem = $semester_by_angkatan[$angkatan] ?? 8;
 

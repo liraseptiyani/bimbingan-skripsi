@@ -2,13 +2,14 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+
+require_once dirname(__DIR__, 3) . '/config/koneksi.php';
+
 if (!isset($_SESSION['username']) || ($_SESSION['role'] ?? '') !== 'dosen' || ($_SESSION['otoritas'] ?? '') !== 'kaprodi') {
     header("Location: " . BASE_URL . "/");
     exit;
 }
 $title = 'Tambah Distribusi Mahasiswa';
-
-require_once dirname(__DIR__, 3) . '/config/koneksi.php';
 
 // Fetch all registered lecturers from database
 $stmtDosen = $pdo->query("SELECT nama FROM dosen ORDER BY nama ASC");
