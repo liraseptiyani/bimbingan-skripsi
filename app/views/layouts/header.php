@@ -448,6 +448,51 @@ document.addEventListener("DOMContentLoaded", function() {
             localStorage.setItem("sidebar-collapsed", document.body.classList.contains("sidebar-collapsed"));
         });
     }
+
+    // Global loading state for submit buttons in forms
+    let lastClickedSubmitButton = null;
+    document.addEventListener("click", function(event) {
+        const target = event.target.closest('button[type="submit"], input[type="submit"]');
+        if (target) {
+            lastClickedSubmitButton = target;
+        }
+    });
+
+    document.addEventListener("submit", function(event) {
+        // Skip if the submit event has been defaultPrevented (e.g. invalid forms or custom validation prevented it)
+        if (event.defaultPrevented) {
+            return;
+        }
+
+        const form = event.target;
+        if (form && form.tagName === 'FORM') {
+            const submitBtn = lastClickedSubmitButton || form.querySelector('button[type="submit"], input[type="submit"]');
+            if (submitBtn) {
+                // If it already has a spinner or loading class, skip to avoid double addition
+                if (submitBtn.querySelector('.fa-spinner') || submitBtn.classList.contains('loading')) {
+                    return;
+                }
+
+                // If it is the login button, it has its own CSS structure
+                if (submitBtn.classList.contains('btn-login')) {
+                    submitBtn.classList.add('loading');
+                    submitBtn.disabled = true;
+                    return;
+                }
+
+                // Store original HTML content
+                submitBtn.dataset.originalHtml = submitBtn.innerHTML;
+                
+                // Disable and prepend loading spinner after a microtask so form submits correctly
+                setTimeout(() => {
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> ' + submitBtn.textContent.trim();
+                }, 0);
+            }
+        }
+        // Reset the tracker
+        lastClickedSubmitButton = null;
+    });
 });
 </script>
 </head>

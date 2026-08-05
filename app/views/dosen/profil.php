@@ -381,12 +381,23 @@ if ($otoritas_aktif === 'kaprodi') {
             cancelButtonText: 'Batal'
         }).then((result) => {
             if (result.isConfirmed) {
+                const btnSubmit = form.querySelector('button[type="submit"]');
+                if (btnSubmit) {
+                    btnSubmit.disabled = true;
+                    btnSubmit.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses...';
+                }
+
                 fetch('<?= BASE_URL ?>/app/controllers/UbahPasswordController.php', {
                     method: 'POST',
                     body: formData
                 })
                 .then(res => res.json())
                 .then(data => {
+                    if (btnSubmit) {
+                        btnSubmit.disabled = false;
+                        btnSubmit.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Kirim';
+                    }
+
                     if (data.success) {
                         Swal.fire({
                             icon: 'success',
@@ -405,6 +416,11 @@ if ($otoritas_aktif === 'kaprodi') {
                     }
                 })
                 .catch(err => {
+                    if (btnSubmit) {
+                        btnSubmit.disabled = false;
+                        btnSubmit.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Kirim';
+                    }
+
                     Swal.fire({
                         icon: 'error',
                         title: 'Error Koneksi',

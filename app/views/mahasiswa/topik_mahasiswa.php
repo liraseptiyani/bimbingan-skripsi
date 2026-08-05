@@ -823,6 +823,11 @@ table thead th {
         }).then((result) => {
             if (result.isConfirmed) {
                 isConfirmedSubmit = true;
+                const btnSave = formDetailTopik.querySelector('.btn-modal-save');
+                if (btnSave) {
+                    btnSave.disabled = true;
+                    btnSave.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
+                }
                 formDetailTopik.submit();
             }
         });
