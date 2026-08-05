@@ -9,12 +9,12 @@ require_once dirname(__DIR__, 2) . '/config/koneksi.php';
 // (mahasiswa tidak punya opsi ini)
 // ==========================================================
 if (!isset($_SESSION['username']) || ($_SESSION['role'] ?? '') !== 'dosen') {
-    header("Location: /bimbingan-skripsi/");
+    header("Location: " . BASE_URL . "/");
     exit;
 }
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header("Location: /bimbingan-skripsi/app/views/dosen/profil.php");
+    header("Location: " . BASE_URL . "/app/views/dosen/profil.php");
     exit;
 }
 
@@ -23,7 +23,7 @@ $otoritas_baru = trim($_POST['otoritas'] ?? '');
 // validasi: dosen boleh switch antara 'dosen' atau 'kaprodi'
 if (!in_array($otoritas_baru, ['dosen', 'kaprodi'], true)) {
     $_SESSION['error'] = "Otoritas tidak valid.";
-    header("Location: /bimbingan-skripsi/app/views/dosen/profil.php");
+    header("Location: " . BASE_URL . "/app/views/dosen/profil.php");
     exit;
 }
 
@@ -61,9 +61,9 @@ try {
     // Redirect ke dashboard sesuai otoritas baru
     // =====================
     if ($otoritas_baru === 'kaprodi') {
-        header("Location: /bimbingan-skripsi/app/views/kaprodi/dashboard.php");
+        header("Location: " . BASE_URL . "/app/views/kaprodi/dashboard.php");
     } else {
-        header("Location: /bimbingan-skripsi/app/views/dosen/dashboard.php");
+        header("Location: " . BASE_URL . "/app/views/dosen/dashboard.php");
     }
 
     exit;
@@ -74,9 +74,9 @@ try {
     $_SESSION['otoritas'] = $otoritas_baru;
     
     if ($otoritas_baru === 'kaprodi') {
-        header("Location: /bimbingan-skripsi/app/views/kaprodi/dashboard.php");
+        header("Location: " . BASE_URL . "/app/views/kaprodi/dashboard.php");
     } else {
-        header("Location: /bimbingan-skripsi/app/views/dosen/dashboard.php");
+        header("Location: " . BASE_URL . "/app/views/dosen/dashboard.php");
     }
 
     exit;

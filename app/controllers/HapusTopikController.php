@@ -6,7 +6,7 @@ if (session_status() === PHP_SESSION_NONE) {
 require_once dirname(__DIR__, 2) . '/config/koneksi.php';
 
 if (!isset($_SESSION['username']) || ($_SESSION['role'] ?? '') !== 'dosen') {
-    header("Location: /bimbingan-skripsi/");
+    header("Location: " . BASE_URL . "/");
     exit;
 }
 
@@ -16,7 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (empty($id)) {
         $_SESSION['swal_error'] = 'ID topik tidak valid!';
-        header("Location: /bimbingan-skripsi/app/views/dosen/topik_penelitian.php");
+        header("Location: " . BASE_URL . "/app/views/dosen/topik_penelitian.php");
         exit;
     }
 
@@ -29,12 +29,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ]);
 
         $_SESSION['swal_success'] = 'Topik penelitian berhasil dihapus!';
-        header("Location: /bimbingan-skripsi/app/views/dosen/topik_penelitian.php");
+        header("Location: " . BASE_URL . "/app/views/dosen/topik_penelitian.php");
         exit;
 
     } catch (PDOException $e) {
         $_SESSION['swal_error'] = 'Gagal menghapus topik: ' . $e->getMessage();
-        header("Location: /bimbingan-skripsi/app/views/dosen/topik_penelitian.php");
+        header("Location: " . BASE_URL . "/app/views/dosen/topik_penelitian.php");
         exit;
     }
 }

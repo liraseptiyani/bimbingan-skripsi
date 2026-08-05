@@ -6,6 +6,6 @@ $_SESSION = [];
 
 session_destroy();
 
-header("Location: /bimbingan-skripsi/");
+header("Location: " . BASE_URL . "/");
 
 exit;

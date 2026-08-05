@@ -12,7 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $npm = $_SESSION['username'] ?? '';
         if (empty($npm) || ($_SESSION['role'] ?? '') !== 'mahasiswa') {
             $_SESSION['swal_error'] = 'Sesi tidak valid!';
-            header("Location: /bimbingan-skripsi/app/views/mahasiswa/profil.php");
+            header("Location: " . BASE_URL . "/app/views/mahasiswa/profil.php");
             exit;
         }
 
@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $check = getimagesize($_FILES['foto_profile']['tmp_name']);
                 if ($check === false) {
                     $_SESSION['swal_error'] = 'File yang diunggah bukan merupakan gambar valid!';
-                    header("Location: /bimbingan-skripsi/app/views/mahasiswa/profil.php");
+                    header("Location: " . BASE_URL . "/app/views/mahasiswa/profil.php");
                     exit;
                 }
 
@@ -36,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $allowedExts = ['jpg', 'jpeg', 'png', 'gif'];
                 if (!in_array($fileExt, $allowedExts)) {
                     $_SESSION['swal_error'] = 'Hanya format JPG, JPEG, PNG, dan GIF yang diperbolehkan!';
-                    header("Location: /bimbingan-skripsi/app/views/mahasiswa/profil.php");
+                    header("Location: " . BASE_URL . "/app/views/mahasiswa/profil.php");
                     exit;
                 }
 
@@ -55,16 +55,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } else {
                 $_SESSION['swal_error'] = 'Tidak ada file foto yang dipilih atau terjadi kesalahan!';
             }
-            header("Location: /bimbingan-skripsi/app/views/mahasiswa/profil.php");
+            header("Location: " . BASE_URL . "/app/views/mahasiswa/profil.php");
             exit;
         } catch (PDOException $e) {
             $_SESSION['swal_error'] = 'Gagal memperbarui foto profil: ' . $e->getMessage();
-            header("Location: /bimbingan-skripsi/app/views/mahasiswa/profil.php");
+            header("Location: " . BASE_URL . "/app/views/mahasiswa/profil.php");
             exit;
         }
     }
 }
 
 $_SESSION['swal_error'] = 'Aksi tidak valid!';
-header("Location: /bimbingan-skripsi/app/views/mahasiswa/profil.php");
+header("Location: " . BASE_URL . "/app/views/mahasiswa/profil.php");
 exit;

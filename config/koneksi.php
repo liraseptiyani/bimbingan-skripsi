@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/config.php';
 date_default_timezone_set('Asia/Jakarta');
 
 $host = "ep-twilight-base-ao8gz75j-pooler.c-2.ap-southeast-1.aws.neon.tech";

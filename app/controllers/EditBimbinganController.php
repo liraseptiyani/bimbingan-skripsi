@@ -4,7 +4,7 @@ date_default_timezone_set('Asia/Jakarta');
 require_once dirname(__DIR__, 2) . '/config/koneksi.php';
 
 if (!isset($_SESSION['username'])) {
-    header("Location: /bimbingan-skripsi/");
+    header("Location: " . BASE_URL . "/");
     exit;
 }
 
@@ -21,14 +21,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $statusBimbingan = $stmtCheck->fetchColumn();
         if ($statusBimbingan === 'selesai') {
             $_SESSION['swal_error'] = 'Anda tidak dapat mengubah bimbingan karena status bimbingan Anda telah selesai/lulus!';
-            header("Location: /bimbingan-skripsi/app/views/mahasiswa/bimbingan.php");
+            header("Location: " . BASE_URL . "/app/views/mahasiswa/bimbingan.php");
             exit;
         }
     } catch (PDOException $e) {}
 
     if ($bimbingan_id <= 0) {
         $_SESSION['swal_error'] = 'ID bimbingan tidak valid!';
-        header("Location: /bimbingan-skripsi/app/views/mahasiswa/bimbingan.php");
+        header("Location: " . BASE_URL . "/app/views/mahasiswa/bimbingan.php");
         exit;
     }
 
@@ -40,13 +40,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if (!$bimb) {
             $_SESSION['swal_error'] = 'Bimbingan tidak ditemukan!';
-            header("Location: /bimbingan-skripsi/app/views/mahasiswa/bimbingan.php");
+            header("Location: " . BASE_URL . "/app/views/mahasiswa/bimbingan.php");
             exit;
         }
 
         if (($bimb['status_pembimbing1'] ?? '') === 'sudah_dibalas' || ($bimb['status_pembimbing2'] ?? '') === 'sudah_dibalas') {
             $_SESSION['swal_error'] = 'Bimbingan yang sudah dibalas oleh dosen tidak dapat diubah!';
-            header("Location: /bimbingan-skripsi/app/views/mahasiswa/bimbingan.php");
+            header("Location: " . BASE_URL . "/app/views/mahasiswa/bimbingan.php");
             exit;
         }
 
@@ -55,7 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (isset($_FILES['draft']) && $_FILES['draft']['error'] !== UPLOAD_ERR_NO_FILE) {
             if ($_FILES['draft']['error'] !== UPLOAD_ERR_OK) {
                 $_SESSION['swal_error'] = 'Gagal mengunggah file draft! Error Code: ' . $_FILES['draft']['error'];
-                header("Location: /bimbingan-skripsi/app/views/mahasiswa/bimbingan.php");
+                header("Location: " . BASE_URL . "/app/views/mahasiswa/bimbingan.php");
                 exit;
             }
 
@@ -63,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $file_ext = strtolower(pathinfo($_FILES['draft']['name'], PATHINFO_EXTENSION));
             if ($file_ext !== 'pdf') {
                 $_SESSION['swal_error'] = 'Hanya file PDF yang diperbolehkan!';
-                header("Location: /bimbingan-skripsi/app/views/mahasiswa/bimbingan.php");
+                header("Location: " . BASE_URL . "/app/views/mahasiswa/bimbingan.php");
                 exit;
             }
 
@@ -81,7 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $target_file = $upload_dir . $nama_file;
             if (!move_uploaded_file($_FILES['draft']['tmp_name'], $target_file)) {
                 $_SESSION['swal_error'] = 'Gagal memindahkan file ke folder uploads!';
-                header("Location: /bimbingan-skripsi/app/views/mahasiswa/bimbingan.php");
+                header("Location: " . BASE_URL . "/app/views/mahasiswa/bimbingan.php");
                 exit;
             }
         }
@@ -132,5 +132,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-header("Location: /bimbingan-skripsi/app/views/mahasiswa/bimbingan.php");
+header("Location: " . BASE_URL . "/app/views/mahasiswa/bimbingan.php");
 exit;

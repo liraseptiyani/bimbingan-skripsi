@@ -680,7 +680,7 @@ table thead th {
             <h3>Detail Topik Penelitian</h3>
             <button type="button" class="modal-close" id="btnHeaderClose">&times;</button>
         </div>
-        <form id="formDetailTopik" method="POST" action="/bimbingan-skripsi/app/views/mahasiswa/topik_mahasiswa.php">
+        <form id="formDetailTopik" method="POST" action="<?= BASE_URL ?>/app/views/mahasiswa/topik_mahasiswa.php">
             <div class="modal-body">
                 <input type="hidden" name="topik_id" id="modalTopikId">
 

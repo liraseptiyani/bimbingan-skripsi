@@ -6,7 +6,7 @@ session_start();
 // (baik sedang beotoritas dosen maupun kaprodi)
 // ==========================================================
 if (!isset($_SESSION['username']) || ($_SESSION['role'] ?? '') !== 'dosen') {
-    header("Location: /bimbingan-skripsi/");
+    header("Location: " . BASE_URL . "/");
     exit;
 }
 
@@ -35,7 +35,7 @@ $fotoPath = '';
 if (!empty($dosenDb['profile_picture'])) {
     $fullPath = dirname(__DIR__, 3) . '/public/uploads/profile/' . $dosenDb['profile_picture'];
     if (file_exists($fullPath) && is_file($fullPath)) {
-        $fotoPath = '/bimbingan-skripsi/public/uploads/profile/' . $dosenDb['profile_picture'];
+        $fotoPath = BASE_URL . '/public/uploads/profile/' . $dosenDb['profile_picture'];
     }
 }
 
@@ -266,7 +266,7 @@ if ($otoritas_aktif === 'kaprodi') {
 
             <div class="card table-card">
                 <div class="avatar-wrap">
-                    <form action="/bimbingan-skripsi/app/controllers/DosenController.php" method="POST" enctype="multipart/form-data">
+                    <form action="<?= BASE_URL ?>/app/controllers/DosenController.php" method="POST" enctype="multipart/form-data">
                         <input type="hidden" name="action" value="ubah_foto">
                         <label class="avatar-label">
                             <?php if (!empty($fotoPath)): ?>
@@ -307,7 +307,7 @@ if ($otoritas_aktif === 'kaprodi') {
             <div class="card">
                 <div class="card-subtitle">Pilih Otoritas</div>
 
-                <form id="formOtoritas" action="/bimbingan-skripsi/app/controllers/SwitchOtoritasController.php" method="POST">
+                <form id="formOtoritas" action="<?= BASE_URL ?>/app/controllers/SwitchOtoritasController.php" method="POST">
                     <div class="form-group">
                         <select class="form-select" name="otoritas" id="otoritasSelect">
                             <?php foreach ($daftar_otoritas as $value => $label): ?>
@@ -330,7 +330,7 @@ if ($otoritas_aktif === 'kaprodi') {
                 <i class="fa-solid fa-key"></i> Ubah Kata Sandi
             </div>
 
-            <form id="formPassword" action="/bimbingan-skripsi/app/controllers/UbahPasswordController.php" method="POST">
+            <form id="formPassword" action="<?= BASE_URL ?>/app/controllers/UbahPasswordController.php" method="POST">
                 <div class="form-group">
                     <label for="password_lama">Kata Sandi Lama <span style="color: #ef4444;">*</span></label>
                     <input type="password" class="form-input" id="password_lama" name="password_lama" placeholder="Masukkan kata sandi lama" required>
@@ -381,7 +381,7 @@ if ($otoritas_aktif === 'kaprodi') {
             cancelButtonText: 'Batal'
         }).then((result) => {
             if (result.isConfirmed) {
-                fetch('/bimbingan-skripsi/app/controllers/UbahPasswordController.php', {
+                fetch('<?= BASE_URL ?>/app/controllers/UbahPasswordController.php', {
                     method: 'POST',
                     body: formData
                 })

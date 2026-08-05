@@ -3,7 +3,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 if (!isset($_SESSION['username']) || ($_SESSION['role'] ?? '') !== 'dosen' || ($_SESSION['otoritas'] ?? '') !== 'kaprodi') {
-    header("Location: /bimbingan-skripsi/");
+    header("Location: /");
     exit;
 }
 $title = 'Distribusi Mahasiswa';

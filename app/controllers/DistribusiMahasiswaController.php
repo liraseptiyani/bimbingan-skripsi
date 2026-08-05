@@ -6,7 +6,7 @@ if (session_status() === PHP_SESSION_NONE) {
 require_once dirname(__DIR__, 2) . '/config/koneksi.php';
 
 if (!isset($_SESSION['username'])) {
-    header("Location: /bimbingan-skripsi/");
+    header("Location: " . BASE_URL . "/");
     exit;
 }
 
@@ -232,13 +232,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $pdo->commit();
             $_SESSION['swal_success'] = "Berhasil mendistribusikan $successCount mahasiswa!";
-            header("Location: /bimbingan-skripsi/app/views/kaprodi/distribusi_mahasiswa.php");
+            header("Location: " . BASE_URL . "/app/views/kaprodi/distribusi_mahasiswa.php");
             exit;
 
         } catch (PDOException $e) {
             $pdo->rollBack();
             $_SESSION['swal_error'] = 'Gagal menyimpan data: ' . $e->getMessage();
-            header("Location: /bimbingan-skripsi/app/views/kaprodi/distribusi_mahasiswa_add.php");
+            header("Location: " . BASE_URL . "/app/views/kaprodi/distribusi_mahasiswa_add.php");
             exit;
         }
     }
@@ -264,7 +264,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if (empty($npm_lama) || empty($npm) || empty($nama) || empty($pembimbing1) || empty($pembahas1) || empty($nomor_sk)) {
             $_SESSION['swal_error'] = 'Harap isi semua field yang wajib (*)!';
-            header("Location: /bimbingan-skripsi/app/views/kaprodi/distribusi_mahasiswa_edit.php?npm=" . urlencode($npm_lama));
+            header("Location: " . BASE_URL . "/app/views/kaprodi/distribusi_mahasiswa_edit.php?npm=" . urlencode($npm_lama));
             exit;
         }
 
@@ -274,7 +274,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $checkStmt->execute([':npm' => $npm]);
                 if ($checkStmt->fetchColumn() > 0) {
                     $_SESSION['swal_error'] = 'NPM baru sudah terdaftar untuk mahasiswa lain!';
-                    header("Location: /bimbingan-skripsi/app/views/kaprodi/distribusi_mahasiswa_edit.php?npm=" . urlencode($npm_lama));
+                    header("Location: " . BASE_URL . "/app/views/kaprodi/distribusi_mahasiswa_edit.php?npm=" . urlencode($npm_lama));
                     exit;
                 }
             }
@@ -373,12 +373,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ]);
 
             $_SESSION['swal_success'] = 'Data distribusi mahasiswa berhasil diubah!';
-            header("Location: /bimbingan-skripsi/app/views/kaprodi/distribusi_mahasiswa.php");
+            header("Location: " . BASE_URL . "/app/views/kaprodi/distribusi_mahasiswa.php");
             exit;
 
         } catch (PDOException $e) {
             $_SESSION['swal_error'] = 'Gagal mengubah data: ' . $e->getMessage();
-            header("Location: /bimbingan-skripsi/app/views/kaprodi/distribusi_mahasiswa_edit.php?npm=" . urlencode($npm_lama));
+            header("Location: " . BASE_URL . "/app/views/kaprodi/distribusi_mahasiswa_edit.php?npm=" . urlencode($npm_lama));
             exit;
         }
     }
@@ -392,7 +392,7 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
         if (empty($npm)) {
             $_SESSION['swal_error'] = 'NPM tidak valid!';
-            header("Location: /bimbingan-skripsi/app/views/kaprodi/distribusi_mahasiswa.php");
+            header("Location: " . BASE_URL . "/app/views/kaprodi/distribusi_mahasiswa.php");
             exit;
         }
 
@@ -405,16 +405,16 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'GET') {
             $stmtSync->execute([':npm' => $npm]);
 
             $_SESSION['swal_success'] = 'Data distribusi mahasiswa berhasil dihapus!';
-            header("Location: /bimbingan-skripsi/app/views/kaprodi/distribusi_mahasiswa.php");
+            header("Location: " . BASE_URL . "/app/views/kaprodi/distribusi_mahasiswa.php");
             exit;
 
         } catch (PDOException $e) {
             $_SESSION['swal_error'] = 'Gagal menghapus data: ' . $e->getMessage();
-            header("Location: /bimbingan-skripsi/app/views/kaprodi/distribusi_mahasiswa.php");
+            header("Location: " . BASE_URL . "/app/views/kaprodi/distribusi_mahasiswa.php");
             exit;
         }
     }
 }
 
-header("Location: /bimbingan-skripsi/app/views/kaprodi/distribusi_mahasiswa.php");
+header("Location: " . BASE_URL . "/app/views/kaprodi/distribusi_mahasiswa.php");
 exit;

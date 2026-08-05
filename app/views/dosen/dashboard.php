@@ -6,12 +6,12 @@ session_start();
 // (kalau otoritas aktifnya 'kaprodi', diarahkan ke dashboard kaprodi)
 // ==========================================================
 if (!isset($_SESSION['username']) || ($_SESSION['role'] ?? '') !== 'dosen') {
-    header("Location: /bimbingan-skripsi/");
+    header("Location: " . BASE_URL . "/");
     exit;
 }
 
 if (($_SESSION['otoritas'] ?? '') === 'kaprodi') {
-    header("Location: /bimbingan-skripsi/app/views/kaprodi/dashboard.php");
+    header("Location: " . BASE_URL . "/app/views/kaprodi/dashboard.php");
     exit;
 }
 
@@ -701,7 +701,7 @@ require_once __DIR__ . '/../layouts/sidebar_dosen.php';
                     <td style="text-align: center;"><span class="status-badge <?= $statusClass ?>"><?= $statusText ?></span></td>
                     <td style="text-align: center;">
                         <?php if (($mhs['status_bimbingan'] ?? 'aktif') === 'aktif'): ?>
-                            <a href="/bimbingan-skripsi/app/controllers/SelesaiBimbinganController.php?npm=<?= urlencode($mhs['npm']) ?>" class="btn-selesai" onclick="return confirm('Apakah Anda yakin ingin menandai bimbingan mahasiswa <?= htmlspecialchars($mhs['nama']) ?> selesai/lulus?')" style="background: #3fae4e; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; font-size: 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; text-decoration: none; font-weight: 600;" title="Tandai mahasiswa ini sudah selesai sidang">
+                            <a href="<?= BASE_URL ?>/app/controllers/SelesaiBimbinganController.php?npm=<?= urlencode($mhs['npm']) ?>" class="btn-selesai" onclick="return confirm('Apakah Anda yakin ingin menandai bimbingan mahasiswa <?= htmlspecialchars($mhs['nama']) ?> selesai/lulus?')" style="background: #3fae4e; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; font-size: 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; text-decoration: none; font-weight: 600;" title="Tandai mahasiswa ini sudah selesai sidang">
                                 <i class="fa-solid fa-circle-check"></i> Selesai
                             </a>
                         <?php else: ?>

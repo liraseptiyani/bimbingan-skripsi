@@ -10,12 +10,12 @@ $action = $_POST['action'] ?? $_GET['action'] ?? '';
 // Only enforce Kaprodi role checks if performing state-modifying CRUD actions (except for self-profile photo update)
 if (!empty($action) && $action !== 'ubah_foto') {
     if (!isset($_SESSION['username']) || ($_SESSION['role'] ?? '') !== 'dosen' || ($_SESSION['otoritas'] ?? '') !== 'kaprodi') {
-        header("Location: /bimbingan-skripsi/");
+        header("Location: " . BASE_URL . "/");
         exit;
     }
 } elseif ($action === 'ubah_foto') {
     if (!isset($_SESSION['username']) || ($_SESSION['role'] ?? '') !== 'dosen') {
-        header("Location: /bimbingan-skripsi/");
+        header("Location: " . BASE_URL . "/");
         exit;
     }
 }
@@ -116,7 +116,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $nip = $_SESSION['username'] ?? '';
         if (empty($nip)) {
             $_SESSION['swal_error'] = 'Sesi tidak valid!';
-            header("Location: /bimbingan-skripsi/app/views/dosen/profil.php");
+            header("Location: " . BASE_URL . "/app/views/dosen/profil.php");
             exit;
         }
 
@@ -128,7 +128,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if (!$currentDosen) {
                 $_SESSION['swal_error'] = 'Dosen tidak ditemukan!';
-                header("Location: /bimbingan-skripsi/app/views/dosen/profil.php");
+                header("Location: " . BASE_URL . "/app/views/dosen/profil.php");
                 exit;
             }
 
@@ -154,12 +154,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } else {
                 $_SESSION['swal_error'] = 'Tidak ada file foto yang dipilih atau terjadi kesalahan!';
             }
-            header("Location: /bimbingan-skripsi/app/views/dosen/profil.php");
+            header("Location: " . BASE_URL . "/app/views/dosen/profil.php");
             exit;
 
         } catch (PDOException $e) {
             $_SESSION['swal_error'] = 'Error: ' . $e->getMessage();
-            header("Location: /bimbingan-skripsi/app/views/dosen/profil.php");
+            header("Location: " . BASE_URL . "/app/views/dosen/profil.php");
             exit;
         }
     }
@@ -178,25 +178,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if (empty($nama) || empty($nip) || empty($bidang_ilmu) || empty($password) || empty($confirm_password) || empty($otoritas)) {
             $_SESSION['swal_error'] = 'Harap isi semua field yang wajib (*)!';
-            header("Location: /bimbingan-skripsi/app/views/kaprodi/kuota_pembimbing_add.php");
+            header("Location: " . BASE_URL . "/app/views/kaprodi/kuota_pembimbing_add.php");
             exit;
         }
 
         if ($password !== $confirm_password) {
             $_SESSION['swal_error'] = 'Password dan konfirmasi password tidak cocok!';
-            header("Location: /bimbingan-skripsi/app/views/kaprodi/kuota_pembimbing_add.php");
+            header("Location: " . BASE_URL . "/app/views/kaprodi/kuota_pembimbing_add.php");
             exit;
         }
 
         if (strlen($password) < 8) {
             $_SESSION['swal_error'] = 'Password minimal harus terdiri dari 8 karakter!';
-            header("Location: /bimbingan-skripsi/app/views/kaprodi/kuota_pembimbing_add.php");
+            header("Location: " . BASE_URL . "/app/views/kaprodi/kuota_pembimbing_add.php");
             exit;
         }
 
         if (strlen($password) > 100) {
             $_SESSION['swal_error'] = 'Password tidak boleh lebih dari 100 karakter!';
-            header("Location: /bimbingan-skripsi/app/views/kaprodi/kuota_pembimbing_add.php");
+            header("Location: " . BASE_URL . "/app/views/kaprodi/kuota_pembimbing_add.php");
             exit;
         }
 
@@ -209,7 +209,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $check->execute([':nip' => $nip]);
             if ($check->fetchColumn() > 0) {
                 $_SESSION['swal_error'] = 'Dosen dengan NIP tersebut sudah terdaftar!';
-                header("Location: /bimbingan-skripsi/app/views/kaprodi/kuota_pembimbing_add.php");
+                header("Location: " . BASE_URL . "/app/views/kaprodi/kuota_pembimbing_add.php");
                 exit;
             }
 
@@ -249,13 +249,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ]);
 
             $_SESSION['swal_success'] = 'Dosen berhasil didaftarkan!';
-            header("Location: /bimbingan-skripsi/app/views/kaprodi/kuota_pembimbing.php");
+            header("Location: " . BASE_URL . "/app/views/kaprodi/kuota_pembimbing.php");
             exit;
 
         } catch (PDOException $e) {
             file_put_contents(dirname(__DIR__, 2) . '/db_log.txt', "tambah_dosen error: " . $e->getMessage() . "\n", FILE_APPEND);
             $_SESSION['swal_error'] = 'Database Error: ' . $e->getMessage();
-            header("Location: /bimbingan-skripsi/app/views/kaprodi/kuota_pembimbing_add.php");
+            header("Location: " . BASE_URL . "/app/views/kaprodi/kuota_pembimbing_add.php");
             exit;
         }
     }
@@ -273,7 +273,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if (empty($nama) || empty($nip) || empty($bidang_ilmu) || empty($otoritas) || empty($nip_lama)) {
             $_SESSION['swal_error'] = 'Harap isi semua field yang wajib (*)!';
-            header("Location: /bimbingan-skripsi/app/views/kaprodi/kuota_pembimbing_edit.php?nip=" . urlencode($nip_lama));
+            header("Location: " . BASE_URL . "/app/views/kaprodi/kuota_pembimbing_edit.php?nip=" . urlencode($nip_lama));
             exit;
         }
 
@@ -285,7 +285,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if (!$currentDosen) {
                 $_SESSION['swal_error'] = 'Dosen tidak ditemukan!';
-                header("Location: /bimbingan-skripsi/app/views/kaprodi/kuota_pembimbing.php");
+                header("Location: " . BASE_URL . "/app/views/kaprodi/kuota_pembimbing.php");
                 exit;
             }
 
@@ -308,7 +308,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $check->execute([':nip' => $nip]);
                 if ($check->fetchColumn() > 0) {
                     $_SESSION['swal_error'] = 'Dosen dengan NIP baru tersebut sudah terdaftar!';
-                    header("Location: /bimbingan-skripsi/app/views/kaprodi/kuota_pembimbing_edit.php?nip=" . urlencode($nip_lama));
+                    header("Location: " . BASE_URL . "/app/views/kaprodi/kuota_pembimbing_edit.php?nip=" . urlencode($nip_lama));
                     exit;
                 }
 
@@ -365,13 +365,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             $_SESSION['swal_success'] = 'Data dosen berhasil diperbarui!';
-            header("Location: /bimbingan-skripsi/app/views/kaprodi/kuota_pembimbing.php");
+            header("Location: " . BASE_URL . "/app/views/kaprodi/kuota_pembimbing.php");
             exit;
 
         } catch (PDOException $e) {
             file_put_contents(dirname(__DIR__, 2) . '/db_log.txt', "edit_dosen error: " . $e->getMessage() . "\n", FILE_APPEND);
             $_SESSION['swal_error'] = 'Database Error: ' . $e->getMessage();
-            header("Location: /bimbingan-skripsi/app/views/kaprodi/kuota_pembimbing_edit.php?nip=" . urlencode($nip_lama));
+            header("Location: " . BASE_URL . "/app/views/kaprodi/kuota_pembimbing_edit.php?nip=" . urlencode($nip_lama));
             exit;
         }
     }
@@ -383,7 +383,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
         if (empty($nip)) {
             $_SESSION['swal_error'] = 'NIP Dosen tidak valid!';
-            header("Location: /bimbingan-skripsi/app/views/kaprodi/kuota_pembimbing.php");
+            header("Location: " . BASE_URL . "/app/views/kaprodi/kuota_pembimbing.php");
             exit;
         }
 
@@ -397,12 +397,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             $stmtDelUser->execute([':nip' => $nip]);
 
             $_SESSION['swal_success'] = 'Dosen berhasil dihapus!';
-            header("Location: /bimbingan-skripsi/app/views/kaprodi/kuota_pembimbing.php");
+            header("Location: " . BASE_URL . "/app/views/kaprodi/kuota_pembimbing.php");
             exit;
 
         } catch (PDOException $e) {
             $_SESSION['swal_error'] = 'Gagal menghapus dosen: ' . $e->getMessage();
-            header("Location: /bimbingan-skripsi/app/views/kaprodi/kuota_pembimbing.php");
+            header("Location: " . BASE_URL . "/app/views/kaprodi/kuota_pembimbing.php");
             exit;
         }
     }

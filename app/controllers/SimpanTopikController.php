@@ -7,7 +7,7 @@ require_once dirname(__DIR__, 2) . '/config/koneksi.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!isset($_SESSION['username']) || ($_SESSION['role'] ?? '') !== 'dosen') {
-        header("Location: /bimbingan-skripsi/");
+        header("Location: " . BASE_URL . "/");
         exit;
     }
 }
@@ -68,7 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (empty($topik) || empty($deskripsi) || empty($kategori) || $kuota_max < 1) {
         $_SESSION['swal_error'] = 'Harap isi semua bidang dengan benar!';
-        header("Location: /bimbingan-skripsi/app/views/dosen/topik_penelitian.php");
+        header("Location: " . BASE_URL . "/app/views/dosen/topik_penelitian.php");
         exit;
     }
 
@@ -100,12 +100,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['swal_success'] = 'Topik penelitian berhasil ditambahkan dan menunggu verifikasi Kaprodi!';
         }
 
-        header("Location: /bimbingan-skripsi/app/views/dosen/topik_penelitian.php");
+        header("Location: " . BASE_URL . "/app/views/dosen/topik_penelitian.php");
         exit;
 
     } catch (PDOException $e) {
         $_SESSION['swal_error'] = 'Gagal menyimpan topik: ' . $e->getMessage();
-        header("Location: /bimbingan-skripsi/app/views/dosen/topik_penelitian.php");
+        header("Location: " . BASE_URL . "/app/views/dosen/topik_penelitian.php");
         exit;
     }
 }

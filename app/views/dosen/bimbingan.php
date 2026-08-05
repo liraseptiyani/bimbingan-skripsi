@@ -5,12 +5,12 @@ session_start();
 // PROTEKSI HALAMAN: hanya dosen yang boleh mengakses
 // ==========================================================
 if (!isset($_SESSION['username']) || ($_SESSION['role'] ?? '') !== 'dosen') {
-    header("Location: /bimbingan-skripsi/");
+    header("Location: " . BASE_URL . "/");
     exit;
 }
 
 if (($_SESSION['otoritas'] ?? '') === 'kaprodi') {
-    header("Location: /bimbingan-skripsi/app/views/kaprodi/dashboard.php");
+    header("Location: " . BASE_URL . "/app/views/kaprodi/dashboard.php");
     exit;
 }
 
@@ -371,7 +371,7 @@ require_once __DIR__ . '/../layouts/sidebar_dosen.php';
                     <td><?= htmlspecialchars($b['npm']) ?></td>
                     <td><?= htmlspecialchars($b['nama']) ?></td>
                     <td class="col-draft">
-                        <a href="/bimbingan-skripsi/public/uploads/draft/<?= htmlspecialchars($b['file_draft']) ?>" class="draft-link" target="_blank" title="<?= htmlspecialchars($b['file_draft']) ?>">
+                        <a href="<?= BASE_URL ?>/public/uploads/draft/<?= htmlspecialchars($b['file_draft']) ?>" class="draft-link" target="_blank" title="<?= htmlspecialchars($b['file_draft']) ?>">
                             <i class="fa-solid fa-file-pdf"></i>
                             <span><?= htmlspecialchars($b['file_draft']) ?></span>
                         </a>
@@ -402,7 +402,7 @@ require_once __DIR__ . '/../layouts/sidebar_dosen.php';
                     </td>
                     <td class="col-aksi">
                         <div class="aksi-group">
-                            <a href="/bimbingan-skripsi/app/views/dosen/detail_bimbingan.php?id=<?= $b['id'] ?>" class="btn-lihat" title="Lihat Detail">
+                            <a href="<?= BASE_URL ?>/app/views/dosen/detail_bimbingan.php?id=<?= $b['id'] ?>" class="btn-lihat" title="Lihat Detail">
                                 <i class="fa-solid fa-eye"></i>
                             </a>
                         </div>

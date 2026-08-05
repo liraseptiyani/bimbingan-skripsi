@@ -987,7 +987,7 @@ require_once __DIR__ . '/../layouts/sidebar_mahasiswa.php';
                     btnSubmitPerbaikan.disabled = true;
                     btnSubmitPerbaikan.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mengirim...';
 
-                    fetch('/bimbingan-skripsi/app/controllers/PengajuanJudulController.php', {
+                    fetch('<?= BASE_URL ?>/app/controllers/PengajuanJudulController.php', {
                         method: 'POST',
                         body: formData
                     })

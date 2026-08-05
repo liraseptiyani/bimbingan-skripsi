@@ -6,7 +6,7 @@ require_once dirname(__DIR__, 2) . '/config/koneksi.php';
 
 // Protect page access for lecturers
 if (!isset($_SESSION['username']) || ($_SESSION['role'] ?? '') !== 'dosen') {
-    header("Location: /bimbingan-skripsi/");
+    header("Location: " . BASE_URL . "/");
     exit;
 }
 
@@ -14,7 +14,7 @@ $npm = trim($_GET['npm'] ?? '');
 
 if (empty($npm)) {
     $_SESSION['swal_error'] = 'NPM tidak valid!';
-    header("Location: /bimbingan-skripsi/app/views/dosen/dashboard.php");
+    header("Location: " . BASE_URL . "/app/views/dosen/dashboard.php");
     exit;
 }
 
@@ -37,7 +37,7 @@ try {
 
     if (!$isSupervised) {
         $_SESSION['swal_error'] = 'Anda tidak memiliki hak untuk menandai selesai mahasiswa ini!';
-        header("Location: /bimbingan-skripsi/app/views/dosen/dashboard.php");
+        header("Location: " . BASE_URL . "/app/views/dosen/dashboard.php");
         exit;
     }
 
@@ -50,5 +50,5 @@ try {
     $_SESSION['swal_error'] = 'Gagal memproses data: ' . $e->getMessage();
 }
 
-header("Location: /bimbingan-skripsi/app/views/dosen/dashboard.php");
+header("Location: " . BASE_URL . "/app/views/dosen/dashboard.php");
 exit;

@@ -9,7 +9,7 @@ if (
     || ($_SESSION['role'] ?? '') !== 'dosen'
     || ($_SESSION['otoritas'] ?? '') !== 'kaprodi'
 ) {
-    header("Location: /bimbingan-skripsi/");
+    header("Location: " . BASE_URL . "/");
     exit;
 }
 
@@ -272,7 +272,7 @@ require_once __DIR__ . '/../layouts/sidebar_kaprodi.php';
                     <td><?= htmlspecialchars($mhs['pembimbing1']) ?></td>
                     <td><?= htmlspecialchars($mhs['pembimbing2']) ?></td>
                     <td>
-                        <a class="btn-aksi" href="/bimbingan-skripsi/app/views/kaprodi/detail_progres.php?npm=<?= urlencode($mhs['npm']) ?>&nama=<?= urlencode($mhs['nama']) ?>" title="Lihat Detail">
+                        <a class="btn-aksi" href="<?= BASE_URL ?>/app/views/kaprodi/detail_progres.php?npm=<?= urlencode($mhs['npm']) ?>&nama=<?= urlencode($mhs['nama']) ?>" title="Lihat Detail">
                             <i class="fa-solid fa-eye"></i>
                         </a>
                     </td>

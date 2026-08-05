@@ -3,7 +3,7 @@ session_start();
 require_once dirname(__DIR__, 2) . '/config/koneksi.php';
 
 if (!isset($_SESSION['username'])) {
-    header("Location: /bimbingan-skripsi/");
+    header("Location: " . BASE_URL . "/");
     exit;
 }
 
@@ -18,14 +18,14 @@ try {
     $statusBimbingan = $stmtCheck->fetchColumn();
     if ($statusBimbingan === 'selesai') {
         $_SESSION['swal_error'] = 'Anda tidak dapat menghapus bimbingan karena status bimbingan Anda telah selesai/lulus!';
-        header("Location: /bimbingan-skripsi/app/views/mahasiswa/bimbingan.php");
+        header("Location: " . BASE_URL . "/app/views/mahasiswa/bimbingan.php");
         exit;
     }
 } catch (PDOException $e) {}
 
 if ($bimbingan_id <= 0) {
     $_SESSION['swal_error'] = 'ID bimbingan tidak valid!';
-    header("Location: /bimbingan-skripsi/app/views/mahasiswa/bimbingan.php");
+    header("Location: " . BASE_URL . "/app/views/mahasiswa/bimbingan.php");
     exit;
 }
 
@@ -37,13 +37,13 @@ try {
 
     if (!$bimb) {
         $_SESSION['swal_error'] = 'Bimbingan tidak ditemukan!';
-        header("Location: /bimbingan-skripsi/app/views/mahasiswa/bimbingan.php");
+        header("Location: " . BASE_URL . "/app/views/mahasiswa/bimbingan.php");
         exit;
     }
 
     if (($bimb['status_pembimbing1'] ?? '') === 'sudah_dibalas' || ($bimb['status_pembimbing2'] ?? '') === 'sudah_dibalas') {
         $_SESSION['swal_error'] = 'Bimbingan yang sudah dibalas oleh dosen tidak dapat dihapus!';
-        header("Location: /bimbingan-skripsi/app/views/mahasiswa/bimbingan.php");
+        header("Location: " . BASE_URL . "/app/views/mahasiswa/bimbingan.php");
         exit;
     }
 
@@ -62,5 +62,5 @@ try {
     $_SESSION['swal_error'] = 'Database Error: ' . $e->getMessage();
 }
 
-header("Location: /bimbingan-skripsi/app/views/mahasiswa/bimbingan.php");
+header("Location: " . BASE_URL . "/app/views/mahasiswa/bimbingan.php");
 exit;

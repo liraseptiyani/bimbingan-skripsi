@@ -5,7 +5,7 @@ date_default_timezone_set('Asia/Jakarta');
 require_once dirname(__DIR__, 2) . '/config/koneksi.php';
 
 if (!isset($_SESSION['username'])) {
-    header("Location: /bimbingan-skripsi/");
+    header("Location: " . BASE_URL . "/");
     exit;
 }
 
@@ -69,7 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $statusBimbingan = $stmtCheck->fetchColumn();
             if ($statusBimbingan === 'selesai') {
                 $_SESSION['swal_error'] = 'Anda tidak dapat menambah bimbingan karena status bimbingan Anda telah selesai/lulus!';
-                header("Location: /bimbingan-skripsi/app/views/mahasiswa/bimbingan.php");
+                header("Location: " . BASE_URL . "/app/views/mahasiswa/bimbingan.php");
                 exit;
             }
         } catch (PDOException $e) {}
@@ -144,9 +144,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['swal_success'] = 'Draft bimbingan berhasil diunggah!';
     }
 
-    header("Location: /bimbingan-skripsi/app/views/mahasiswa/bimbingan.php");
+    header("Location: " . BASE_URL . "/app/views/mahasiswa/bimbingan.php");
     exit;
 }
 
-header("Location: /bimbingan-skripsi/app/views/mahasiswa/bimbingan.php");
+header("Location: " . BASE_URL . "/app/views/mahasiswa/bimbingan.php");
 exit;

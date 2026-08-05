@@ -13,12 +13,12 @@ function getOnlyTime($tanggal_string) {
 // PROTEKSI HALAMAN: hanya dosen yang boleh mengakses
 // ==========================================================
 if (!isset($_SESSION['username']) || ($_SESSION['role'] ?? '') !== 'dosen') {
-    header("Location: /bimbingan-skripsi/");
+    header("Location: " . BASE_URL . "/");
     exit;
 }
 
 if (($_SESSION['otoritas'] ?? '') === 'kaprodi') {
-    header("Location: /bimbingan-skripsi/app/views/kaprodi/dashboard.php");
+    header("Location: " . BASE_URL . "/app/views/kaprodi/dashboard.php");
     exit;
 }
 
@@ -494,7 +494,7 @@ require_once __DIR__ . '/../layouts/sidebar_dosen.php';
 
 <div class="content">
 
-    <a href="/bimbingan-skripsi/app/views/dosen/bimbingan.php" class="back-link">
+    <a href="<?= BASE_URL ?>/app/views/dosen/bimbingan.php" class="back-link">
         <i class="fa-solid fa-chevron-left"></i> Forum Bimbingan
     </a>
 
@@ -600,7 +600,7 @@ require_once __DIR__ . '/../layouts/sidebar_dosen.php';
                     ?></div>
                     
                     <?php if (!empty($pesan['file'])): ?>
-                        <a href="/bimbingan-skripsi/public/uploads/draft/<?= htmlspecialchars($pesan['file']) ?>" class="chat-file-attachment" target="_blank">
+                        <a href="<?= BASE_URL ?>/public/uploads/draft/<?= htmlspecialchars($pesan['file']) ?>" class="chat-file-attachment" target="_blank">
                             <i class="fa-regular fa-file-pdf chat-file-icon"></i>
                             <div class="chat-file-info">
                                 <span class="chat-file-name"><?= htmlspecialchars($pesan['file']) ?></span>
@@ -626,7 +626,7 @@ require_once __DIR__ . '/../layouts/sidebar_dosen.php';
 
     <!-- ============ KOTAK BALAS PESAN ============ -->
     <div class="reply-box">
-        <form id="formBalasForum" method="POST" action="/bimbingan-skripsi/app/controllers/BalasForumController.php" enctype="multipart/form-data">
+        <form id="formBalasForum" method="POST" action="<?= BASE_URL ?>/app/controllers/BalasForumController.php" enctype="multipart/form-data">
             <input type="hidden" name="bimbingan_id" value="<?= $id ?>">
 
             <!-- Quote Preview Container -->

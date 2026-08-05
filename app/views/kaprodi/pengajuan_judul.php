@@ -9,7 +9,7 @@ if (
     || ($_SESSION['role'] ?? '') !== 'dosen'
     || ($_SESSION['otoritas'] ?? '') !== 'kaprodi'
 ) {
-    header("Location: /bimbingan-skripsi/");
+    header("Location: " . BASE_URL . "/");
     exit;
 }
 
