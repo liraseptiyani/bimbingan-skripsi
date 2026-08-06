@@ -12,7 +12,7 @@ RewriteCond %{THE_REQUEST} /app/views/mahasiswa/pengajuan_riwayat\.php [NC]
 RewriteCond %{REQUEST_URI} ^(.*)/app/views/mahasiswa/pengajuan_riwayat\.php$ [NC]
 RewriteRule ^ %1/riwayat_pengajuan [R=302,L]
 
-# General Role-based Redirects
+# General Role-based Redirects (with /app/views/ in path)
 RewriteCond %{REQUEST_METHOD} GET
 RewriteCond %{THE_REQUEST} /app/views/mahasiswa/([a-zA-Z0-9_-]+)\.php [NC]
 RewriteCond %{REQUEST_URI} ^(.*)/app/views/mahasiswa/([a-zA-Z0-9_-]+)\.php$ [NC]
@@ -32,6 +32,22 @@ RewriteCond %{REQUEST_METHOD} GET
 RewriteCond %{THE_REQUEST} /app/views/auth/login\.php [NC]
 RewriteCond %{REQUEST_URI} ^(.*)/app/views/auth/login\.php$ [NC]
 RewriteRule ^ %1/login [R=302,L]
+
+# Redirects for relative .php links clicked at clean folder level (GET requests only)
+RewriteCond %{REQUEST_METHOD} GET
+RewriteCond %{THE_REQUEST} /mahasiswa/([a-zA-Z0-9_-]+)\.php [NC]
+RewriteCond %{REQUEST_URI} ^(.*)/mahasiswa/([a-zA-Z0-9_-]+)\.php$ [NC]
+RewriteRule ^ %1/mahasiswa/%2 [R=302,L]
+
+RewriteCond %{REQUEST_METHOD} GET
+RewriteCond %{THE_REQUEST} /dosen/([a-zA-Z0-9_-]+)\.php [NC]
+RewriteCond %{REQUEST_URI} ^(.*)/dosen/([a-zA-Z0-9_-]+)\.php$ [NC]
+RewriteRule ^ %1/dosen/%2 [R=302,L]
+
+RewriteCond %{REQUEST_METHOD} GET
+RewriteCond %{THE_REQUEST} /kaprodi/([a-zA-Z0-9_-]+)\.php [NC]
+RewriteCond %{REQUEST_URI} ^(.*)/kaprodi/([a-zA-Z0-9_-]+)\.php$ [NC]
+RewriteRule ^ %1/kaprodi/%2 [R=302,L]
 
 
 # =====================================================================
@@ -56,3 +72,11 @@ RewriteRule ^kaprodi/([a-zA-Z0-9_-]+)$ app/views/kaprodi/$1.php [L,QSA]
 
 # Auth Clean URL
 RewriteRule ^login$ app/views/auth/login.php [L,QSA]
+
+# Support relative .php links internally (when clean URLs are active)
+RewriteRule ^mahasiswa/([a-zA-Z0-9_-]+)\.php$ app/views/mahasiswa/$1.php [L,QSA]
+RewriteRule ^dosen/([a-zA-Z0-9_-]+)\.php$ app/views/dosen/$1.php [L,QSA]
+RewriteRule ^kaprodi/([a-zA-Z0-9_-]+)\.php$ app/views/kaprodi/$1.php [L,QSA]
+
+# Support relative controller links (resolving to root-level controllers/...)
+RewriteRule ^controllers/([a-zA-Z0-9_-]+)\.php$ app/controllers/$1.php [L,QSA]
