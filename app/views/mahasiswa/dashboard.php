@@ -31,15 +31,26 @@ $pembahas = '-';
 $judul = '-';
 
 try {
-    $stmt = $pdo->prepare("SELECT * FROM distribusi_mahasiswa WHERE REPLACE(npm, ' ', '') = REPLACE(:npm, ' ', '') LIMIT 1");
+    $sql = "SELECT dm.*, 
+                   d1.nama AS nama_p1, 
+                   d2.nama AS nama_p2, 
+                   db1.nama AS nama_pb1, 
+                   db2.nama AS nama_pb2 
+            FROM distribusi_mahasiswa dm
+            LEFT JOIN dosen d1 ON dm.pembimbing1 = d1.nip
+            LEFT JOIN dosen d2 ON dm.pembimbing2 = d2.nip
+            LEFT JOIN dosen db1 ON dm.pembahas1 = db1.nip
+            LEFT JOIN dosen db2 ON dm.pembahas2 = db2.nip
+            WHERE REPLACE(dm.npm, ' ', '') = REPLACE(:npm, ' ', '') LIMIT 1";
+    $stmt = $pdo->prepare($sql);
     $stmt->execute([':npm' => $npmMhs]);
     $dist = $stmt->fetch(PDO::FETCH_ASSOC);
     if ($dist) {
-        $dospem1 = $dist['pembimbing1'] ?: '-';
-        $dospem2 = $dist['pembimbing2'] ?: '-';
+        $dospem1 = $dist['nama_p1'] ?: $dist['pembimbing1'] ?: '-';
+        $dospem2 = $dist['nama_p2'] ?: $dist['pembimbing2'] ?: '-';
         
-        $p1 = $dist['pembahas1'] ?? '';
-        $p2 = $dist['pembahas2'] ?? '';
+        $p1 = $dist['nama_pb1'] ?: $dist['pembahas1'] ?? '';
+        $p2 = $dist['nama_pb2'] ?: $dist['pembahas2'] ?? '';
         if (!empty($p1) && !empty($p2)) {
             $pembahas = $p1 . ' / ' . $p2;
         } elseif (!empty($p1)) {

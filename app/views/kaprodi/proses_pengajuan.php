@@ -60,8 +60,8 @@ try {
     // Setup selected values for dropdowns
     $selectedP1 = $dist['pembimbing1'] ?? $p['pembimbing1'] ?? '';
     $selectedP2 = $dist['pembimbing2'] ?? $p['pembimbing2'] ?? '';
-    $selectedPb1 = $dist['pembahas1'] ?? '';
-    $selectedPb2 = $dist['pembahas2'] ?? '';
+    $selectedPb1 = $dist['pembahas1'] ?? $p['pembahas1'] ?? '';
+    $selectedPb2 = $dist['pembahas2'] ?? $p['pembahas2'] ?? '';
 
 } catch (PDOException $e) {
     header("Location: " . BASE_URL . "/app/views/kaprodi/pengajuan_judul.php");
@@ -70,7 +70,7 @@ try {
 
 // Fetch list of dosen for dropdowns
 try {
-    $stmtD = $pdo->query("SELECT nama FROM dosen ORDER BY nama ASC");
+    $stmtD = $pdo->query("SELECT nip, nama FROM dosen ORDER BY nama ASC");
     $daftar_dosen = $stmtD->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     $daftar_dosen = [];
@@ -568,7 +568,7 @@ function renderDocCard($filename, $label, $isDocx = false) {
                             <select id="pembimbing1" name="pembimbing1" class="searchable-select">
                                 <option value="">-- Pilih Pembimbing 1 --</option>
                                 <?php foreach ($daftar_dosen as $d): ?>
-                                    <option value="<?= htmlspecialchars($d['nama']) ?>" <?= $selectedP1 === $d['nama'] ? 'selected' : '' ?>><?= htmlspecialchars($d['nama']) ?></option>
+                                    <option value="<?= htmlspecialchars($d['nip']) ?>" <?= $selectedP1 === $d['nip'] ? 'selected' : '' ?>><?= htmlspecialchars($d['nama']) ?></option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
@@ -578,7 +578,7 @@ function renderDocCard($filename, $label, $isDocx = false) {
                             <select id="pembimbing2" name="pembimbing2" class="searchable-select">
                                 <option value="">-- Pilih Pembimbing 2 (Boleh Kosong) --</option>
                                 <?php foreach ($daftar_dosen as $d): ?>
-                                    <option value="<?= htmlspecialchars($d['nama']) ?>" <?= $selectedP2 === $d['nama'] ? 'selected' : '' ?>><?= htmlspecialchars($d['nama']) ?></option>
+                                    <option value="<?= htmlspecialchars($d['nip']) ?>" <?= $selectedP2 === $d['nip'] ? 'selected' : '' ?>><?= htmlspecialchars($d['nama']) ?></option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
@@ -588,7 +588,7 @@ function renderDocCard($filename, $label, $isDocx = false) {
                             <select id="pembahas1" name="pembahas1" required class="searchable-select">
                                 <option value="">-- Pilih Dosen Pembahas 1 --</option>
                                 <?php foreach ($daftar_dosen as $d): ?>
-                                    <option value="<?= htmlspecialchars($d['nama']) ?>" <?= $selectedPb1 === $d['nama'] ? 'selected' : '' ?>><?= htmlspecialchars($d['nama']) ?></option>
+                                    <option value="<?= htmlspecialchars($d['nip']) ?>" <?= $selectedPb1 === $d['nip'] ? 'selected' : '' ?>><?= htmlspecialchars($d['nama']) ?></option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
@@ -598,7 +598,7 @@ function renderDocCard($filename, $label, $isDocx = false) {
                             <select id="pembahas2" name="pembahas2" class="searchable-select">
                                 <option value="">-- Pilih Dosen Pembahas 2 (Boleh Kosong) --</option>
                                 <?php foreach ($daftar_dosen as $d): ?>
-                                    <option value="<?= htmlspecialchars($d['nama']) ?>" <?= $selectedPb2 === $d['nama'] ? 'selected' : '' ?>><?= htmlspecialchars($d['nama']) ?></option>
+                                    <option value="<?= htmlspecialchars($d['nip']) ?>" <?= $selectedPb2 === $d['nip'] ? 'selected' : '' ?>><?= htmlspecialchars($d['nama']) ?></option>
                                 <?php endforeach; ?>
                             </select>
                         </div>

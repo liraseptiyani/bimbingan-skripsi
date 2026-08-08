@@ -80,28 +80,50 @@ function formatSkDate($dateStr) {
     return date('d-M-Y', $timestamp);
 }
 
-// Dynamic NIP helper (Fetches NIP from dosen table where NIP corresponds to lecturer username)
-function getDosenDetails($pdo, $name) {
-    if (empty($name) || $name === '-') {
+function getDosenDetails($pdo, $identifier) {
+    if (empty($identifier) || $identifier === '-') {
         return ['nama' => '-', 'nip' => '-'];
     }
-    // Clean name for matching
-    $cleanName = strtolower(preg_replace('/[^a-z0-9]/', '', $name));
+    
+    $cleanId = trim($identifier);
+    
     try {
-        // Method 1: Exact match on clean string
+        // 1. Try finding by NIP (digits only)
+        $cleanNip = preg_replace('/[^0-9]/', '', $cleanId);
+        if (!empty($cleanNip)) {
+            $stmt = $pdo->prepare("SELECT nama, nip FROM dosen WHERE REPLACE(nip, ' ', '') = :nip LIMIT 1");
+            $stmt->execute([':nip' => $cleanNip]);
+            $res = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($res) {
+                return formatNip($res);
+            }
+        }
+
+        // 2. Try finding by NIP (exact match)
+        $stmt = $pdo->prepare("SELECT nama, nip FROM dosen WHERE nip = :nip LIMIT 1");
+        $stmt->execute([':nip' => $cleanId]);
+        $res = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($res) {
+            return formatNip($res);
+        }
+
+        // 3. Fallback to name search
+        $cleanName = strtolower(preg_replace('/[^a-z0-9]/', '', $cleanId));
+        
+        // Method 3a: Exact match on clean name
         $stmt = $pdo->prepare("SELECT nama, nip FROM dosen WHERE REPLACE(REPLACE(REPLACE(LOWER(nama), ' ', ''), ',', ''), '.', '') = :name LIMIT 1");
         $stmt->execute([':name' => str_replace('.', '', $cleanName)]);
         $res = $stmt->fetch(PDO::FETCH_ASSOC);
         if ($res) return formatNip($res);
 
-        // Method 2: LIKE search on clean name
+        // Method 3b: LIKE search on clean name
         $stmt = $pdo->prepare("SELECT nama, nip FROM dosen WHERE REPLACE(REPLACE(LOWER(nama), ' ', ''), ',', '') LIKE :name LIMIT 1");
         $stmt->execute([':name' => '%' . $cleanName . '%']);
         $res = $stmt->fetch(PDO::FETCH_ASSOC);
         if ($res) return formatNip($res);
 
-        // Method 3: Keyword search for multi-word matches
-        $words = explode(' ', preg_replace('/[,\.]/', ' ', strtolower(trim($name))));
+        // Method 3c: Keyword search for multi-word matches
+        $words = explode(' ', preg_replace('/[,\.]/', ' ', strtolower(trim($identifier))));
         $words = array_values(array_filter($words, function($w) {
             return strlen($w) > 2 && !in_array($w, ['kom', 'ssi', 'eng', 'prof', 'dr', 'phd', 'scom', 'mcs', 'mti', 'mt']);
         }));
@@ -120,7 +142,8 @@ function getDosenDetails($pdo, $name) {
             if ($res) return formatNip($res);
         }
     } catch (PDOException $e) {}
-    return ['nama' => $name, 'nip' => '-'];
+    
+    return ['nama' => $identifier, 'nip' => '-'];
 }
 
 function formatNip($res) {

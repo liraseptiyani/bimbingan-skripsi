@@ -33,7 +33,18 @@ $stmtMhs->execute([':npm' => $npmMhs]);
 $namaMhs = $stmtMhs->fetchColumn() ?: ($isMahasiswaAccount ? ($_SESSION['nama'] ?? 'LIRA SEPTIYANI') : 'LIRA SEPTIYANI');
 
 // Fetch distribution details
-$stmtDist = $pdo->prepare("SELECT * FROM distribusi_mahasiswa WHERE REPLACE(npm, ' ', '') = REPLACE(:npm, ' ', '') LIMIT 1");
+$sqlDist = "SELECT dm.*, 
+                   d1.nama AS nama_p1, 
+                   d2.nama AS nama_p2, 
+                   db1.nama AS nama_pb1, 
+                   db2.nama AS nama_pb2 
+            FROM distribusi_mahasiswa dm
+            LEFT JOIN dosen d1 ON dm.pembimbing1 = d1.nip
+            LEFT JOIN dosen d2 ON dm.pembimbing2 = d2.nip
+            LEFT JOIN dosen db1 ON dm.pembahas1 = db1.nip
+            LEFT JOIN dosen db2 ON dm.pembahas2 = db2.nip
+            WHERE REPLACE(dm.npm, ' ', '') = REPLACE(:npm, ' ', '') LIMIT 1";
+$stmtDist = $pdo->prepare($sqlDist);
 $stmtDist->execute([':npm' => $npmMhs]);
 $distribusi = $stmtDist->fetch(PDO::FETCH_ASSOC);
 
@@ -43,9 +54,21 @@ if (!$distribusi || empty($distribusi['pembimbing1'])) {
     exit;
 }
 
-$pembimbingUtama = $distribusi['pembimbing1'] ?? 'Belum ditentukan';
-$pembimbingPembantu = $distribusi['pembimbing2'] ?? 'Belum ditentukan';
-$pembahas = $distribusi['pembahas1'] ?? 'Belum ditentukan';
+$pembimbingUtama = $distribusi['nama_p1'] ?: $distribusi['pembimbing1'] ?: 'Belum ditentukan';
+$pembimbingPembantu = $distribusi['nama_p2'] ?: $distribusi['pembimbing2'] ?: 'Belum ditentukan';
+
+$p1 = $distribusi['nama_pb1'] ?: $distribusi['pembahas1'] ?? '';
+$p2 = $distribusi['nama_pb2'] ?: $distribusi['pembahas2'] ?? '';
+if (!empty($p1) && !empty($p2)) {
+    $pembahas = $p1 . ' / ' . $p2;
+} elseif (!empty($p1)) {
+    $pembahas = $p1;
+} elseif (!empty($p2)) {
+    $pembahas = $p2;
+} else {
+    $pembahas = 'Belum ditentukan';
+}
+
 $judulSkripsi = $distribusi['judul_skripsi'] ?? 'Belum ditentukan';
 
 // Fetch bimbingan list from database

@@ -20,8 +20,8 @@ $daftarDosen = [];
 $no = 1;
 foreach ($daftarDosenRaw as $d) {
     // Calculate terisi dynamically from distribusi_mahasiswa (only active guidance: status_bimbingan != 'selesai')
-    $stmtCount = $pdo->prepare("SELECT COUNT(*) FROM distribusi_mahasiswa WHERE (pembimbing1 = :nama OR pembimbing2 = :nama) AND (status_bimbingan IS NULL OR status_bimbingan != 'selesai')");
-    $stmtCount->execute([':nama' => $d['nama']]);
+    $stmtCount = $pdo->prepare("SELECT COUNT(*) FROM distribusi_mahasiswa WHERE (pembimbing1 = :nip OR pembimbing2 = :nip OR pembimbing1 = :nama OR pembimbing2 = :nama) AND (status_bimbingan IS NULL OR status_bimbingan != 'selesai')");
+    $stmtCount->execute([':nip' => $d['nip'], ':nama' => $d['nama']]);
     $terisi = $stmtCount->fetchColumn();
 
     $daftarDosen[] = [

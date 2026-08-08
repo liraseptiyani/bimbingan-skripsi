@@ -12,8 +12,8 @@ if (!isset($_SESSION['username']) || ($_SESSION['role'] ?? '') !== 'dosen' || ($
 $title = 'Tambah Distribusi Mahasiswa';
 
 // Fetch all registered lecturers from database
-$stmtDosen = $pdo->query("SELECT nama FROM dosen ORDER BY nama ASC");
-$listDosen = $stmtDosen->fetchAll(PDO::FETCH_COLUMN);
+$stmtDosen = $pdo->query("SELECT nip, nama FROM dosen ORDER BY nama ASC");
+$listDosen = $stmtDosen->fetchAll(PDO::FETCH_ASSOC);
 
 // Fetch all registered students from database
 $stmtMhs = $pdo->query("SELECT * FROM mahasiswa ORDER BY nama ASC");
@@ -26,23 +26,23 @@ foreach ($listMahasiswa as $m) {
 }
 
 $p1OptionsHtml = '<option value="" disabled selected>Pilih Pembimbing 1</option>';
-foreach ($listDosen as $namaDosen) {
-    $p1OptionsHtml .= '<option value="' . htmlspecialchars($namaDosen) . '">' . htmlspecialchars($namaDosen) . '</option>';
+foreach ($listDosen as $d) {
+    $p1OptionsHtml .= '<option value="' . htmlspecialchars($d['nip']) . '">' . htmlspecialchars($d['nama']) . '</option>';
 }
 
 $p2OptionsHtml = '<option value="" selected>Pilih Pembimbing 2 (Opsional)</option>';
-foreach ($listDosen as $namaDosen) {
-    $p2OptionsHtml .= '<option value="' . htmlspecialchars($namaDosen) . '">' . htmlspecialchars($namaDosen) . '</option>';
+foreach ($listDosen as $d) {
+    $p2OptionsHtml .= '<option value="' . htmlspecialchars($d['nip']) . '">' . htmlspecialchars($d['nama']) . '</option>';
 }
 
 $pb1OptionsHtml = '<option value="" disabled selected>Pilih Pembahas 1</option>';
-foreach ($listDosen as $namaDosen) {
-    $pb1OptionsHtml .= '<option value="' . htmlspecialchars($namaDosen) . '">' . htmlspecialchars($namaDosen) . '</option>';
+foreach ($listDosen as $d) {
+    $pb1OptionsHtml .= '<option value="' . htmlspecialchars($d['nip']) . '">' . htmlspecialchars($d['nama']) . '</option>';
 }
 
 $pb2OptionsHtml = '<option value="" selected>Pilih Pembahas 2 (Opsional)</option>';
-foreach ($listDosen as $namaDosen) {
-    $pb2OptionsHtml .= '<option value="' . htmlspecialchars($namaDosen) . '">' . htmlspecialchars($namaDosen) . '</option>';
+foreach ($listDosen as $d) {
+    $pb2OptionsHtml .= '<option value="' . htmlspecialchars($d['nip']) . '">' . htmlspecialchars($d['nama']) . '</option>';
 }
 
 include '../layouts/header.php';

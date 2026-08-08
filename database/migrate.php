@@ -336,6 +336,63 @@ try {
         }
     }
 
+    // 8. Backfill: Convert lecturer names to NIPs in distribusi_mahasiswa and pengajuan_judul
+    echo "Melakukan migrasi data Nama Dosen ke NIP Dosen...\n";
+    try {
+        $dosenList = $pdo->query("SELECT nip, nama FROM dosen")->fetchAll(PDO::FETCH_ASSOC);
+        
+        $findNipByName = function($name) use ($dosenList) {
+            if (empty($name) || $name === '-') return null;
+            $cleanSearch = strtolower(preg_replace('/[^a-z0-9]/', '', $name));
+            foreach ($dosenList as $d) {
+                $cleanName = strtolower(preg_replace('/[^a-z0-9]/', '', $d['nama']));
+                if ($cleanName === $cleanSearch) {
+                    return $d['nip'];
+                }
+            }
+            return null;
+        };
+        
+        // Migrate distribusi_mahasiswa
+        $distRows = $pdo->query("SELECT npm, pembimbing1, pembimbing2, pembahas1, pembahas2 FROM distribusi_mahasiswa")->fetchAll(PDO::FETCH_ASSOC);
+        $stmtUpdateDist = $pdo->prepare("UPDATE distribusi_mahasiswa SET pembimbing1 = :p1, pembimbing2 = :p2, pembahas1 = :pb1, pembahas2 = :pb2 WHERE npm = :npm");
+        foreach ($distRows as $row) {
+            $p1_nip = $findNipByName($row['pembimbing1']) ?: $row['pembimbing1'];
+            $p2_nip = $findNipByName($row['pembimbing2']) ?: $row['pembimbing2'];
+            $pb1_nip = $findNipByName($row['pembahas1']) ?: $row['pembahas1'];
+            $pb2_nip = $findNipByName($row['pembahas2']) ?: $row['pembahas2'];
+            
+            $stmtUpdateDist->execute([
+                ':p1' => $p1_nip,
+                ':p2' => !empty($p2_nip) && $p2_nip !== '-' ? $p2_nip : null,
+                ':pb1' => !empty($pb1_nip) && $pb1_nip !== '-' ? $pb1_nip : null,
+                ':pb2' => !empty($pb2_nip) && $pb2_nip !== '-' ? $pb2_nip : null,
+                ':npm' => $row['npm']
+            ]);
+        }
+        
+        // Migrate pengajuan_judul
+        $pjRows = $pdo->query("SELECT id, pembimbing1, pembimbing2, pembahas1, pembahas2 FROM pengajuan_judul")->fetchAll(PDO::FETCH_ASSOC);
+        $stmtUpdatePj = $pdo->prepare("UPDATE pengajuan_judul SET pembimbing1 = :p1, pembimbing2 = :p2, pembahas1 = :pb1, pembahas2 = :pb2 WHERE id = :id");
+        foreach ($pjRows as $row) {
+            $p1_nip = $findNipByName($row['pembimbing1']) ?: $row['pembimbing1'];
+            $p2_nip = $findNipByName($row['pembimbing2']) ?: $row['pembimbing2'];
+            $pb1_nip = $findNipByName($row['pembahas1']) ?: $row['pembahas1'];
+            $pb2_nip = $findNipByName($row['pembahas2']) ?: $row['pembahas2'];
+            
+            $stmtUpdatePj->execute([
+                ':p1' => $p1_nip,
+                ':p2' => !empty($p2_nip) && $p2_nip !== '-' ? $p2_nip : null,
+                ':pb1' => !empty($pb1_nip) && $pb1_nip !== '-' ? $pb1_nip : null,
+                ':pb2' => !empty($pb2_nip) && $pb2_nip !== '-' ? $pb2_nip : null,
+                ':id' => $row['id']
+            ]);
+        }
+        echo "Migrasi data Nama Dosen ke NIP Dosen selesai.\n";
+    } catch (PDOException $eMigrate) {
+        echo "Gagal migrasi data dosen ke NIP: " . $eMigrate->getMessage() . "\n";
+    }
+
     echo "=== Migrasi Database Berhasil Selesai ===\n";
     echo "PENTING: Demi keamanan, silakan hapus atau nonaktifkan file ini (database/migrate.php) dari server produksi setelah dijalankan.\n";
 

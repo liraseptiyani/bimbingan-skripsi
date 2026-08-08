@@ -28,8 +28,17 @@ try {
 // Fetch processed submissions only (disetujui or ditolak)
 // Sorted by Nomor SK (newest/latest approved on top)
 try {
-    $sql = "SELECT p.*, dm.nomor_sk 
+    $sql = "SELECT p.*, 
+                   d1.nama AS nama_p1, 
+                   d2.nama AS nama_p2, 
+                   db1.nama AS nama_pb1, 
+                   db2.nama AS nama_pb2, 
+                   dm.nomor_sk 
             FROM pengajuan_judul p
+            LEFT JOIN dosen d1 ON p.pembimbing1 = d1.nip
+            LEFT JOIN dosen d2 ON p.pembimbing2 = d2.nip
+            LEFT JOIN dosen db1 ON p.pembahas1 = db1.nip
+            LEFT JOIN dosen db2 ON p.pembahas2 = db2.nip
             LEFT JOIN distribusi_mahasiswa dm ON REPLACE(p.mahasiswa_npm, ' ', '') = REPLACE(dm.npm, ' ', '')
             WHERE p.status != 'menunggu'
             ORDER BY 
@@ -46,7 +55,17 @@ try {
 // Fetch all distributions to match for approved view
 $distribusi_list = [];
 try {
-    $stmtDist = $pdo->query("SELECT * FROM distribusi_mahasiswa");
+    $sqlDist = "SELECT dm.*, 
+                       d1.nama AS nama_p1, 
+                       d2.nama AS nama_p2, 
+                       db1.nama AS nama_pb1, 
+                       db2.nama AS nama_pb2 
+                FROM distribusi_mahasiswa dm
+                LEFT JOIN dosen d1 ON dm.pembimbing1 = d1.nip
+                LEFT JOIN dosen d2 ON dm.pembimbing2 = d2.nip
+                LEFT JOIN dosen db1 ON dm.pembahas1 = db1.nip
+                LEFT JOIN dosen db2 ON dm.pembahas2 = db2.nip";
+    $stmtDist = $pdo->query($sqlDist);
     $dists = $stmtDist->fetchAll(PDO::FETCH_ASSOC);
     foreach ($dists as $d) {
         $normNpm = strtolower(preg_replace('/[^a-z0-9]/', '', $d['npm']));
@@ -637,34 +656,34 @@ require_once __DIR__ . '/../layouts/sidebar_kaprodi.php';
                              <td>
                                  <?php if ($p['status'] === 'disetujui'): ?>
                                      <div class="decision-info">
-                                          <div class="d-row">
-                                              <span class="d-label">Pembimbing 1</span>
-                                              <span><?= htmlspecialchars($p['pembimbing1'] ?? $distData['pembimbing1'] ?? '-') ?></span>
-                                          </div>
-                                          <?php 
-                                          $p2_val = $p['pembimbing2'] ?? $distData['pembimbing2'] ?? '';
-                                          if (!empty($p2_val) && $p2_val !== '-'): 
-                                          ?>
-                                              <div class="d-row">
-                                                  <span class="d-label">Pembimbing 2</span>
-                                                  <span><?= htmlspecialchars($p2_val) ?></span>
-                                              </div>
-                                          <?php endif; ?>
-                                          <?php
-                                          $pb2_val = $p['pembahas2'] ?? $distData['pembahas2'] ?? '';
-                                          $pb1_label = (!empty($pb2_val) && $pb2_val !== '-') ? 'Pembahas 1' : 'Pembahas';
-                                          ?>
-                                          <div class="d-row">
-                                              <span class="d-label"><?= $pb1_label ?></span>
-                                              <span><?= htmlspecialchars($p['pembahas1'] ?? $distData['pembahas1'] ?? '-') ?></span>
-                                          </div>
-                                          <?php if (!empty($pb2_val) && $pb2_val !== '-'): ?>
-                                              <div class="d-row">
-                                                  <span class="d-label">Pembahas 2</span>
-                                                  <span><?= htmlspecialchars($pb2_val) ?></span>
-                                              </div>
-                                          <?php endif; ?>
-                                          <div class="d-row" style="margin-top: 4px; border-top: 1px dashed #e2e8f0; padding-top: 6px;">
+                                         <div class="d-row">
+                                             <span class="d-label">Pembimbing 1</span>
+                                             <span><?= htmlspecialchars($p['nama_p1'] ?? $distData['nama_p1'] ?? $p['pembimbing1'] ?? $distData['pembimbing1'] ?? '-') ?></span>
+                                         </div>
+                                         <?php 
+                                         $p2_val = $p['nama_p2'] ?? $distData['nama_p2'] ?? $p['pembimbing2'] ?? $distData['pembimbing2'] ?? '';
+                                         if (!empty($p2_val) && $p2_val !== '-'): 
+                                         ?>
+                                             <div class="d-row">
+                                                 <span class="d-label">Pembimbing 2</span>
+                                                 <span><?= htmlspecialchars($p2_val) ?></span>
+                                             </div>
+                                         <?php endif; ?>
+                                         <?php
+                                         $pb2_val = $p['nama_pb2'] ?? $distData['nama_pb2'] ?? $p['pembahas2'] ?? $distData['pembahas2'] ?? '';
+                                         $pb1_label = (!empty($pb2_val) && $pb2_val !== '-') ? 'Pembahas 1' : 'Pembahas';
+                                         ?>
+                                         <div class="d-row">
+                                             <span class="d-label"><?= $pb1_label ?></span>
+                                             <span><?= htmlspecialchars($p['nama_pb1'] ?? $distData['nama_pb1'] ?? $p['pembahas1'] ?? $distData['pembahas1'] ?? '-') ?></span>
+                                         </div>
+                                         <?php if (!empty($pb2_val) && $pb2_val !== '-'): ?>
+                                             <div class="d-row">
+                                                 <span class="d-label">Pembahas 2</span>
+                                                 <span><?= htmlspecialchars($pb2_val) ?></span>
+                                             </div>
+                                         <?php endif; ?>
+                                         <div class="d-row" style="margin-top: 4px; border-top: 1px dashed #e2e8f0; padding-top: 6px;">
                                              <span class="d-label">Nomor SK</span>
                                              <span style="font-family: monospace; font-weight: 600; color: #166534; background: #f0fdf4; padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(22, 101, 52, 0.1);"><?= htmlspecialchars($p['nomor_sk'] ?? $distData['nomor_sk'] ?? '-') ?></span>
                                          </div>
@@ -904,10 +923,10 @@ require_once __DIR__ . '/../layouts/sidebar_kaprodi.php';
             document.getElementById('row_sk_akhir').style.display = 'grid';
             document.getElementById('row_alasan_akhir').style.display = 'none';
 
-            const p1_val = p.pembimbing1 || (dist ? dist.pembimbing1 : '-') || '-';
-            const p2_val = p.pembimbing2 || (dist ? dist.pembimbing2 : '-') || '-';
-            const pb1_val = p.pembahas1 || (dist ? dist.pembahas1 : '-') || '-';
-            const pb2_val = p.pembahas2 || (dist ? dist.pembahas2 : '-') || '-';
+            const p1_val = p.nama_p1 || (dist ? dist.nama_p1 : '') || p.pembimbing1 || (dist ? dist.pembimbing1 : '-') || '-';
+            const p2_val = p.nama_p2 || (dist ? dist.nama_p2 : '') || p.pembimbing2 || (dist ? dist.pembimbing2 : '-') || '-';
+            const pb1_val = p.nama_pb1 || (dist ? dist.nama_pb1 : '') || p.pembahas1 || (dist ? dist.pembahas1 : '-') || '-';
+            const pb2_val = p.nama_pb2 || (dist ? dist.nama_pb2 : '') || p.pembahas2 || (dist ? dist.pembahas2 : '-') || '-';
 
             document.getElementById('view_p1_akhir').textContent = p1_val;
 

@@ -70,7 +70,17 @@ $cari = trim($_GET['cari'] ?? '');
 $daftarMahasiswa = [];
 try {
     if (!empty($cari)) {
-        $sql = "SELECT dm.*, pj.id AS pengajuan_id FROM distribusi_mahasiswa dm
+        $sql = "SELECT dm.*, 
+                       d1.nama AS nama_p1, 
+                       d2.nama AS nama_p2, 
+                       db1.nama AS nama_pb1, 
+                       db2.nama AS nama_pb2, 
+                       pj.id AS pengajuan_id 
+                FROM distribusi_mahasiswa dm
+                LEFT JOIN dosen d1 ON dm.pembimbing1 = d1.nip
+                LEFT JOIN dosen d2 ON dm.pembimbing2 = d2.nip
+                LEFT JOIN dosen db1 ON dm.pembahas1 = db1.nip
+                LEFT JOIN dosen db2 ON dm.pembahas2 = db2.nip
                 LEFT JOIN (
                     SELECT DISTINCT ON (mahasiswa_npm) id, mahasiswa_npm 
                     FROM pengajuan_judul 
@@ -79,14 +89,24 @@ try {
                 ) pj ON REPLACE(pj.mahasiswa_npm, ' ', '') = REPLACE(dm.npm, ' ', '')
                 WHERE dm.npm LIKE :cari 
                    OR dm.nama LIKE :cari 
-                   OR dm.pembimbing1 LIKE :cari 
-                   OR dm.pembimbing2 LIKE :cari 
+                   OR d1.nama LIKE :cari 
+                   OR d2.nama LIKE :cari 
                 ORDER BY dm.created_at DESC";
         $stmt = $pdo->prepare($sql);
         $stmt->execute([':cari' => '%' . $cari . '%']);
         $daftarMahasiswa = $stmt->fetchAll(PDO::FETCH_ASSOC);
     } else {
-        $sql = "SELECT dm.*, pj.id AS pengajuan_id FROM distribusi_mahasiswa dm
+        $sql = "SELECT dm.*, 
+                       d1.nama AS nama_p1, 
+                       d2.nama AS nama_p2, 
+                       db1.nama AS nama_pb1, 
+                       db2.nama AS nama_pb2, 
+                       pj.id AS pengajuan_id 
+                FROM distribusi_mahasiswa dm
+                LEFT JOIN dosen d1 ON dm.pembimbing1 = d1.nip
+                LEFT JOIN dosen d2 ON dm.pembimbing2 = d2.nip
+                LEFT JOIN dosen db1 ON dm.pembahas1 = db1.nip
+                LEFT JOIN dosen db2 ON dm.pembahas2 = db2.nip
                 LEFT JOIN (
                     SELECT DISTINCT ON (mahasiswa_npm) id, mahasiswa_npm 
                     FROM pengajuan_judul 
@@ -516,13 +536,13 @@ include '../layouts/topbar.php';
                 <?php foreach ($daftarMahasiswa as $m): ?>
                 <tr data-npm="<?= htmlspecialchars($m['npm']) ?>" 
                     data-nama="<?= htmlspecialchars(strtolower($m['nama'])) ?>" 
-                    data-pembimbing1="<?= htmlspecialchars(strtolower($m['pembimbing1'])) ?>" 
-                    data-pembimbing2="<?= htmlspecialchars(strtolower($m['pembimbing2'] ?? '')) ?>" 
+                    data-pembimbing1="<?= htmlspecialchars(strtolower($m['nama_p1'] ?: $m['pembimbing1'])) ?>" 
+                    data-pembimbing2="<?= htmlspecialchars(strtolower($m['nama_p2'] ?: $m['pembimbing2'] ?? '')) ?>" 
                     data-angkatan="<?= htmlspecialchars("20" . substr($m['npm'], 0, 2)) ?>">
                     <td><?= htmlspecialchars($m['npm']) ?></td>
                     <td><?= htmlspecialchars($m['nama']) ?></td>
-                    <td><?= htmlspecialchars($m['pembimbing1']) ?></td>
-                    <td><?= htmlspecialchars($m['pembimbing2'] ?: '-') ?></td>
+                    <td><?= htmlspecialchars($m['nama_p1'] ?: $m['pembimbing1']) ?></td>
+                    <td><?= htmlspecialchars(($m['nama_p2'] ?: $m['pembimbing2']) ?: '-') ?></td>
                     <td>
                         <?php 
                         $fullSk = $m['nomor_sk'];
@@ -755,22 +775,24 @@ include '../layouts/topbar.php';
         document.getElementById('view_nama').textContent = m.nama;
         document.getElementById('view_npm').textContent = m.npm;
         document.getElementById('view_judul').textContent = m.judul_skripsi;
-        document.getElementById('view_pembimbing1').textContent = m.pembimbing1;
+        document.getElementById('view_pembimbing1').textContent = m.nama_p1 || m.pembimbing1;
         
         const rowP2 = document.getElementById('row_pembimbing2');
-        if (m.pembimbing2 && m.pembimbing2.trim() !== '') {
+        const p2_name = m.nama_p2 || m.pembimbing2;
+        if (p2_name && p2_name.trim() !== '' && p2_name !== '-') {
             rowP2.style.display = 'grid';
-            document.getElementById('view_pembimbing2').textContent = m.pembimbing2;
+            document.getElementById('view_pembimbing2').textContent = p2_name;
         } else {
             rowP2.style.display = 'none';
         }
 
-        document.getElementById('view_pembahas1').textContent = m.pembahas1;
+        document.getElementById('view_pembahas1').textContent = m.nama_pb1 || m.pembahas1;
 
         const rowPb2 = document.getElementById('row_pembahas2');
-        if (m.pembahas2 && m.pembahas2.trim() !== '') {
+        const pb2_name = m.nama_pb2 || m.pembahas2;
+        if (pb2_name && pb2_name.trim() !== '' && pb2_name !== '-') {
             rowPb2.style.display = 'grid';
-            document.getElementById('view_pembahas2').textContent = m.pembahas2;
+            document.getElementById('view_pembahas2').textContent = pb2_name;
         } else {
             rowPb2.style.display = 'none';
         }

@@ -17,8 +17,8 @@ $listDosen = [];
 
 // Fetch all registered lecturers from database
 try {
-    $stmtDosen = $pdo->query("SELECT nama FROM dosen ORDER BY nama ASC");
-    $listDosen = $stmtDosen->fetchAll(PDO::FETCH_COLUMN);
+    $stmtDosen = $pdo->query("SELECT nip, nama FROM dosen ORDER BY nama ASC");
+    $listDosen = $stmtDosen->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     // Fail silently
 }
@@ -185,8 +185,8 @@ include '../layouts/topbar.php';
                 <label>Pembimbing 1 <span class="req">*</span></label>
                 <select name="pembimbing1" required class="searchable-select">
                     <option value="" disabled>Pilih Pembimbing 1</option>
-                    <?php foreach ($listDosen as $namaDosen): ?>
-                        <option value="<?= htmlspecialchars($namaDosen) ?>" <?= ($mhs['pembimbing1'] ?? '') === $namaDosen ? 'selected' : '' ?>><?= htmlspecialchars($namaDosen) ?></option>
+                    <?php foreach ($listDosen as $d): ?>
+                        <option value="<?= htmlspecialchars($d['nip']) ?>" <?= ($mhs['pembimbing1'] ?? '') === $d['nip'] ? 'selected' : '' ?>><?= htmlspecialchars($d['nama']) ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
@@ -195,8 +195,8 @@ include '../layouts/topbar.php';
                 <label>Pembimbing 2</label>
                 <select name="pembimbing2" class="searchable-select">
                     <option value="">Pilih Pembimbing 2 (Optional)</option>
-                    <?php foreach ($listDosen as $namaDosen): ?>
-                        <option value="<?= htmlspecialchars($namaDosen) ?>" <?= ($mhs['pembimbing2'] ?? '') === $namaDosen ? 'selected' : '' ?>><?= htmlspecialchars($namaDosen) ?></option>
+                    <?php foreach ($listDosen as $d): ?>
+                        <option value="<?= htmlspecialchars($d['nip']) ?>" <?= ($mhs['pembimbing2'] ?? '') === $d['nip'] ? 'selected' : '' ?>><?= htmlspecialchars($d['nama']) ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
@@ -205,8 +205,8 @@ include '../layouts/topbar.php';
                 <label>Pembahas 1 <span class="req">*</span></label>
                 <select name="pembahas1" required class="searchable-select">
                     <option value="" disabled>Pilih Pembahas 1</option>
-                    <?php foreach ($listDosen as $namaDosen): ?>
-                        <option value="<?= htmlspecialchars($namaDosen) ?>" <?= ($mhs['pembahas1'] ?? '') === $namaDosen ? 'selected' : '' ?>><?= htmlspecialchars($namaDosen) ?></option>
+                    <?php foreach ($listDosen as $d): ?>
+                        <option value="<?= htmlspecialchars($d['nip']) ?>" <?= ($mhs['pembahas1'] ?? '') === $d['nip'] ? 'selected' : '' ?>><?= htmlspecialchars($d['nama']) ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
@@ -215,8 +215,8 @@ include '../layouts/topbar.php';
                 <label>Pembahas 2</label>
                 <select name="pembahas2" class="searchable-select">
                     <option value="">Pilih Pembahas 2 (Boleh Kosong)</option>
-                    <?php foreach ($listDosen as $namaDosen): ?>
-                        <option value="<?= htmlspecialchars($namaDosen) ?>" <?= ($mhs['pembahas2'] ?? '') === $namaDosen ? 'selected' : '' ?>><?= htmlspecialchars($namaDosen) ?></option>
+                    <?php foreach ($listDosen as $d): ?>
+                        <option value="<?= htmlspecialchars($d['nip']) ?>" <?= ($mhs['pembahas2'] ?? '') === $d['nip'] ? 'selected' : '' ?>><?= htmlspecialchars($d['nama']) ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
