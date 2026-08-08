@@ -116,7 +116,7 @@ include '../layouts/topbar.php';
     </div>
 
     <div class="card form-card">
-        <form method="post" action="../../controllers/DosenController.php" enctype="multipart/form-data">
+        <form method="post" action="<?= BASE_URL ?>/app/controllers/DosenController.php" enctype="multipart/form-data">
             <input type="hidden" name="action" value="edit_dosen">
             <input type="hidden" name="nip_lama" value="<?= htmlspecialchars($nip) ?>">
 

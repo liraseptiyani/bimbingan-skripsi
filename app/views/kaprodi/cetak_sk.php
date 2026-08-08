@@ -134,8 +134,9 @@ function formatNip($res) {
 }
 
 $dosenP1 = getDosenDetails($pdo, $p1);
-$dosenP2 = $p2 ? getDosenDetails($pdo, $p2) : ['nama' => '-', 'nip' => '-'];
-$dosenPb = getDosenDetails($pdo, $pb1);
+$dosenP2 = ($p2 && $p2 !== '-') ? getDosenDetails($pdo, $p2) : ['nama' => '-', 'nip' => '-'];
+$dosenPb1 = getDosenDetails($pdo, $pb1);
+$dosenPb2 = ($pb2 && $pb2 !== '-') ? getDosenDetails($pdo, $pb2) : ['nama' => '-', 'nip' => '-'];
 
 // Standard Kajur and Kaprodi matching
 $kajurD = getDosenDetails($pdo, 'Dwi Sakethi');
@@ -496,22 +497,26 @@ $kaprodiNip = $kaprodiD['nip'] !== '-' ? $kaprodiD['nip'] : '19810414 200501 1 0
                         <?= htmlspecialchars($judul_disetujui) ?>
                     </td>
                 </tr>
-                <!-- Empty rows mimicking the PDF template layout space for long titles -->
+                <!-- Empty rows mimicking the PDF template layout space for long titles (diatur dinamis) -->
+                <?php
+                $numSigs = 2; // Pembimbing 1 dan Pembahas 1 selalu ada
+                if ($p2 && $p2 !== '-') $numSigs++;
+                if ($pb2 && $pb2 !== '-') $numSigs++;
+                $numSpacers = 4 - $numSigs;
+                for ($s = 0; $s < $numSpacers; $s++):
+                ?>
                 <tr>
                     <td class="sop-label" style="height: 24px;"></td>
                     <td class="sop-separator"></td>
                     <td class="sop-val" colspan="4"></td>
                 </tr>
-                <tr>
-                    <td class="sop-label" style="height: 24px;"></td>
-                    <td class="sop-separator"></td>
-                    <td class="sop-val" colspan="4"></td>
-                </tr>
+                <?php endfor; ?>
                 <tr>
                     <td class="sop-label" colspan="6" style="background-color: #dce6f1; font-weight: bold; height: 34px;">
                         Dan menetapkan
                     </td>
                 </tr>
+                <!-- Pembimbing Utama -->
                 <tr>
                     <td class="sop-label">Pembimbing Utama</td>
                     <td class="sop-separator">:</td>
@@ -528,6 +533,8 @@ $kaprodiNip = $kaprodiD['nip'] !== '-' ? $kaprodiD['nip'] : '19810414 200501 1 0
                     <td class="sop-separator"></td>
                     <td class="sop-val"></td>
                 </tr>
+                <!-- Pembimbing Pembantu (jika ada) -->
+                <?php if ($p2 && $p2 !== '-'): ?>
                 <tr>
                     <td class="sop-label">Pembimbing Pembantu</td>
                     <td class="sop-separator">:</td>
@@ -544,13 +551,15 @@ $kaprodiNip = $kaprodiD['nip'] !== '-' ? $kaprodiD['nip'] : '19810414 200501 1 0
                     <td class="sop-separator"></td>
                     <td class="sop-val"></td>
                 </tr>
+                <?php endif; ?>
+                <!-- Pembahas 1 -->
                 <tr>
-                    <td class="sop-label">Pembahas</td>
+                    <td class="sop-label"><?= ($pb2 && $pb2 !== '-') ? 'Pembahas I' : 'Pembahas' ?></td>
                     <td class="sop-separator">:</td>
-                    <td class="sop-val" style="white-space: nowrap;"><?= htmlspecialchars($dosenPb['nama']) ?></td>
+                    <td class="sop-val" style="white-space: nowrap;"><?= htmlspecialchars($dosenPb1['nama']) ?></td>
                     <td class="sop-label">NIP</td>
                     <td class="sop-separator">:</td>
-                    <td class="sop-val" style="white-space: nowrap;"><?= htmlspecialchars($dosenPb['nip']) ?></td>
+                    <td class="sop-val" style="white-space: nowrap;"><?= htmlspecialchars($dosenPb1['nip']) ?></td>
                 </tr>
                 <tr>
                     <td class="sop-label">TANDA TANGAN</td>
@@ -560,6 +569,25 @@ $kaprodiNip = $kaprodiD['nip'] !== '-' ? $kaprodiD['nip'] : '19810414 200501 1 0
                     <td class="sop-separator"></td>
                     <td class="sop-val"></td>
                 </tr>
+                <!-- Pembahas 2 (jika ada) -->
+                <?php if ($pb2 && $pb2 !== '-'): ?>
+                <tr>
+                    <td class="sop-label">Pembahas II</td>
+                    <td class="sop-separator">:</td>
+                    <td class="sop-val" style="white-space: nowrap;"><?= htmlspecialchars($dosenPb2['nama']) ?></td>
+                    <td class="sop-label">NIP</td>
+                    <td class="sop-separator">:</td>
+                    <td class="sop-val" style="white-space: nowrap;"><?= htmlspecialchars($dosenPb2['nip']) ?></td>
+                </tr>
+                <tr>
+                    <td class="sop-label">TANDA TANGAN</td>
+                    <td class="sop-separator">:</td>
+                    <td class="sop-val"></td>
+                    <td class="sop-label"></td>
+                    <td class="sop-separator"></td>
+                    <td class="sop-val"></td>
+                </tr>
+                <?php endif; ?>
                 <!-- Blank row at bottom of table matching the PDF template layout -->
                 <tr>
                     <td class="sop-label" style="height: 24px;"></td>

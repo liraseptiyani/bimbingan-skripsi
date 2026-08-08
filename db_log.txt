@@ -324,3 +324,4 @@ Session: Array
 )
 
 VERIFIKASI Query successful for status 'menunggu' on ID 9.
+PENGAJUAN JUDUL REQUEST: method=POST | action=setujui | session_user=198104142005011001 | session_role=dosen | post={"id":"31","action":"setujui","judul_disetujui_pilihan":"utama","pembimbing1":"Dr. rer. nat. Akmal Junaidi, S.Si., M.Sc","pembimbing2":"","pembahas1":"Prof. Dr. Eng. ADMI SYARIF","pembahas2":"Dewi Asiah Shofiana, S.Komp., M.Kom","alasan":""} | files=[]

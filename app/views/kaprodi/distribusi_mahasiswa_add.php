@@ -202,7 +202,7 @@ include '../layouts/topbar.php';
     </div>
 
     <div class="card form-card">
-        <form method="post" action="../../controllers/DistribusiMahasiswaController.php">
+        <form method="post" action="<?= BASE_URL ?>/app/controllers/DistribusiMahasiswaController.php">
             <input type="hidden" name="action" value="tambah_distribusi">
 
             <div style="overflow-x: auto;">
